@@ -65,6 +65,39 @@ Ghost Mode (anonymat réversible + purgatoire Redis), modération anti-brigading
 R2), sponsoring (Pins dorés). Chacun aura ses propres décisions de conception à acter avant
 implémentation (ex : qui peut voir la correspondance auteur réel ↔ post anonyme avant claim).
 
+## Critères de qualité par incrément ("super-métriques")
+
+Décision utilisateur du 2026-08-22 : ces critères remplacent "ça devrait marcher" — un
+incrément n'est loggué "fait" dans `LOG.md` que s'il les satisfait tous. Concrets et
+vérifiables, pas des impressions :
+
+**Backend (`apps/api`)**
+- `npm run build` et `npm run lint` passent à zéro erreur.
+- `npm run test` passe, avec de vraies assertions sur la logique critique — pas des tests qui
+  vérifient juste que ça compile/répond 200.
+- **Tests négatifs obligatoires sur les zones à risque**, pas seulement le chemin nominal : un
+  rôle local qui échoue à agir hors de sa ville, une action destructrice nationale unilatérale
+  qui échoue, une Bounty expirée qui échoue à être réclamée.
+- La fonctionnalité vérifiée manuellement en conditions réelles (requête HTTP réelle contre le
+  serveur qui tourne), jamais supposée à partir de la lecture du code.
+- L'agent concerné (`security-review`, `architecture-review`, `critical-logic-tests`) invoqué
+  quand le changement touche son domaine — voir `.claude/agents/`.
+
+**Frontend (`apps/web`)**
+- `npm run build` et `npm run lint` passent à zéro erreur.
+- Fonctionnalité exercée dans un vrai navigateur (serveur de dev), chemin nominal + au moins un
+  cas limite — jamais "ça devrait marcher" sans l'avoir vu tourner.
+
+**Base de données**
+- Toute migration s'applique proprement sur une base neuve ET sur l'état actuel.
+- Toute requête spatiale (PostGIS) vérifiée sur des données de test réalistes — pas seulement
+  "pas d'erreur SQL", le résultat géographique doit être correct (bon regroupement, bonne ville).
+
+**Discipline générale**
+- Zéro `TODO`/stub laissé à la place d'une fonctionnalité annoncée "faite" dans `LOG.md`.
+- Un incrément qui ne satisfait pas ces critères n'est ni loggué "fait", ni commité comme tel —
+  il reste marqué en cours (`.claude/HANDOFF/.in_progress`) jusqu'à correction.
+
 ## Scale-to-zero
 
 Toute dépendance ajoutée doit rester compatible avec l'hypothèse "coût zéro au repos" (pas de

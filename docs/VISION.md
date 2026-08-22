@@ -55,6 +55,24 @@ pitch (mais détaillé dans le futur `.pptx`) :
 | Modération anti-brigading (>6 signalements/6 villes) | Roadmap / pitch uniquement |
 | Sponsoring (Pins dorés) | Roadmap / pitch uniquement |
 
+## Idée de croissance captée (hors noyau MVP)
+
+Proposée par l'utilisateur le 2026-08-22 — **pont WhatsApp de viralité** : quand un Reality-Vlog
+dépasse un seuil de viralité sur MindClash 228, poster automatiquement une notification dans le
+groupe WhatsApp CESTOM existant (langage naturel, incitatif — donner envie d'aller réagir/donner
+son avis sur la plateforme, pas un message robotique) pour engager la communauté qui est déjà là.
+Numéro WhatsApp de départ : celui de l'utilisateur (membre du bureau CESTOM), à remplacer par un
+numéro "CESTOM TV" dédié plus tard.
+
+Pourquoi c'est fort : ça exploite le canal déjà identifié comme "bruit" en section Problème comme
+entonnoir d'acquisition/réengagement, dans l'esprit FOMO Sociale déjà présent dans les Canaux de
+distribution (`docs/LEAN_CANVAS.md` section 6) — un bon élément pour le `.pptx`.
+
+Pourquoi ce n'est pas dans le noyau MVP actuel : dépend de Reality-Vlogs, déjà hors périmètre
+(tableau ci-dessus), et ajoute une dépendance externe non budgétée dans `docs/STACK.md` (API
+WhatsApp Business — numéro vérifié, templates de message approuvés pour l'envoi proactif,
+infrastructure de webhook). À reprendre explicitement si/quand Reality-Vlogs entre en scope.
+
 ## Métriques qu'on vise (post-lancement, pas des gates MVP)
 
 DAU/MAU > 30 %, rétention J1/J7/J30, ratio consommation/création, taux de conversion

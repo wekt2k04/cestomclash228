@@ -14,6 +14,13 @@ Décisions actées le 2026-08-22 (voir `.claude/HANDOFF/LOG.md` pour l'historiqu
 | Cache / temps réel | Redis (Upstash) | **Différé** — pas nécessaire tant que Ghost Mode (seul mécanisme qui en dépend dans le canevas) n'est pas construit. |
 | Stockage vidéo | Cloudflare R2 | **Différé** — Reality-Vlogs hors du noyau MVP (pas d'egress fees quand on l'active). |
 
+## Prérequis
+
+- **Node.js ≥ 20.9** (Next.js 16 l'exige). Constaté le 2026-08-22 : le Node par défaut de la
+  machine de dev était en v18.20.0 (trop ancien, `create-next-app` échoue sur le typegen) — géré
+  via `nvm` (nvm-windows, déjà installé), basculé sur une version plus récente déjà présente
+  localement. Si une session future retombe sur v18, relancer `nvm use` avec une version ≥ 20.
+
 ## Environnement actuel
 
 - **100 % local** : PostgreSQL+PostGIS via Docker Compose. Aucun compte cloud créé pour
