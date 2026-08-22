@@ -1,0 +1,18 @@
+# Dépendances / builds (pré-créé avant le scaffold applicatif)
+node_modules/
+dist/
+.next/
+out/
+coverage/
+
+# Secrets / env
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Handoff — marqueur de travail en cours, jamais commité
+.claude/HANDOFF/.in_progress

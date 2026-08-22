@@ -1,0 +1,72 @@
+# ARCHITECTURE — MindClash 228
+
+Voir `docs/STACK.md` pour le choix des technologies et `docs/VISION.md` pour le périmètre du
+premier incrément. Ce document couvre la structure et les décisions de conception qui ne se
+lisent pas directement dans le code.
+
+## Composants
+
+```
+Next.js (PWA)  ──HTTP/JSON──>  NestJS (API)  ──SQL──>  PostgreSQL + PostGIS
+     │                              │
+     └── MapLibre GL JS             └── (différé) Redis — Ghost Mode uniquement
+```
+
+Monorepo à deux packages : `apps/web` (Next.js) et `apps/api` (NestJS). Types partagés entre
+les deux quand c'est utile (contrat API).
+
+## RBAC spatial (noyau MVP — 2 niveaux)
+
+Deux rôles pour le MVP : **national** (Bureau Exécutif) et **local** (SG/délégué d'une ville).
+Le canevas stratégique complet prévoit 9 rôles nationaux asymétriques et un fallback par
+absence de rôle local — différé, voir `docs/VISION.md`.
+
+Deux décisions de conception actées, à ne pas re-discuter à chaque changement :
+
+1. **Scope basé sur la cible de l'action, pas sur la position physique de l'acteur.** Le
+   canevas dit qu'un SG "évapore" ses privilèges "dès que son curseur GPS ou son action cible"
+   un autre territoire — on retient la lecture **cible de la ressource** (le SG de Safi ne peut
+   agir que sur des ressources géotaguées Safi, quel que soit l'endroit où il se trouve
+   physiquement). Un scope basé sur le GPS live de l'acteur serait fragile (un SG en déplacement
+   perdrait ses droits) et ne correspond pas à la réalité d'un mandat associatif. Le GPS peut
+   servir à centrer la carte, jamais à autoriser une action.
+2. **Pouvoir national volontairement limité, pour garantir l'ordre.** Décision utilisateur du
+   2026-08-22 : le Bureau Exécutif central n'a pas de pouvoir absolu. Aucune action destructrice
+   (bannir, supprimer, mettre en quarantaine) ne doit pouvoir être déclenchée unilatéralement
+   par un seul rôle national — ce principe est cohérent avec le mécanisme anti-brigading du
+   canevas (quarantaine déclenchée par un algorithme multi-villes, jamais par un admin seul).
+   Dans le MVP à 2 niveaux, ça se traduit concrètement par : le rôle national peut épingler du
+   contenu, voir les statistiques agrégées, diffuser des alertes — mais ne peut pas
+   supprimer/bannir unilatéralement en dehors d'un mécanisme collectif ou d'une action locale
+   confirmée par le rôle local concerné.
+
+Vérifié par l'agent `.claude/agents/security-review.md` (le garde-fou doit être appliqué côté
+serveur, pas seulement caché côté UI) et `.claude/agents/architecture-review.md` (la logique de
+scope doit être centralisée, pas dupliquée entre frontend et backend).
+
+## Modèle de données (esquisse, MVP)
+
+- `users` — identité, méthode d'auth (email+password hashé, ou Google OAuth), ville affiliée.
+- `roles` — rôle (national/local) + ville pour un rôle local.
+- `pins` — géométrie PostGIS (point), type (astuce/lieu/etc.), auteur, ville dérivée de la
+  géométrie.
+- `bounties` — géométrie PostGIS, titre, description, créateur, statut (ouverte / réclamée /
+  résolue / expirée), échéance (2h/12h/24h), horodatage serveur faisant autorité pour
+  l'expiration (jamais seulement un countdown client).
+
+Toute frontière de "ville"/"zone" est définie à un seul endroit (table ou fonction PostGIS
+faisant autorité), jamais recalculée différemment ailleurs — sinon le RBAC spatial et le
+clustering peuvent diverger silencieusement.
+
+## Différé (hors noyau MVP, ne pas construire avant qu'on y revienne explicitement)
+
+Ghost Mode (anonymat réversible + purgatoire Redis), modération anti-brigading complète (seuil
+>6 signalements/6 villes), RBAC à 9 rôles nationaux asymétriques, Reality-Vlogs (upload vidéo
+R2), sponsoring (Pins dorés). Chacun aura ses propres décisions de conception à acter avant
+implémentation (ex : qui peut voir la correspondance auteur réel ↔ post anonyme avant claim).
+
+## Scale-to-zero
+
+Toute dépendance ajoutée doit rester compatible avec l'hypothèse "coût zéro au repos" (pas de
+job cron permanent, pas de connexion DB persistante incompatible serverless) — vérifié par
+`.claude/agents/architecture-review.md`.
