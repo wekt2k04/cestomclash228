@@ -87,3 +87,28 @@ Append-only. Une entrée par incrément vérifié et commité — jamais réécr
 - `npm audit` sur `pitch/` signale 2 vulnérabilités high dans `image-size` (dépendance
   transitive de pptxgenjs, DoS sur parsing ICNS/JXL/HEIF) — sans impact réel ici : script
   dev-only, jamais déployé, ne traite que des PNG qu'on contrôle nous-mêmes.
+
+## 2026-08-22 — Backend Social-Map (module `pins`, PostGIS)
+
+- `City` enrichi d'un `centerPoint` (geography Point) ; les 12 villes seedées ont maintenant de
+  vraies coordonnées. `Pin` (geography Point + type/titre/description/auteur/ville) — la ville
+  est **déduite automatiquement** de la position (plus proche voisin PostGIS, opérateur `<->`),
+  jamais fournie par le client.
+- Endpoints : `POST /pins`, `GET /pins` (filtre bbox optionnel), `GET /pins/clusters`
+  (regroupement réel via `ST_ClusterDBSCAN`, précision en mètres configurable), `GET /pins/:id`,
+  `DELETE /pins/:id`.
+- **Application concrète du "pouvoir national limité"** (principe de `docs/ARCHITECTURE.md`) :
+  suppression d'un Pin réservée à son auteur ou à un rôle local dans SA ville — un rôle national
+  n'a **aucun** moyen de supprimer unilatéralement un Pin qu'il n'a pas créé. Vérifié à la fois
+  par des tests unitaires (`pins.service.spec.ts`, 6 tests) et en conditions réelles (voir
+  ci-dessous) : c'est le test qui compte le plus de cet incrément.
+- **Vérifié réellement** contre un vrai serveur + vraie base : création de Pin près de Rabat →
+  ville déduite "Rabat" correcte ; idem Marrakech ; clustering de 3 pins proches → 1 cluster de
+  count 3 + le pin distant reste seul ; filtre bbox exclut bien Marrakech quand on cible Rabat ;
+  admin national qui tente de supprimer un Pin de Rabat qu'il n'a pas créé → 403 ; rôle local
+  Rabat qui tente de supprimer un Pin de Marrakech → 403 ; l'auteur supprime son propre Pin →
+  200, puis 404 à la relecture.
+- Accroc de session (pas un bug produit) : le throttling login (5/60s, voir increment précédent)
+  s'est déclenché pendant mes propres tests répétés — 429 attendu et correct, juste reporté le
+  test de quelques secondes.
+- `npm run build` / `lint` / `test` (16/16) verts sur `apps/api`.
