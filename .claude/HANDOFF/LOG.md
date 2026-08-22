@@ -45,3 +45,28 @@ Append-only. Une entrée par incrément vérifié et commité — jamais réécr
   (`{"status":"ok","info":{"database":{"status":"up"}}}`).
 - Contrainte ressources notée (RAM libre faible sur la machine de dev, 1,2 Go/15,7 Go au moment
   du check) : éviter de faire tourner plusieurs serveurs de dev en parallèle en continu.
+
+## 2026-08-22 — Auth + RBAC 2 niveaux
+
+- Modules `cities` (12 villes universitaires marocaines seedées), `users`, `roles` (RBAC
+  national/local), `auth` (signup/login email+mdp via bcrypt, Google OAuth câblé mais sans
+  vraies clés pour l'instant, JWT, throttling renforcé sur signup/login).
+- Décisions de `docs/ARCHITECTURE.md` implémentées concrètement : scope RBAC basé sur la ville
+  cible (jamais le GPS live de l'acteur), et `RolesService` n'expose aucune méthode de type
+  "action destructrice unilatérale par un rôle national" — bootstrap du premier admin national
+  via `BOOTSTRAP_ADMIN_EMAIL`, toute assignation de rôle ultérieure passe par un rôle national
+  déjà existant.
+- **Vérifié réellement** contre un vrai serveur + vraie base : bootstrap admin, un membre
+  ordinaire qui tente `/roles/assign` reçoit 403, l'admin national assigne un rôle local (Rabat)
+  avec succès, mauvais mot de passe → 401, email dupliqué → 409, mot de passe trop court rejeté
+  par le DTO (400), route protégée sans token → 401. `passwordHash` jamais exposé dans une
+  réponse (vérifié sur les 3 réponses signup/me).
+- Tests automatisés ajoutés : `apps/api/src/roles/roles.service.spec.ts` (9 tests, dont 2 cas
+  négatifs et 1 cas limite de réassignation) — écrit par un agent appliquant le mandat
+  `critical-logic-tests`, relu et ré-exécuté indépendamment (10/10 tests passent avec le reste
+  de la suite). Aucun bug trouvé dans le service.
+- Lint : 14 erreurs et 2 warnings trouvés et corrigés (types `any` non sûrs sur le profil Google
+  et le user de la requête JWT, promesse flottante dans `main.ts`, var inutilisée dans
+  `auth.service.ts` remplacée par un mapper `toPublicUser` à allowlist explicite plutôt qu'un
+  destructure-and-discard). `npm run lint` et `npm run build` passent à zéro erreur après
+  correction.

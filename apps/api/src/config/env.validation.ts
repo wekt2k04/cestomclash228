@@ -16,4 +16,12 @@ export const envValidationSchema = Joi.object({
   GOOGLE_CALLBACK_URL: Joi.string().uri().allow('').default(''),
 
   WEB_ORIGIN: Joi.string().uri().default('http://localhost:3000'),
+
+  // Email qui recoit automatiquement le role national a l'inscription -
+  // amorce la toute premiere assignation de role (bootstrap), voir
+  // roles.service.ts et docs/ARCHITECTURE.md.
+  BOOTSTRAP_ADMIN_EMAIL: Joi.string()
+    .email({ tlds: false })
+    .allow('')
+    .default(''),
 });

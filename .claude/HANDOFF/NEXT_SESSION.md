@@ -49,6 +49,16 @@ l'utilisateur, "à la fin") — deck jury (problème → solution → démo → 
 capture d'écran de la vraie démo + éléments de `docs/LEAN_CANVAS.md` + identité visuelle
 ci-dessus.
 
+## Problème connu à vérifier
+
+Les 3 agents custom dans `.claude/agents/` (`security-review`, `architecture-review`,
+`critical-logic-tests`) ne sont **pas reconnus** par l'outil Agent dans cette session
+(`Agent type 'critical-logic-tests' not found. Available agents: claude, claude-code-guide,
+Explore, general-purpose, Plan, statusline-setup` — constaté le 2026-08-22). Contournement
+utilisé : agent `general-purpose` avec le contenu du fichier `.claude/agents/*.md` collé dans le
+prompt. À vérifier en session future : version de Claude Code, format attendu, ou besoin d'un
+redémarrage de session pour que les agents créés en cours de route soient détectés.
+
 ## Décisions en attente (à trancher avec l'utilisateur le moment venu, pas avant)
 
 - Date précise de l'échéance CréaAfrica (on sait "< 1 mois", pas de date exacte — pas bloquant
