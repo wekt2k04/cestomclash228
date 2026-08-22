@@ -58,6 +58,25 @@ Toute frontière de "ville"/"zone" est définie à un seul endroit (table ou fon
 faisant autorité), jamais recalculée différemment ailleurs — sinon le RBAC spatial et le
 clustering peuvent diverger silencieusement.
 
+## Ambiance sonore (UX)
+
+Décision utilisateur du 2026-08-22 : un son de fond calme façon jeu mobile (Piano Tiles,
+Shadow Fight) dès le lancement de l'appli, pas une fonctionnalité différée — ça fait partie du
+polish du noyau MVP sur la Social-Map.
+
+- **Autoplay avec son bloqué par les navigateurs** avant interaction utilisateur — démarrage en
+  sourdine, fondu enchaîné dès le premier tap/clic (jamais un `audio.play()` qui échoue
+  silencieusement sans plan B).
+- **`AudioProvider` global** (React Context) au niveau du layout racine Next.js, pas par page —
+  l'ambiance ne redémarre pas à chaque navigation. La piste change selon le contexte (calme en
+  exploration de la carte, légèrement plus tendue quand une Bounty approche de l'expiration) via
+  une petite state machine de "mood", pas du code dispersé par écran.
+- **Contrôle utilisateur permanent** (mute/volume visible, préférence persistée en localStorage)
+  — jamais de son imposé sans échappatoire facile (usage en bibliothèque, en cours).
+- **Bloquant réel** : il faut de vrais fichiers audio (libres de droits ou composés) — à fournir
+  ou choisir avec l'utilisateur (Pixabay Audio, Freesound CC0, itch.io) quand on construit
+  l'écran Social-Map. L'architecture ci-dessus peut être posée avant d'avoir les fichiers.
+
 ## Différé (hors noyau MVP, ne pas construire avant qu'on y revienne explicitement)
 
 Ghost Mode (anonymat réversible + purgatoire Redis), modération anti-brigading complète (seuil

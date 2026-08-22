@@ -54,6 +54,7 @@ pitch (mais détaillé dans le futur `.pptx`) :
 | Ghost Mode (anonymat réversible, Redis) | Roadmap / pitch uniquement |
 | Modération anti-brigading (>6 signalements/6 villes) | Roadmap / pitch uniquement |
 | Sponsoring (Pins dorés) | Roadmap / pitch uniquement |
+| Ambiance sonore (son de fond façon jeu, contextuel) | **Réel** — architecture posée dès le premier écran, bloqué sur la fourniture de vrais fichiers audio (voir `docs/ARCHITECTURE.md`) |
 
 ## Idée de croissance captée (hors noyau MVP)
 
