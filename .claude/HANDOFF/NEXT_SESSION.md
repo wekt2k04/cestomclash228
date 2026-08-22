@@ -28,10 +28,21 @@ Cadrage terminé, aucun code applicatif encore écrit. Fait dans cette session :
 
 ## Prochaine étape
 
-Scaffolder le monorepo (`apps/web` Next.js, `apps/api` NestJS, Docker Compose PostgreSQL+PostGIS
-local), puis construire dans l'ordre : auth → Social-Map (pins + clustering) → RBAC 2 niveaux →
-Bounties. Chaque brique : incrément → vérifié réellement → audité par l'agent concerné → commit
-→ entrée dans `LOG.md`.
+Fait : monorepo scaffoldé (`apps/web`, `apps/api`), Postgres+PostGIS local (`infra/`), modules
+`database`/`health` vérifiés avec une vraie connexion DB. Suite, dans l'ordre : auth (email+mdp
++ Google OAuth) → RBAC 2 niveaux (users/roles) → Social-Map (pins + clustering) → Bounties.
+Chaque brique : incrément → vérifié réellement (critères dans `docs/ARCHITECTURE.md` § critères
+de qualité) → audité par l'agent concerné → commit → entrée dans `LOG.md`.
+
+Pour lancer l'environnement de dev : `docker compose -f infra/docker-compose.yml up -d`, puis
+`cd apps/api && npm run start:dev` (port 3001, `.env` déjà configuré en local). `apps/web` pas
+encore lancé en continu (contrainte RAM machine de dev, voir LOG.md) — build vérifié seulement
+pour l'instant.
+
+**Avant d'écrire du code Next.js** : ce projet est en Next.js 16, qui a des breaking changes
+vs. les conventions "classiques" — lire `apps/web/node_modules/next/dist/docs/` avant d'écrire
+des pages/layouts/data-fetching (rappel auto-généré dans `apps/web/AGENTS.md`, ne pas supprimer
+ce fichier ni `apps/web/CLAUDE.md`, ils sont régénérés par `next dev` de toute façon).
 
 Une fois le noyau démontrable de bout en bout : construire le `.pptx` de pitch (demandé par
 l'utilisateur, "à la fin") — deck jury (problème → solution → démo → moat → business → ask),

@@ -31,3 +31,17 @@ Append-only. Une entrée par incrément vérifié et commité — jamais réécr
   deux piliers du produit (carte + gamification) en une seule forme, au lieu d'une simple
   recoloration de l'étoile CESTOM.
 - Republié sur le même artifact (même URL) après re-vérification (`--check` OK).
+
+## 2026-08-22 — Scaffold monorepo + plomberie DB vérifiée
+
+- `apps/web` (Next.js 16, TS, Tailwind) et `apps/api` (NestJS, TS strict) scaffoldés en projets
+  séparés (pas de workspace npm). `infra/docker-compose.yml` : Postgres+PostGIS local.
+- Bloqueur résolu : Node système en v18.20.0, Next.js 16 exige ≥20.9 — basculé via `nvm` sur une
+  version plus récente déjà installée localement (voir `docs/STACK.md`).
+- API : modules `database` (TypeORM) et `health` (Terminus), `ConfigModule` avec validation Joi
+  stricte, helmet + CORS + ValidationPipe globale, ThrottlerModule prêt pour l'auth à venir.
+- **Vérifié réellement** (pas supposé) : `npm run build`/`lint` OK sur les deux apps ; conteneur
+  Postgres `healthy` ; serveur Nest démarré, `GET /health` confirme une connexion DB réelle
+  (`{"status":"ok","info":{"database":{"status":"up"}}}`).
+- Contrainte ressources notée (RAM libre faible sur la machine de dev, 1,2 Go/15,7 Go au moment
+  du check) : éviter de faire tourner plusieurs serveurs de dev en parallèle en continu.
