@@ -112,3 +112,44 @@ Append-only. Une entrée par incrément vérifié et commité — jamais réécr
   s'est déclenché pendant mes propres tests répétés — 429 attendu et correct, juste reporté le
   test de quelques secondes.
 - `npm run build` / `lint` / `test` (16/16) verts sur `apps/api`.
+
+## 2026-08-22 — Backend Bounties (cycle de vie complet)
+
+- `Bounty` (geography Point, ville déduite comme pour `Pin`) : créer / réclamer / résoudre,
+  avec expiration **serveur** (2h/12h/24h, horodatage en base, jamais un simple countdown
+  client). Pas de scheduler/cron (incompatible scale-to-zero) : expiration "matérialisée" en
+  base à la lecture (`materializeExpiry()` avant chaque requête).
+- Réclamation implémentée comme une **unique requête UPDATE conditionnelle atomique**
+  (`WHERE status='open' AND "expiresAt">now() AND "authorId"!=$1`) plutôt qu'un lire-puis-écrire,
+  spécifiquement pour éviter la course entre deux utilisateurs qui réclament en même temps (cas
+  limite du mandat `critical-logic-tests`).
+- Résolution : l'auteur OU la personne qui a réclamé peuvent clôturer (décision délibérée, pas
+  un oubli) — seulement si le statut est `claimed`.
+
+**Bug réel trouvé et corrigé en vérification manuelle** (pas par les tests unitaires — c'est le
+point important) : `Repository.query()` de cette version de TypeORM renvoie un **tuple**
+`[rows, rowCount]` pour une requête mutante avec `RETURNING`, pas directement le tableau de
+lignes comme pour un `SELECT`. Le premier jet faisait `rows.length === 0` sur ce tuple (donc
+toujours `2`, jamais `0`) : l'auto-réclamation et la double-réclamation n'étaient **silencieusement
+pas bloquées** (200 OK au lieu de 400/409), alors que la mise à jour en base était correctement
+empêchée par le `WHERE`. Détecté en testant en vrai contre le serveur (voir ci-dessous), pas
+supposé depuis la lecture du code — exactement le genre d'écart qu'un mock naïf en test unitaire
+n'aurait pas révélé. Corrigé par destructuration typée `const [rows] = await ...query<[...]>()`.
+Les tests unitaires ajoutés après coup (`bounties.service.spec.ts`) reproduisent la vraie forme
+du tuple, pas une supposition.
+
+**Vérifié réellement** contre un vrai serveur + vraie base, avant ET après le fix : création avec
+ville déduite correcte ; auto-réclamation → 400 ; réclamation par un tiers → 200/claimed ;
+double-réclamation → 409 ; résolution par l'auteur → 200/resolved ; résolution d'une Bounty encore
+`open` → 409 ; résolution par un tiers non impliqué → 403 ; **expiration réelle** testée en
+recalant `expiresAt` dans le passé directement en base (`docker compose exec psql`) — la lecture
+matérialise bien `status: expired`, et la réclamation d'une Bounty expirée échoue en 409.
+
+Incident de session (pas un bug produit) : un `npm run build` séparé lancé pendant que
+`start:dev --watch` tournait a de nouveau perturbé le process (`EADDRINUSE`, deux instances en
+concurrence sur le port 3001 après un hot-reload rapide) — process stale tué proprement, un seul
+process relancé. Voir `.claude/HANDOFF/NEXT_SESSION.md`.
+
+`npm run build` / `lint` / `test` (26/26) verts sur `apps/api`. Le noyau MVP backend (auth, RBAC,
+Social-Map, Bounties) est maintenant complet et vérifié de bout en bout — reste le frontend
+Next.js.

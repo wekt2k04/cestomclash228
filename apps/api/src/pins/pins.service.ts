@@ -10,13 +10,7 @@ import { CitiesService } from '../cities/cities.service';
 import { RolesService } from '../roles/roles.service';
 import { RoleScope } from '../roles/role-scope.enum';
 import { CreatePinDto } from './dto/create-pin.dto';
-
-export interface BBox {
-  minLng: number;
-  minLat: number;
-  maxLng: number;
-  maxLat: number;
-}
+import type { BBox } from '../common/bbox';
 
 export interface PinView {
   id: string;
