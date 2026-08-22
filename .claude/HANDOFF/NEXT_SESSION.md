@@ -34,6 +34,12 @@ Fait : monorepo scaffoldé (`apps/web`, `apps/api`), Postgres+PostGIS local (`in
 Chaque brique : incrément → vérifié réellement (critères dans `docs/ARCHITECTURE.md` § critères
 de qualité) → audité par l'agent concerné → commit → entrée dans `LOG.md`.
 
+Pitch deck : `pitch/MindClash228-Pitch.pptx` (généré par `pitch/generate-deck.mjs`, voir
+`pitch/README.md`). À régénérer avec `node generate-deck.mjs` une fois : (1) la slide Démo
+remplacée par une vraie capture du frontend, (2) l'"ask" de la slide de closing précisé avec
+l'utilisateur, (3) un aperçu visuel réel obtenu (aucun outil de rendu PowerPoint disponible ici
+— pas encore vérifié à l'œil).
+
 Pour lancer l'environnement de dev : `docker compose -f infra/docker-compose.yml up -d`, puis
 `cd apps/api && npm run start:dev` (port 3001, `.env` déjà configuré en local). `apps/web` pas
 encore lancé en continu (contrainte RAM machine de dev, voir LOG.md) — build vérifié seulement

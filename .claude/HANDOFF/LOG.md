@@ -70,3 +70,20 @@ Append-only. Une entrée par incrément vérifié et commité — jamais réécr
   `auth.service.ts` remplacée par un mapper `toPublicUser` à allowlist explicite plutôt qu'un
   destructure-and-discard). `npm run lint` et `npm run build` passent à zéro erreur après
   correction.
+
+## 2026-08-22 — Premier jet du pitch deck (.pptx)
+
+- `pitch/generate-deck.mjs` (pptxgenjs) génère `pitch/MindClash228-Pitch.pptx` — 11 slides
+  (couverture, problème, segments, solution, démo, avantage déloyal, business model, traction,
+  stack/coûts, roadmap, closing) à partir de `docs/LEAN_CANVAS.md`/`docs/VISION.md`. Script
+  ré-exécutable, pas un one-shot — pensé pour être régénéré quand une vraie capture d'écran du
+  MVP existera (slide Démo actuellement un placeholder honnête, pas une fausse capture).
+  Polices Windows (Bahnschrift/Segoe UI) plutôt que les Google Fonts de l'identité web, pour
+  éviter une substitution silencieuse chez un jury sans ces polices installées.
+- **Vérifié réellement** : zip valide (`unzip -t`), 11 slides confirmées, images (logo CESTOM)
+  intégrées. **Non vérifié** : rendu visuel réel — aucun outil PowerPoint/LibreOffice disponible
+  dans cet environnement pour capturer un aperçu. À ouvrir par l'utilisateur pour repérer un
+  éventuel chevauchement avant usage.
+- `npm audit` sur `pitch/` signale 2 vulnérabilités high dans `image-size` (dépendance
+  transitive de pptxgenjs, DoS sur parsing ICNS/JXL/HEIF) — sans impact réel ici : script
+  dev-only, jamais déployé, ne traite que des PNG qu'on contrôle nous-mêmes.
