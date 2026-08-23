@@ -25,8 +25,8 @@ entrée) :
   Pins, `AuthProvider`/`AudioProvider`.
 - Premier jet du pitch deck : `pitch/MindClash228-Pitch.pptx` (régénérable via
   `node pitch/generate-deck.mjs`, voir `pitch/README.md`).
-- `RESUME_FONCTIONNEL.md` (racine du repo) : résumé en langage métier de ce qui a été construit,
-  destiné à l'utilisateur — demandé explicitement, à tenir à jour à chaque évolution notable.
+- `docs/RESUME_FONCTIONNEL.md` : résumé en langage métier de ce qui a été construit, destiné à
+  l'utilisateur — demandé explicitement, à tenir à jour à chaque évolution notable.
 
 ## À faire en priorité : vérification visuelle réelle
 
