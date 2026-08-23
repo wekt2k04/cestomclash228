@@ -322,3 +322,52 @@ Deux retours utilisateur après le fix précédent :
 proprement), `npm run lint`/`build` verts, Hero présent dans le HTML rendu côté serveur. **Non
 vérifié** : rendu sonore réel sur téléphone après ce fix (toujours pas d'outil audio disponible
 pour l'écouter moi-même) — à confirmer par l'utilisateur.
+
+## 2026-08-23 (suite) — Son "toujours" muet sur téléphone après le passage au MP3
+
+Retour utilisateur : le MP3 ne réglait pas le problème, le son ne démarrait toujours pas sur
+téléphone. Le fichier lui-même a d'abord été re-vérifié (pas supposé sain) : `curl` sur
+`http://192.168.11.129:3000/audio/epic.mp3` (l'URL LAN réellement utilisée par le téléphone)
+renvoie `200`, `Content-Type: audio/mpeg`, `Content-Length: 1420225` — identique à l'accès en
+`localhost`. **Le fichier et le serveur sont écartés comme cause.**
+
+**Cause racine trouvée par relecture du code de déverrouillage** (`audio-context.tsx`,
+`AudioProvider`) : les écouteurs de "premier geste" étaient posés sur `pointerdown`, `keydown`
+ET `touchend`, avec retrait de TOUS les écouteurs dès que UN SEUL se déclenche
+(`{ once: true }` + retrait manuel des trois dans le handler). Sur un tap tactile, `pointerdown`
+se déclenche systématiquement **avant** `touchend` dans la séquence d'événements du navigateur —
+il "gagne" donc toujours la course et déclenche seul le déverrouillage. Or `pointerdown` est un
+déclencheur documenté comme insuffisant pour débloquer un `AudioContext` sur plusieurs
+navigateurs mobiles (WebKit/iOS en particulier), contrairement à `touchend`/`click`/`keydown`
+qui sont universellement reconnus. Comme l'ancien code ne vérifiait jamais l'état réel du
+contexte après `resume()` (une promesse peut se résoudre sans que l'état passe à `"running"`) et
+ne loggait aucune erreur (`void engine.play(src)` sans `.catch`), l'échec était **silencieux et
+systématique à chaque tap** — pas intermittent, ce qui correspond exactement au symptôme rapporté
+("toujours pas").
+
+**Corrigé** (`lib/audio-context.tsx`) par trois changements complémentaires :
+1. `pointerdown` retiré de la liste des déclencheurs (conservés : `touchend`, `click`,
+   `keydown`).
+2. `LoopEngine.play()` vérifie désormais explicitement `ctx.state === "running"` après
+   `resume()` et lève une erreur sinon, au lieu de continuer silencieusement.
+3. Le handler de déverrouillage ne retire ses écouteurs qu'**après confirmation** de succès — si
+   un geste échoue, il continue d'écouter le geste suivant au lieu d'abandonner définitivement
+   (l'ancien comportement "un seul essai, puis plus jamais" transformait toute défaillance
+   ponctuelle en silence permanent pour le reste de la session).
+
+Profité du même fichier pour intégrer deux recommandations issues de la recherche NN/g menée en
+parallèle (voir plus bas) : architecture à deux étages de gain (`cycleGain` pour le fondu de
+boucle, `masterGain` pour le niveau utilisateur/ducking) permettant un **ducking** immédiat
+(volume réduit à 30 % pendant qu'une sheet/formulaire est ouvert·e, restauré à la fermeture) sans
+attendre la fin du cycle en cours, et un signal `recentlyUnlocked` bref (2,5 s) consommé par
+`MuteToggle` pour rendre visible "le son vient de démarrer, voici où le contrôler" — l'ancien
+comportement démarrait l'audio en arrière-plan sans aucun signal visuel.
+
+**Vérifié réellement** : `npm run lint` et `npx tsc --noEmit` verts sur `apps/web` après
+réécriture complète de `audio-context.tsx` et `MuteToggle.tsx`. **Non vérifiable par moi** :
+rendu sonore réel sur téléphone (toujours aucun outil audio/navigateur disponible dans cet
+environnement) — le raisonnement ci-dessus est déduit de la lecture du code et de la
+documentation connue des politiques d'autoplay mobiles, pas d'une observation directe du
+téléphone. À confirmer par l'utilisateur ; si le son ne démarre toujours pas après ce correctif,
+l'hypothèse suivante à explorer est l'interrupteur silencieux matériel iOS (indétectable en JS —
+dans ce cas la seule option est un contrôle manuel bien visible, déjà en place via `MuteToggle`).

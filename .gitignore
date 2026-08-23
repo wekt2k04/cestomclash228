@@ -16,3 +16,6 @@ Thumbs.db
 
 # Handoff — marqueur de travail en cours, jamais commité
 .claude/HANDOFF/.in_progress
+
+# Claude Code — état interne de session, pas du contenu projet
+.claude/scheduled_tasks.lock
