@@ -251,3 +251,37 @@ Docker+NestJS — RAM machine toujours serrée, ~1,4-1,6 Go libres avec les 3 en
 - **Vérifié** : `npm run lint`/`build` verts, fichier audio servi (200, taille exacte). **Non
   vérifié** : le rendu sonore réel sur téléphone après ce fix (pas d'outil audio/navigateur pour
   l'écouter moi-même) — à confirmer par l'utilisateur.
+
+## 2026-08-23 — Remplacement de la carte interactive par une carte SVG stylisée
+
+Décision utilisateur suite à l'échec persistant de la carte MapLibre sur téléphone (cause
+précise jamais identifiée avec certitude, malgré le fix de visibilité d'erreur du commit
+précédent — voir aussi la demande explicite : "oublie la notion de carte, depuis là ça ne
+marche pas"). Remplace entièrement MapLibre GL JS + tuiles CARTO par un SVG inline.
+
+- **Données géographiques réelles**, pas approximées : contour du Maroc depuis un GeoJSON
+  simplifié réel (`glynnbird/countriesgeojson`), projeté avec une transformation linéaire
+  lng/lat → x/y calculée une fois (script Node ponctuel, pas conservé dans le repo — seul le
+  résultat l'est). **Les 12 villes seedées côté backend sont projetées avec la MÊME
+  transformation** que le contour, garantissant leur cohérence relative (une ville côtière reste
+  près du contour, Tanger tombe exactement au point le plus au nord, etc. — vérifié par
+  inspection des coordonnées produites, pas juste supposé correct).
+- `MoroccoMap.tsx` : contour + 12 cercles de ville avec un nombre "personnes présentes"
+  **volontairement aléatoire pour l'instant** (généré une fois au montage, pas à chaque rendu) —
+  demande explicite de l'utilisateur, pas encore relié à une vraie métrique.
+- `CityPanel.tsx` (nouveau) : clic sur une ville → liste réelle de ses Pins/Bounties (filtrage
+  côté client sur `/pins` et `/bounties`, pas encore un paramètre `cityId` dédié côté API — voir
+  note dans `morocco-geo.ts`), réutilise `PinDetail`/`BountyDetail` déjà testés pour les actions.
+- `CreateSheet.tsx` : la position n'est plus "centre de la carte" (n'existe plus) mais un
+  sélecteur de ville, qui résout en interne vers les coordonnées de cette ville.
+- `SocialMap.tsx` supprimé, `maplibre-gl` désinstallé, CSS MapLibre-spécifique retiré de
+  `globals.css`.
+
+**Vérifié réellement** : `npm run build`/`lint` verts, HTML servi par le serveur de dev contient
+bien le SVG rendu côté serveur avec les noms de villes (Rabat/Casablanca/Tanger confirmés dans
+la réponse curl) — contrairement à MapLibre, un SVG inline n'a aucune dépendance réseau externe
+donc rien ne peut échouer au chargement des tuiles/style. **Non vérifié à l'œil** (toujours pas
+d'outil navigateur) — à confirmer par l'utilisateur sur PC et téléphone.
+
+Documentation mise à jour en conséquence : `docs/STACK.md`, `docs/ARCHITECTURE.md`,
+`docs/VISION.md`, `docs/RESUME_FONCTIONNEL.md`.

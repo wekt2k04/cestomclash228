@@ -9,11 +9,24 @@ lisent pas directement dans le code.
 ```
 Next.js (PWA)  ──HTTP/JSON──>  NestJS (API)  ──SQL──>  PostgreSQL + PostGIS
      │                              │
-     └── MapLibre GL JS             └── (différé) Redis — Ghost Mode uniquement
+     └── SVG inline (carte)         └── (différé) Redis — Ghost Mode uniquement
 ```
 
 Monorepo à deux packages : `apps/web` (Next.js) et `apps/api` (NestJS). Types partagés entre
 les deux quand c'est utile (contrat API).
+
+**Visualisation carte (2026-08-23)** : le backend Pins/Bounties (PostGIS, clustering
+`ST_ClusterDBSCAN`, déduction de ville par plus-proche-voisin) est inchangé et pleinement
+fonctionnel — voir `apps/api/src/pins`. Côté frontend, la carte interactive (MapLibre GL JS +
+tuiles CARTO) a été remplacée par un SVG inline statique (contour du Maroc + 12 villes, voir
+`apps/web/src/lib/morocco-geo.ts` et `MoroccoMap.tsx`) : elle ne s'affichait pas de façon
+fiable sur mobile (cause précise non identifiée avant le remplacement) et l'utilisateur a
+explicitement demandé quelque chose de simple/conteneurisé/rapide à charger. Le clic sur une
+ville ouvre la liste de ses Pins/Bounties réels (`CityPanel.tsx`, filtrage côté client sur les
+listes complètes — pas encore un paramètre `cityId` dédié côté API, voir la note dans
+`morocco-geo.ts`). Les compteurs de présence par ville affichés sur la carte sont pour
+l'instant des nombres aléatoires (décision explicite, pas encore de vraie métrique
+"utilisateurs actifs par ville").
 
 ## RBAC spatial (noyau MVP — 2 niveaux)
 

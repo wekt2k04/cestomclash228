@@ -4,11 +4,24 @@ Dernière mise à jour : 2026-08-23.
 
 ## État actuel
 
-**Le noyau MVP (backend + frontend) est écrit, buildé et lint-propre de bout en bout, et
-l'utilisateur a commencé à le tester dans un vrai navigateur** (app exposée sur le réseau local,
-PC + téléphone). Un premier bug réel a déjà été trouvé de cette façon et corrigé (voir entrée
-2026-08-23 dans `LOG.md`) — exactement le genre de chose que `build`/`lint`/tests ne révèlent
-pas. Continuer ce round de vérification visuelle avant d'aller plus loin.
+**Le noyau MVP (backend + frontend) est écrit, buildé et lint-propre de bout en bout, testé en
+conditions réelles sur PC et téléphone (réseau local).** Plusieurs allers-retours avec
+l'utilisateur ce 2026-08-23 ont déjà fait bouger des choses réelles (voir `LOG.md` pour le détail
+de chaque entrée) :
+
+1. Un vrai bug d'API trouvé et corrigé (`/bounties?status=...` rejeté à tort).
+2. L'ambiance sonore entièrement refaite : ne jouait pas du tout sur téléphone (fix : appel
+   synchrone dans le geste utilisateur, pas via un effet React), style musical changé pour
+   quelque chose de plus épique (référence donnée : "Arise" de Solo Leveling), et un vrai moteur
+   de boucle Web Audio API avec fondu enchaîné (pas de coupure audible au bouclage).
+3. **La carte interactive (MapLibre) a été entièrement remplacée** par une carte SVG stylisée du
+   Maroc avec présence par ville (chiffres aléatoires pour l'instant) — elle ne s'affichait pas
+   de façon fiable sur téléphone. Voir `docs/ARCHITECTURE.md` § Visualisation carte pour le
+   détail. Le backend Pins/Bounties/PostGIS n'a pas changé.
+
+**Prochaine étape immédiate : confirmation visuelle par l'utilisateur** que la nouvelle carte et
+le son fonctionnent maintenant (toujours pas d'outil navigateur dans cette session pour le
+vérifier soi-même).
 
 Pour exposer l'app sur le réseau local (PC + téléphone sur le même Wi-Fi) :
 `apps/web/.env.local` a `NEXT_PUBLIC_API_URL` pointé sur l'IP LAN de la machine (pas

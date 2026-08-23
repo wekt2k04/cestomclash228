@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { apiFetch, ApiError } from "@/lib/api";
+import { CITIES } from "@/lib/morocco-geo";
 import type { BountyView, PinType, PinView } from "@/lib/types";
 import { DetailSheet } from "./DetailSheet";
 
@@ -16,18 +17,19 @@ const PIN_TYPES: Array<{ value: PinType; label: string }> = [
 const DURATIONS = [2, 12, 24];
 
 export function CreateSheet({
-  center,
+  initialCity,
   onClose,
   onPinCreated,
   onBountyCreated,
 }: {
-  center: { lat: number; lng: number };
+  initialCity?: string;
   onClose: () => void;
   onPinCreated: (pin: PinView) => void;
   onBountyCreated: (bounty: BountyView) => void;
 }) {
   const { token } = useAuth();
   const [kind, setKind] = useState<"pin" | "bounty">("bounty");
+  const [cityName, setCityName] = useState(initialCity ?? CITIES[0].name);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [pinType, setPinType] = useState<PinType>("astuce");
@@ -40,6 +42,9 @@ export function CreateSheet({
     setError(null);
     setSubmitting(true);
     try {
+      // Pas de carte cliquable : la position soumise est le centre
+      // approximatif de la ville choisie (voir lib/morocco-geo.ts).
+      const city = CITIES.find((c) => c.name === cityName) ?? CITIES[0];
       if (kind === "bounty") {
         const bounty = await apiFetch<BountyView>("/bounties", {
           method: "POST",
@@ -47,8 +52,8 @@ export function CreateSheet({
           body: JSON.stringify({
             title,
             description,
-            lat: center.lat,
-            lng: center.lng,
+            lat: city.lat,
+            lng: city.lng,
             durationHours,
           }),
         });
@@ -61,8 +66,8 @@ export function CreateSheet({
             type: pinType,
             title,
             description,
-            lat: center.lat,
-            lng: center.lng,
+            lat: city.lat,
+            lng: city.lng,
           }),
         });
         onPinCreated(pin);
@@ -87,10 +92,20 @@ export function CreateSheet({
           </TabButton>
         </div>
 
-        <p className="text-xs text-ink-faint">
-          Position : centre actuel de la carte — déplace la carte avant de créer
-          si besoin.
-        </p>
+        <label className="flex flex-col gap-1.5 text-sm text-ink-muted">
+          Ville
+          <select
+            value={cityName}
+            onChange={(e) => setCityName(e.target.value)}
+            className="input"
+          >
+            {CITIES.map((c) => (
+              <option key={c.name} value={c.name}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </label>
 
         <input
           required

@@ -46,7 +46,7 @@ pitch (mais détaillé dans le futur `.pptx`) :
 
 | Fonctionnalité | Statut MVP |
 |---|---|
-| Social-Map (PostGIS, clustering, MapLibre) | **Réel** |
+| Social-Map (PostGIS, clustering côté backend ; vue frontend = carte du Maroc stylisée en SVG, pas de tuiles interactives — voir `docs/ARCHITECTURE.md`) | **Réel** |
 | Bounties (créer / réclamer / résoudre / expirer) | **Réel** |
 | Auth (email+mot de passe + Google OAuth) | **Réel** |
 | RBAC à 2 niveaux (national / local), pouvoir national volontairement limité | **Réel** |

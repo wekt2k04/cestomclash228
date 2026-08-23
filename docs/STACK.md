@@ -7,7 +7,7 @@ Décisions actées le 2026-08-22 (voir `.claude/HANDOFF/LOG.md` pour l'historiqu
 | Couche | Choix | Pourquoi |
 |---|---|---|
 | Frontend | Next.js (React), PWA | Vercel (hébergeur cible) est fait par la même équipe — meilleur support edge/SSR/PWA. |
-| Cartographie | MapLibre GL JS + tuiles gratuites (OSM/MapTiler free tier) | Open-source, zéro coût d'API — cohérent avec le "scale-to-zero" du canevas. |
+| Visualisation carte | SVG inline (contour du Maroc + villes), pas de librairie de carte | **Remplace MapLibre GL JS le 2026-08-23** — la carte interactive (tuiles CARTO) ne s'affichait pas de façon fiable sur mobile (cause précise non identifiée) et l'utilisateur a demandé "quelque chose de simple, conteneurisé... qui ne prenne pas de temps à charger". Un SVG inline n'a aucune dépendance réseau externe. Le backend PostGIS/clustering reste inchangé (voir `docs/ARCHITECTURE.md`), seule la couche de rendu frontend a changé. |
 | Backend | NestJS (Node.js/TypeScript) | Structure en modules/guards adaptée à la complexité du RBAC spatial et de la modération. TypeScript partagé avec le frontend. |
 | Base de données | PostgreSQL + PostGIS | Requêtes géospatiales (clustering, scope RBAC par zone). |
 | Auth | Email + mot de passe (hashé, rate-limité) + Google OAuth | Friction d'inscription minimale, plateforme robuste dès le départ (décision utilisateur du 2026-08-22 — pas de compromis sécurité même pour la démo). |
