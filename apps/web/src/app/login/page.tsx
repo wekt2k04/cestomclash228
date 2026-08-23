@@ -5,8 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api";
+import { ErrorMessage } from "@/components/ErrorMessage";
+import { Spinner } from "@/components/Spinner";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -15,9 +18,22 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // Validation au blur (pas a chaque frappe - NN/g : signaler une erreur
+  // pendant que l'utilisateur tape encore est premature et perçu comme
+  // agressif ; attendre la soumission, a l'inverse, est trop tardif et fait
+  // perdre un aller-retour complet).
+  const [touched, setTouched] = useState<{ email?: boolean; password?: boolean }>({});
+
+  const emailError =
+    touched.email && !EMAIL_RE.test(email) ? "Adresse email invalide." : null;
+  const passwordError =
+    touched.password && password.length === 0 ? "Le mot de passe est requis." : null;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setTouched({ email: true, password: true });
+    if (!EMAIL_RE.test(email) || password.length === 0) return;
+
     setError(null);
     setSubmitting(true);
     try {
@@ -39,7 +55,7 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
         <label className="flex flex-col gap-1.5 text-sm text-ink-muted">
           Email
           <input
@@ -47,8 +63,16 @@ export default function LoginPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="input"
+            onBlur={() => setTouched((t) => ({ ...t, email: true }))}
+            aria-invalid={!!emailError}
+            aria-describedby={emailError ? "login-email-error" : undefined}
+            className={`input ${emailError ? "border-red" : ""}`}
           />
+          {emailError && (
+            <span id="login-email-error" role="alert" className="text-xs text-red">
+              {emailError}
+            </span>
+          )}
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm text-ink-muted">
@@ -58,14 +82,28 @@ export default function LoginPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="input"
+            onBlur={() => setTouched((t) => ({ ...t, password: true }))}
+            aria-invalid={!!passwordError}
+            aria-describedby={passwordError ? "login-password-error" : undefined}
+            className={`input ${passwordError ? "border-red" : ""}`}
           />
+          {passwordError && (
+            <span id="login-password-error" role="alert" className="text-xs text-red">
+              {passwordError}
+            </span>
+          )}
         </label>
 
-        {error && <p className="text-sm text-red">{error}</p>}
+        {error && <ErrorMessage>{error}</ErrorMessage>}
 
         <button type="submit" disabled={submitting} className="btn-primary">
-          {submitting ? "Connexion…" : "Se connecter"}
+          {submitting ? (
+            <span className="flex items-center justify-center gap-2">
+              <Spinner /> Connexion…
+            </span>
+          ) : (
+            "Se connecter"
+          )}
         </button>
       </form>
 

@@ -36,7 +36,7 @@ export function Header() {
             <button
               type="button"
               onClick={logout}
-              className="rounded-lg border border-line bg-bg-elevated px-3 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:text-ink"
+              className="flex h-11 items-center rounded-lg border border-line bg-bg-elevated px-3 text-xs font-medium text-ink-muted transition-colors hover:text-ink"
             >
               Déconnexion
             </button>
@@ -45,13 +45,13 @@ export function Header() {
           <div className="flex items-center gap-2">
             <Link
               href="/login"
-              className="rounded-lg border border-line bg-bg-elevated px-3 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:text-ink"
+              className="flex h-11 items-center rounded-lg border border-line bg-bg-elevated px-3 text-xs font-medium text-ink-muted transition-colors hover:text-ink"
             >
               Connexion
             </Link>
             <Link
               href="/signup"
-              className="rounded-lg bg-cyan px-3 py-1.5 text-xs font-semibold text-cyan-ink"
+              className="flex h-11 items-center rounded-lg bg-cyan px-3 text-xs font-semibold text-cyan-ink"
             >
               Rejoindre
             </Link>

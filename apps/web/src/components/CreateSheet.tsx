@@ -6,11 +6,13 @@ import { apiFetch, ApiError } from "@/lib/api";
 import { CITIES } from "@/lib/morocco-geo";
 import type { BountyView, PinType, PinView } from "@/lib/types";
 import { DetailSheet } from "./DetailSheet";
+import { ErrorMessage } from "./ErrorMessage";
+import { Spinner } from "./Spinner";
 
 const PIN_TYPES: Array<{ value: PinType; label: string }> = [
   { value: "astuce", label: "Astuce" },
   { value: "lieu_sur", label: "Lieu sûr" },
-  { value: "piege_administratif", label: "Piège administratif" },
+  { value: "piege_administratif", label: "Piège admin." },
   { value: "alerte", label: "Alerte" },
 ];
 
@@ -36,9 +38,23 @@ export function CreateSheet({
   const [durationHours, setDurationHours] = useState(2);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // Validation au blur, pas a chaque frappe (NN/g : signaler une erreur
+  // pendant que l'utilisateur tape encore est premature et percu comme
+  // agressif) - un champ ne montre son erreur qu'une fois "touche".
+  const [touched, setTouched] = useState<{ title?: boolean; description?: boolean }>({});
+
+  const titleError =
+    touched.title && title.trim().length === 0 ? "Le titre est requis." : null;
+  const descriptionError =
+    touched.description && description.trim().length === 0
+      ? "La description est requise."
+      : null;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setTouched({ title: true, description: true });
+    if (title.trim().length === 0 || description.trim().length === 0) return;
+
     setError(null);
     setSubmitting(true);
     try {
@@ -80,9 +96,17 @@ export function CreateSheet({
     }
   }
 
+  const hasDraft = title.trim().length > 0 || description.trim().length > 0;
+
   return (
-    <DetailSheet onClose={onClose}>
-      <form onSubmit={onSubmit} className="flex flex-col gap-3">
+    <DetailSheet
+      onClose={onClose}
+      confirmClose={() =>
+        !hasDraft ||
+        window.confirm("Abandonner ce brouillon ? Le contenu saisi sera perdu.")
+      }
+    >
+      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-3">
         <div className="flex gap-2">
           <TabButton active={kind === "bounty"} onClick={() => setKind("bounty")}>
             Bounty (entraide)
@@ -107,23 +131,46 @@ export function CreateSheet({
           </select>
         </label>
 
-        <input
-          required
-          maxLength={120}
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Titre"
-          className="input"
-        />
-        <textarea
-          required
-          maxLength={2000}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Description"
-          rows={3}
-          className="input resize-none"
-        />
+        <label className="flex flex-col gap-1.5 text-sm text-ink-muted">
+          Titre
+          <input
+            required
+            maxLength={120}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onBlur={() => setTouched((t) => ({ ...t, title: true }))}
+            aria-invalid={!!titleError}
+            aria-describedby={titleError ? "create-title-error" : undefined}
+            placeholder="Ex. Photocopieur gratuit à la fac"
+            className={`input ${titleError ? "border-red" : ""}`}
+          />
+          {titleError && (
+            <span id="create-title-error" role="alert" className="text-xs text-red">
+              {titleError}
+            </span>
+          )}
+        </label>
+
+        <label className="flex flex-col gap-1.5 text-sm text-ink-muted">
+          Description
+          <textarea
+            required
+            maxLength={2000}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            onBlur={() => setTouched((t) => ({ ...t, description: true }))}
+            aria-invalid={!!descriptionError}
+            aria-describedby={descriptionError ? "create-description-error" : undefined}
+            placeholder="Donne assez de détails pour être utile à quelqu'un qui découvre la ville"
+            rows={3}
+            className={`input resize-none ${descriptionError ? "border-red" : ""}`}
+          />
+          {descriptionError && (
+            <span id="create-description-error" role="alert" className="text-xs text-red">
+              {descriptionError}
+            </span>
+          )}
+        </label>
 
         {kind === "bounty" ? (
           <div className="flex gap-2">
@@ -138,23 +185,29 @@ export function CreateSheet({
             ))}
           </div>
         ) : (
-          <select
-            value={pinType}
-            onChange={(e) => setPinType(e.target.value as PinType)}
-            className="input"
-          >
+          <div className="grid grid-cols-2 gap-2">
             {PIN_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>
+              <TabButton
+                key={t.value}
+                active={pinType === t.value}
+                onClick={() => setPinType(t.value)}
+              >
                 {t.label}
-              </option>
+              </TabButton>
             ))}
-          </select>
+          </div>
         )}
 
-        {error && <p className="text-sm text-red">{error}</p>}
+        {error && <ErrorMessage>{error}</ErrorMessage>}
 
         <button type="submit" disabled={submitting} className="btn-primary">
-          {submitting ? "Publication…" : "Publier"}
+          {submitting ? (
+            <span className="flex items-center justify-center gap-2">
+              <Spinner /> Publication…
+            </span>
+          ) : (
+            "Publier"
+          )}
         </button>
       </form>
     </DetailSheet>
@@ -174,7 +227,8 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex-1 rounded-lg border px-2 py-1.5 text-xs font-medium ${
+      aria-pressed={active}
+      className={`flex-1 rounded-lg border px-2 py-2 text-xs font-medium ${
         active
           ? "border-cyan bg-cyan text-cyan-ink"
           : "border-line bg-bg-elevated text-ink-muted"

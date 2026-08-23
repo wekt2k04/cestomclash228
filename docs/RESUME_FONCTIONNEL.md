@@ -50,10 +50,14 @@ elle boucle plutôt qu'une coupure nette. Un bouton permet de la couper. Piste "
 
 ## Remarques à prendre en compte
 
-- **Testé en vrai sur PC et téléphone** (via le réseau local, pas encore en ligne) — un vrai bug
-  a été trouvé et corrigé de cette façon (l'API rejetait à tort les demandes de Bounties
-  filtrées par statut). Le son ne fonctionnait pas non plus sur téléphone au premier essai,
-  corrigé aussi.
+- **Testé en vrai sur PC et téléphone** (via le réseau local, pas encore en ligne) — plusieurs
+  vrais bugs ont été trouvés et corrigés de cette façon, jamais par lint/build seuls : l'API
+  rejetait à tort les demandes de Bounties filtrées par statut, une erreur d'hydratation React
+  sur les chiffres de présence, et le son qui ne démarrait pas sur téléphone (trois causes
+  successives corrigées : format audio non supporté, puis un geste tactile mal reconnu par le
+  navigateur pour débloquer le son — voir `.claude/HANDOFF/LOG.md`). **Ce dernier correctif
+  (2026-08-23) n'est pas encore reconfirmé par un test réel sur téléphone** — voir
+  `.claude/HANDOFF/WORKFLOW_STATUS.md`.
 - **La connexion Google ne fonctionne pas encore concrètement** : le mécanisme est câblé mais il
   manque de vraies clés Google (à obtenir sur la console développeur Google).
 - **Les chiffres de présence par ville sur la carte sont aléatoires** — décision explicite pour

@@ -7,6 +7,8 @@ import { apiFetch, ApiError } from "@/lib/api";
 import { formatCountdown } from "@/lib/geo";
 import type { BountyView } from "@/lib/types";
 import { DetailSheet } from "./DetailSheet";
+import { ErrorMessage } from "./ErrorMessage";
+import { Spinner } from "./Spinner";
 
 const STATUS_LABEL: Record<BountyView["status"], string> = {
   open: "Ouverte",
@@ -71,7 +73,7 @@ export function BountyDetail({
             : ""}
         </p>
 
-        {error && <p className="text-sm text-red">{error}</p>}
+        {error && <ErrorMessage>{error}</ErrorMessage>}
 
         {!user && (
           <Link href="/login" className="btn-primary text-center">
@@ -85,7 +87,13 @@ export function BountyDetail({
             onClick={() => act("claim")}
             className="btn-primary"
           >
-            {busy ? "…" : "Réclamer cette Bounty"}
+            {busy ? (
+              <span className="flex items-center justify-center gap-2">
+                <Spinner /> Réclamation…
+              </span>
+            ) : (
+              "Réclamer cette Bounty"
+            )}
           </button>
         )}
         {canResolve && (
@@ -95,7 +103,13 @@ export function BountyDetail({
             onClick={() => act("resolve")}
             className="btn-primary"
           >
-            {busy ? "…" : "Marquer résolue"}
+            {busy ? (
+              <span className="flex items-center justify-center gap-2">
+                <Spinner /> Mise à jour…
+              </span>
+            ) : (
+              "Marquer résolue"
+            )}
           </button>
         )}
       </div>

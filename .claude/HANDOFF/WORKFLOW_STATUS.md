@@ -48,19 +48,24 @@ base locale (dev, jetable) — pas de nettoyage automatique, pas un problème en
 
 | Workflow | Dernière vérification | Statut |
 |---|---|---|
-| `npm run lint` (apps/web) | 2026-08-23 | ✅ |
-| `npx tsc --noEmit` (apps/web) | 2026-08-23 | ✅ |
+| `npm run lint` (apps/web) | 2026-08-23 (après la passe UX NN/g complète) | ✅ |
+| `npx tsc --noEmit` (apps/web) | 2026-08-23 (après la passe UX NN/g complète) | ✅ |
 | Accueil SSR — Hero + noms de villes présents dans le HTML rendu serveur | 2026-08-23 | ✅ |
-| Carte Maroc — rendu SVG, sélection de ville → panneau | 2026-08-22 (build/curl seulement) | ⚠️ jamais confirmé à l'œil |
-| `CreateSheet` — création Pin/Bounty depuis l'UI | jamais testé UI réelle, seulement via API directe | ⛔ |
-| Audio — déverrouillage 1er geste, boucle, mute, ducking | 2026-08-23 — **réécrit ce jour**, bug de déverrouillage mobile corrigé (voir LOG.md) | ⛔ **non confirmé sur téléphone réel — c'est le point actif en attente de retour utilisateur** |
+| Carte Maroc — rendu SVG, sélection de ville → panneau | 2026-08-23 — **coordonnées de 3 villes ajustées** (anti-chevauchement, voir LOG.md), rayons discrétisés en 3 paliers, `role="button"`+clavier ajoutés. SSR vérifié : nouvelles coordonnées et 12× `role="button"` présents dans le HTML rendu | ⚠️ build/curl vert, jamais confirmé à l'œil (rendu visuel réel, sélection tactile) |
+| `CreateSheet` — création Pin/Bounty depuis l'UI | 2026-08-23 — labels visibles + validation au blur + confirmation d'abandon ajoutés | ⛔ jamais testé UI réelle, seulement via API directe |
+| `DetailSheet` — scrim, bouton retour navigateur, ducking audio à l'ouverture | 2026-08-23 — **nouveau comportement**, écrit ce jour (historique navigateur, scrim cliquable) | ⛔ non testable ici (nécessite un geste retour réel sur appareil) |
+| Login/Signup — validation au blur, retour visuel mot de passe | 2026-08-23 — réécrit, pages SSR re-vérifiées (200, contenu attendu présent) | ⚠️ build/curl vert, jamais confirmé à l'œil |
+| Audio — déverrouillage 1er geste, boucle, mute, ducking | 2026-08-23 — réécrit (bug de déverrouillage mobile corrigé, voir LOG.md) | ⛔ **non confirmé sur téléphone réel — point actif en attente de retour utilisateur** |
 | Exposition LAN (PC + téléphone atteignent l'app) | 2026-08-22 | ✅ (confirmé par l'utilisateur) |
 | Hydratation SSR/client (pas de mismatch React) | 2026-08-23 (dernier bug de ce type corrigé) | ✅ (corrigé, pas re-régressé depuis) |
 
 **Limite structurelle** : aucun outil de navigateur/appareil réel n'est disponible dans cet
 environnement (voir `.claude/HANDOFF/NEXT_SESSION.md`). Tout ce qui est marqué ⛔ ne peut être
 vérifié que par un test réel de l'utilisateur — ne jamais annoncer ces lignes comme "vérifiées"
-sur la seule base d'un lint/build vert.
+sur la seule base d'un lint/build vert. **En particulier le bouton retour navigateur pour fermer
+une sheet (`DetailSheet`) est une implémentation réelle mais entièrement non testée en dehors de
+la lecture du code** — priorité de confirmation la prochaine fois que l'utilisateur teste sur
+téléphone.
 
 ## Règle d'audit
 

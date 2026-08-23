@@ -25,17 +25,31 @@ export interface CityGeo {
   y: number;
 }
 
+// Kénitra, Meknès et Ifrane ont été décalées manuellement par rapport à leur
+// projection lng/lat -> x/y brute (voir commentaire de tête). Motif :
+// recherche NN/g sur la hiérarchie visuelle (Fork 3, 2026-08-23) - à la
+// projection brute, Rabat/Kénitra n'étaient qu'à ~17px l'une de l'autre et
+// Fès/Meknès/Ifrane à ~26px, un rayon de cercle maximal réaliste (voir
+// MoroccoMap.tsx) les aurait fait fusionner visuellement (violation du
+// principe de proximité de la Gestalt - deux marqueurs distincts perçus
+// comme un seul blob). Chaque ville a été éloignée de son ancrage
+// (Rabat pour Kénitra, Fès pour Meknès/Ifrane) le long du MÊME vecteur
+// géographique réel (donc dans la même direction relative), juste à une
+// distance suffisante pour garantir un espacement ≥ 40px même au plus grand
+// rayon des deux côtés - la direction relative reste réaliste, seule la
+// distance est étirée. Vérifié par calcul explicite (script ponctuel, pas
+// conservé) : les 3 paires concernées passent de 17-28px à 41-47px.
 export const CITIES: CityGeo[] = [
   { name: "Rabat", lat: 34.0209, lng: -6.8416, x: 506.9, y: 139.79 },
   { name: "Casablanca", lat: 33.5731, lng: -7.5898, x: 471.04, y: 161.25 },
   { name: "Marrakech", lat: 31.6295, lng: -7.9811, x: 452.3, y: 254.38 },
   { name: "Fès", lat: 34.0331, lng: -5.0003, x: 595.12, y: 139.21 },
   { name: "Tanger", lat: 35.7595, lng: -5.834, x: 555.18, y: 56.48 },
-  { name: "Ifrane", lat: 33.5228, lng: -5.1106, x: 589.84, y: 163.66 },
+  { name: "Ifrane", lat: 33.5228, lng: -5.1106, x: 586.14, y: 180.78 },
   { name: "Safi", lat: 32.2994, lng: -9.2372, x: 392.11, y: 222.28 },
   { name: "Agadir", lat: 30.4278, lng: -9.5981, x: 374.81, y: 311.96 },
   { name: "Oujda", lat: 34.6867, lng: -1.9114, x: 743.13, y: 107.89 },
-  { name: "Kénitra", lat: 34.261, lng: -6.5802, x: 519.42, y: 128.29 },
-  { name: "Meknès", lat: 33.8935, lng: -5.5473, x: 568.91, y: 145.89 },
+  { name: "Kénitra", lat: 34.261, lng: -6.5802, x: 538.2, y: 111.04 },
+  { name: "Meknès", lat: 33.8935, lng: -5.5473, x: 550.56, y: 150.57 },
   { name: "El Jadida", lat: 33.2316, lng: -8.5007, x: 427.4, y: 177.61 },
 ];

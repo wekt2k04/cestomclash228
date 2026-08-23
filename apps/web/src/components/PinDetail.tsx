@@ -5,6 +5,8 @@ import { useAuth } from "@/lib/auth-context";
 import { apiFetch, ApiError } from "@/lib/api";
 import type { PinType, PinView } from "@/lib/types";
 import { DetailSheet } from "./DetailSheet";
+import { ErrorMessage } from "./ErrorMessage";
+import { Spinner } from "./Spinner";
 
 const TYPE_LABEL: Record<PinType, string> = {
   astuce: "Astuce",
@@ -54,7 +56,7 @@ export function PinDetail({
           {pin.cityName} · par {pin.authorDisplayName}
         </p>
 
-        {error && <p className="text-sm text-red">{error}</p>}
+        {error && <ErrorMessage>{error}</ErrorMessage>}
 
         {canDelete && (
           <button
@@ -63,7 +65,13 @@ export function PinDetail({
             onClick={remove}
             className="rounded-lg border border-red/40 px-3 py-2 text-sm font-medium text-red"
           >
-            {busy ? "…" : "Supprimer ce Pin"}
+            {busy ? (
+              <span className="flex items-center justify-center gap-2">
+                <Spinner /> Suppression…
+              </span>
+            ) : (
+              "Supprimer ce Pin"
+            )}
           </button>
         )}
       </div>

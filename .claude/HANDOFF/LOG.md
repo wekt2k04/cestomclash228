@@ -371,3 +371,102 @@ documentation connue des politiques d'autoplay mobiles, pas d'une observation di
 téléphone. À confirmer par l'utilisateur ; si le son ne démarre toujours pas après ce correctif,
 l'hypothèse suivante à explorer est l'interrupteur silencieux matériel iOS (indétectable en JS —
 dans ce cas la seule option est un contrôle manuel bien visible, déjà en place via `MuteToggle`).
+
+## 2026-08-23 (suite) — Passe UX complète guidée par la recherche NN/g
+
+Demande explicite : sectionner l'appli en interfaces, identifier par interface les éléments à
+étudier, chercher la recherche de conception scientifique (Nielsen Norman Group en priorité)
+pertinente pour chacun, puis concevoir en conséquence — audio compris. 4 recherches menées en
+parallèle (forks), une par groupe d'interfaces : (1) formulaires (CreateSheet/login/signup),
+(2) mobile/tactile/bottom sheets, (3) hiérarchie visuelle/dataviz (carte), (4) feedback
+système/erreurs + audio. Chaque changement ci-dessous cite le principe qui le motive — jamais
+appliqué par pur goût esthétique.
+
+**Formulaires** (`CreateSheet.tsx`, `login/page.tsx`, `signup/page.tsx`) :
+- Labels visibles ajoutés sur Titre/Description (CreateSheet) — NN/g cite l'absence de label
+  visible (placeholder seul) comme une des erreurs de formulaire les plus fréquentes : le
+  placeholder disparaît dès la saisie commencée, l'utilisateur perd le contexte du champ.
+- Validation au blur (pas à la frappe, pas seulement à la soumission) avec message d'erreur par
+  champ, `aria-invalid`/`aria-describedby` — équilibre entre "trop tôt" (perçu comme agressif) et
+  "trop tard" (aller-retour complet perdu).
+- Retour positif (coche verte) sur le mot de passe du signup une fois le seuil de 8 caractères
+  atteint — confirmation immédiate qu'une contrainte affichée est satisfaite, pas seulement ses
+  violations.
+- Sélecteur de type de Pin (CreateSheet) : `<select>` à 4 options remplacé par des boutons
+  visibles (`TabButton`, déjà utilisé ailleurs dans le même formulaire) — NN/g déconseille les
+  menus déroulants en dessous d'environ 6-7 options (coût d'interaction plus élevé qu'un choix
+  visible, options invisibles tant que non ouvertes). Le sélecteur de ville (12 options)
+  volontairement laissé en `<select>` — NN/g recommande justement le menu déroulant à cette
+  échelle-là.
+
+**Mobile/tactile/bottom sheets** (`DetailSheet.tsx`, `Header.tsx`, `MuteToggle.tsx`) :
+- Cibles tactiles portées à 40-44px minimum (WCAG 2.5.5 / NN/g) : boutons d'auth du Header
+  (32px de haut → 44px), `MuteToggle` (36×36 → 44×44), bouton de fermeture de `DetailSheet`
+  (zone de frappe élargie par padding négatif, sans changer la taille visuelle de l'icône).
+- Scrim (fond assombri, cliquable) ajouté derrière chaque sheet — son absence laissait le
+  contenu derrière une sheet ouverte visuellement actif et cliquable, ambigu sur ce qui a le
+  focus de l'interaction.
+- Intégration au bouton retour du navigateur : ouvrir une sheet pousse une entrée d'historique ;
+  le geste "retour" natif (bouton Android, swipe iOS, bouton navigateur desktop) la ferme comme
+  n'importe quel overlay natif — auparavant un pur état React invisible pour l'historique du
+  navigateur, contraire à l'attente d'un utilisateur mobile.
+- `CreateSheet` seule (la seule sheet avec saisie non enregistrée) confirme l'abandon d'un
+  brouillon avant fermeture (`window.confirm`) — NN/g distingue "Cancel" (annule une action, perte
+  de données possible) de "Close" (simple fermeture, rien à perdre) ; les sheets en lecture seule
+  (CityPanel/PinDetail/BountyDetail) n'ont pas cette confirmation, rien à y perdre.
+
+**Hiérarchie visuelle / carte** (`MoroccoMap.tsx`, `morocco-geo.ts`) :
+- Taille des cercles discrétisée en 3 paliers nets (11/15/19px) au lieu d'une interpolation
+  continue (14-28px) — un encodage visuel continu par la taille est difficile à comparer
+  précisément à l'œil ; quelques paliers distincts se perçoivent et se comparent immédiatement.
+- Un seul élément mis en avant (halo pointillé doré sur la ville la plus active) — au-delà de
+  1-2 points d'emphase simultanés, la hiérarchie visuelle s'effondre. Pas de nouvel accent
+  couleur : réutilise `--gold`, déjà dans la palette existante (limite à 4 accents déjà
+  respectée, cf. entrée précédente sur l'identité visuelle).
+- **Risque géométrique réel corrigé** : à la projection lng/lat→x/y brute, Rabat/Kénitra
+  n'étaient qu'à ~17px l'une de l'autre et Fès/Meknès/Ifrane à ~26px — avec un rayon max
+  réaliste, ces marqueurs auraient visuellement fusionné (violation du principe de proximité de
+  la Gestalt, un utilisateur perçoit un seul point là où il y en a deux ou trois, et ne peut plus
+  cliquer isolément sur l'un d'eux). Corrigé en éloignant Kénitra/Meknès/Ifrane de leur ancrage
+  géographique (Rabat, Fès) **le long du même vecteur réel** — direction relative inchangée,
+  distance étirée jusqu'à un écart ≥ 40px vérifié par calcul explicite pour les 3 paires
+  concernées (17-28px → 41-47px). Rayon max lui-même réduit en parallèle (28px → 19px), ce qui
+  réduit aussi le risque résiduel pour les paires plus modérément proches (Rabat/Casablanca
+  ~42px, Kénitra/Meknès ~41px — marge faible mais positive, complétée visuellement par le
+  contour sombre de 2px déjà présent autour de chaque cercle).
+- Chaque marqueur de ville rendu accessible au clavier (`role="button"`, `tabIndex`, `onKeyDown`
+  Entrée/Espace, `aria-label` avec le nom et le compte) — un `<g onClick>` SVG nu n'est ni
+  focusable ni activable au clavier, gap trouvé en implémentant le point précédent, corrigé dans
+  la foulée (même fichier, même risque de fond : accessibilité des contrôles). `role="img"` retiré
+  du `<svg>` racine (incompatible avec des enfants focusables), remplacé par son seul
+  `aria-label` pour le contexte d'ensemble.
+
+**Feedback système / erreurs** (`CityPanel.tsx`, `BountyDetail.tsx`, `PinDetail.tsx`,
+`login`/`signup`, nouveau `ErrorMessage.tsx`/`Spinner.tsx` partagés) :
+- **Bug réel corrigé** : `CityPanel` avalait silencieusement tout échec réseau
+  (`.catch(() => {})`) — violation directe de l'heuristique NN/g "visibilité de l'état du
+  système". Remplacé par un état d'erreur explicite avec bouton "Réessayer".
+- "Chargement…" (texte nu) remplacé par un skeleton screen dans `CityPanel` — perçu comme plus
+  rapide qu'un texte/spinner nu à durée égale, et évite le saut de mise en page au chargement
+  réel (NN/g, skeleton screens).
+- `role="alert"` ajouté à tous les messages d'erreur (aucun n'en avait avant) — sans lui, un
+  lecteur d'écran ne signale jamais l'apparition d'un message injecté après coup dans le DOM.
+  Icône ajoutée à côté du texte rouge — la couleur seule est invisible pour un daltonisme
+  rouge-vert. Les deux extraits dans `ErrorMessage.tsx`, réutilisé partout (3+ duplications
+  avant extraction).
+- Boutons "busy" (déjà correctement `disabled`) complétés par un spinner inline visible
+  (`Spinner.tsx`) — un simple changement de texte ("…") peut passer inaperçu en lecture rapide.
+
+**Audio** : voir entrée précédente (ducking + signal `recentlyUnlocked`) — traité dans le même
+lot que le bug de déverrouillage mobile, sources : WCAG 1.4.2 (contrôle audio, déjà conforme,
+rien à changer côté consentement/mute) + principe de charge cognitive (réduire le volume ambiant
+pendant une tâche de lecture/saisie).
+
+**Vérifié réellement** à chaque fichier, pas en bloc à la fin : `npm run lint` et
+`npx tsc --noEmit` verts après CHAQUE fichier modifié (pas seulement en fin de lot) ; SSR
+re-vérifié par `curl` après le changement de coordonnées de `morocco-geo.ts` (nouvelles
+coordonnées et 12× `role="button"` bien présents dans le HTML rendu serveur) et après la
+réécriture de login/signup (200, contenu attendu présent). **Non vérifiable ici** : tout rendu
+visuel réel et toute interaction tactile/clavier réelle — voir
+`.claude/HANDOFF/WORKFLOW_STATUS.md` pour le détail ligne par ligne de ce qui reste à confirmer
+par l'utilisateur.

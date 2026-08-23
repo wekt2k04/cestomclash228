@@ -86,11 +86,40 @@ polish du noyau MVP sur la Social-Map.
   une petite state machine de "mood", pas du code dispersé par écran.
 - **Contrôle utilisateur permanent** (mute/volume visible, préférence persistée en localStorage)
   — jamais de son imposé sans échappatoire facile (usage en bibliothèque, en cours).
-- **Activé le 2026-08-23** : deux pistes CC0 (domaine public) récupérées sur OpenGameArt.org —
-  `apps/web/public/audio/{calm,urgent}.ogg`, crédits et licence dans
-  `apps/web/public/audio/CREDITS.md`. Format Ogg Vorbis : **pas lu par Safari/iOS** (WebKit ne
-  le supporte pas) — limitation connue, non bloquante vu le public cible (Android très
-  majoritaire), à corriger avant un déploiement large (ajouter un fallback `.mp3`).
+- **État actuel (2026-08-23)** : une piste "Battle March" (CC-BY 3.0, PlayOnLoop — crédit dans
+  `apps/web/public/audio/CREDITS.md` et lien visible dans le Header) en **MP3**, format décodé
+  de façon universelle y compris mobile (un premier essai en WAV PCM 8 bits, puis en Ogg Vorbis,
+  ne jouait pas de façon fiable sur téléphone — voir historique dans ce même `CREDITS.md`).
+  Bouclée via un moteur `LoopEngine` (Web Audio API, `apps/web/src/lib/audio-context.tsx`) à
+  fondu enchaîné au point de bouclage, pas un `<audio loop>` qui saute sec à 0:00.
+- **Chaîne de gain à deux étages** dans `LoopEngine` : un gain "de cycle" forme le fondu
+  d'entrée/sortie à chaque boucle, connecté à un gain "maître" qui porte le niveau utilisateur et
+  le **ducking** (volume réduit pendant qu'une `DetailSheet` — sheet ou formulaire — est ouverte,
+  restauré à la fermeture). Séparer les deux évite qu'un changement de niveau maître attende la
+  fin du cycle en cours pour prendre effet.
+- **Déverrouillage mobile** : `AudioContext.resume()` peut se résoudre sans que l'état ne passe
+  réellement à `"running"` si le geste d'origine n'est pas reconnu comme valide par le
+  navigateur — `LoopEngine.play()` vérifie l'état explicitement et lève une erreur sinon, et
+  `AudioProvider` continue d'écouter le geste suivant plutôt que d'abandonner après un seul essai
+  (bug réel trouvé et corrigé le 2026-08-23, voir `.claude/HANDOFF/LOG.md` pour le détail —
+  `pointerdown` déclenchait le déverrouillage AVANT `touchend` sur mobile alors qu'il est moins
+  fiable que ce dernier pour débloquer un `AudioContext`).
+
+## Panneaux de détail (sheets)
+
+`CityPanel`, `CreateSheet`, `PinDetail`, `BountyDetail` partagent tous un unique wrapper,
+`DetailSheet.tsx` — **toute la mécanique de présentation vit à un seul endroit**, jamais
+dupliquée par sheet : scrim cliquable, taille de cible tactile du bouton de fermeture,
+intégration au bouton retour du navigateur (une sheet ouverte pousse une entrée d'historique et
+se ferme sur `popstate`, comme n'importe quel overlay natif), et ducking audio (`useAudio().duck`/
+`unduck` appelés au montage/démontage). Un consommateur qui a une saisie non enregistrée à
+protéger (seul `CreateSheet` aujourd'hui) passe un `confirmClose` optionnel — les sheets en
+lecture seule n'ont rien à y perdre et ne le passent pas. Ajouter une nouvelle sheet ne demande
+jamais de ré-implémenter cette mécanique, seulement de l'envelopper dans `<DetailSheet>`.
+
+Messages d'erreur (`ErrorMessage.tsx`) et indicateur "busy" (`Spinner.tsx`) sont également des
+composants partagés uniques, pas dupliqués par écran — `role="alert"` et l'icône (pas seulement
+la couleur) n'existent qu'à un endroit à maintenir.
 
 ## Différé (hors noyau MVP, ne pas construire avant qu'on y revienne explicitement)
 
