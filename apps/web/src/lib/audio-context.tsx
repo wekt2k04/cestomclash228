@@ -15,12 +15,16 @@ const LOOP_FADE_SECONDS = 1.5; // duree du fondu de part et d'autre du point de 
 export type AudioMood = "calm" | "urgent";
 
 // "Battle March - Epic Orchestral Music Loop" par PlayOnLoop (CC-BY 3.0,
-// credit requis - voir apps/web/public/audio/CREDITS.md). Meme piste sur les
-// deux mood pour l'instant - un vrai second morceau pour "urgent" pourra
-// remplacer cette entree plus tard sans toucher au reste.
+// credit requis - voir apps/web/public/audio/CREDITS.md). En MP3 (pas WAV) :
+// la 1ere version telechargee (WAV PCM 8 bits) ne jouait pas du tout sur
+// telephone - hypothese la plus probable, le decodeur audio de certains
+// navigateurs/OS mobiles ne supporte pas le PCM 8 bits (desktop est plus
+// permissif). Le MP3 est un format universellement decode, y compris mobile.
+// Meme piste sur les deux mood pour l'instant - un vrai second morceau pour
+// "urgent" pourra remplacer cette entree plus tard sans toucher au reste.
 const TRACKS: Partial<Record<AudioMood, string>> = {
-  calm: "/audio/epic.wav",
-  urgent: "/audio/epic.wav",
+  calm: "/audio/epic.mp3",
+  urgent: "/audio/epic.mp3",
 };
 
 // Moteur de boucle Web Audio API avec fondu enchaine au point de bouclage,

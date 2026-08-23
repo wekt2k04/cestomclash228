@@ -298,3 +298,27 @@ each time it's called"). Corrigé en remplaçant par un hash déterministe du no
 en gardant l'effet visuel "pas encore de vraies données" demandé. Vérifié réellement : deux
 requêtes `curl` successives sur `/` renvoient exactement le même nombre pour Rabat (59), avant
 le fix elles auraient différé à chaque rendu.
+
+## 2026-08-23 — Accueil "vide" + son toujours muet sur téléphone
+
+Deux retours utilisateur après le fix précédent :
+
+1. **"Interface d'accueil vierge, rien d'intéressant qui donne envie de continuer"** : ajouté
+   `Hero.tsx` — tagline réelle du canevas ("Explore. Partage. Level-up." + une phrase de
+   proposition de valeur), salutation personnalisée si connecté, bouton d'inscription sinon.
+   Contenu réel (repris du canevas stratégique), pas de texte inventé. Gate `!loading` déjà
+   présent dans le pattern d'auth existant, donc pas de nouveau risque d'hydratation (le
+   contenu par défaut rendu côté serveur — `loading=true` — est identique à celui du premier
+   rendu client).
+2. **"Toujours pas de son sur téléphone"** : hypothèse retenue — le fichier `epic.wav` était en
+   **PCM 8 bits**, un format assez inhabituel que certains décodeurs audio mobiles ne
+   supportent probablement pas (desktop plus permissif). Comme `LoopEngine.preload()` n'avait
+   pas de `try/catch` autour de `decodeAudioData()`, un échec de décodage aurait échoué en
+   silence (promesse rejetée jamais interceptée) - explique "aucune erreur visible, juste pas de
+   son". Remplacé par un **MP3** (128 kbps, depuis Playonloop.com directement plutôt que la copie
+   WAV d'OpenGameArt.org) — format décodé de façon universelle, y compris mobile.
+
+**Vérifié** : fichier servi (200, taille exacte), l'ancien `.wav` renvoie bien 404 (retiré
+proprement), `npm run lint`/`build` verts, Hero présent dans le HTML rendu côté serveur. **Non
+vérifié** : rendu sonore réel sur téléphone après ce fix (toujours pas d'outil audio disponible
+pour l'écouter moi-même) — à confirmer par l'utilisateur.

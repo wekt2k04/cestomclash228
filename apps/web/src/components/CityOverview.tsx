@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { Hero } from "./Hero";
 import { MoroccoMap } from "./MoroccoMap";
 import { CityPanel } from "./CityPanel";
 import { CreateSheet } from "./CreateSheet";
@@ -18,6 +19,7 @@ export function CityOverview() {
 
   return (
     <div className="relative flex flex-1 flex-col">
+      <Hero />
       <MoroccoMap onSelectCity={setSelectedCity} />
 
       <button
