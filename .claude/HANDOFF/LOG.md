@@ -153,3 +153,43 @@ process relancé. Voir `.claude/HANDOFF/NEXT_SESSION.md`.
 `npm run build` / `lint` / `test` (26/26) verts sur `apps/api`. Le noyau MVP backend (auth, RBAC,
 Social-Map, Bounties) est maintenant complet et vérifié de bout en bout — reste le frontend
 Next.js.
+
+## 2026-08-22/23 — Frontend Next.js (noyau MVP)
+
+- `AuthProvider`/`AudioProvider` (contexts globaux, layout racine) ; `lib/api.ts` (client HTTP
+  partagé) ; pages `/`, `/login`, `/signup`, `/auth/callback` (callback Google OAuth, lit le
+  token dans le fragment d'URL).
+- `SocialMap` (MapLibre GL JS, style CARTO dark-matter gratuit) : clusters de Pins réels
+  (`/pins/clusters`, précision dérivée du zoom), Bounties individuelles (pas de clustering —
+  cohérent avec leur nature "urgente/actionnable" dans le canevas), clic sur cluster → zoom,
+  clic sur pin isolé/Bounty → panneau de détail. Bouton "+" (création) redirige vers `/login` si
+  non authentifié plutôt que d'exposer un formulaire qui échouerait en 401.
+- `AudioProvider` : architecture posée (autoplay-safe, mute persistant) mais **inerte** — aucun
+  fichier audio réel (`TRACKS` vide), conforme à la décision actée dans `docs/ARCHITECTURE.md`.
+- Accroc réel trouvé en buildant (pas supposé) : `maplibre-gl` v6.5.0 (bien plus récente que la
+  convention "classique" `import maplibregl from 'maplibre-gl'`) n'a **pas d'export par
+  défaut** — build cassé net avec ce pattern. Corrigé en imports nommés
+  (`import { MapLibreMap, Marker, NavigationControl } from "maplibre-gl"`). Découvert en lisant
+  le bundle ESM réel, pas en supposant depuis la mémoire d'entraînement — rappel direct de la
+  note `apps/web/AGENTS.md` sur Next.js 16.
+- Autre accroc réel : la version d'`eslint-plugin-react-hooks` de ce scaffold a une règle
+  `react-hooks/set-state-in-effect` plus stricte qui flague la lecture localStorage/URL dans un
+  effet suivie d'un `setState`. Gardé le pattern (lecture dans un effet, pas un `useState`
+  paresseux) car c'est le seul qui évite un mismatch d'hydratation SSR — désactivé la règle
+  ligne par ligne avec justification, plutôt que de restructurer vers un pattern plus risqué.
+
+**Vérifié** : `npm run build`/`lint` verts (0 erreur) sur `apps/web`. Les 5 routes compilent.
+Testé via curl (pas de navigateur) : `/`, `/login`, `/signup`, `/auth/callback` répondent 200,
+`/` contient bien le rendu serveur du header ("MINDCLASH"), aucune erreur dans le log du serveur
+de dev, le style de carte externe (CARTO) est bien joignable (200) depuis cet environnement.
+
+**Non vérifié — à faire savoir explicitement, pas à cacher** : le rendu visuel réel dans un
+navigateur (la carte s'affiche-t-elle correctement, les marqueurs sont-ils bien positionnés/
+cliquables, les formulaires fonctionnent-ils de bout en bout). L'extension Claude in Chrome
+n'est pas connectée dans cette session (l'utilisateur a choisi de continuer sans lors de
+l'installation) — je n'ai donc pas pu piloter un vrai navigateur. `npm run build`/`lint` et les
+tests vérifient la correction du code, pas le comportement visuel/interactif réel. L'utilisateur
+doit lancer `cd apps/web && npm run dev` et tester lui-même le parcours (voir NEXT_SESSION.md).
+
+Serveur de dev Next.js arrêté après ce check (pas laissé tourner en continu à côté de
+Docker+NestJS — RAM machine toujours serrée, ~1,4-1,6 Go libres avec les 3 en même temps).

@@ -1,26 +1,152 @@
 @import "tailwindcss";
 
+/* Identite visuelle MindClash 228 - memes tokens que la planche de marque
+   publiee (voir .claude/HANDOFF/NEXT_SESSION.md pour le lien). App
+   entierement sombre par design (pas de mode clair - l'esthetique "tactique"
+   fait partie du produit, pas une preference d'affichage). */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: oklch(0.17 0.02 260);
+  --bg-elevated: oklch(0.22 0.02 260);
+  --bg-card: oklch(0.25 0.018 262);
+  --line: oklch(0.34 0.02 260 / 0.55);
+  --ink: oklch(0.96 0.008 90);
+  --ink-muted: oklch(0.68 0.02 260);
+  --ink-faint: oklch(0.52 0.02 260);
+  --cyan: oklch(0.78 0.13 215);
+  --cyan-ink: oklch(0.16 0.02 260);
+  --red: oklch(0.64 0.19 25);
+  --gold: oklch(0.8 0.15 85);
+  --green: oklch(0.7 0.16 152);
+
+  --font-head: var(--font-chakra-petch), "Rajdhani", system-ui, sans-serif;
+  --font-body: var(--font-ibm-plex-sans), "Segoe UI", system-ui, sans-serif;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-card: var(--bg-card);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-cyan: var(--cyan);
+  --color-cyan-ink: var(--cyan-ink);
+  --color-red: var(--red);
+  --color-gold: var(--gold);
+  --color-green: var(--green);
+  --font-sans: var(--font-body);
+  --font-head: var(--font-head);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+a {
+  color: var(--cyan);
+}
+a:hover {
+  color: var(--ink);
+}
+
+/* MapLibre charge son propre CSS mais quelques controles gardent un theme
+   clair par defaut - on les fond dans l'UI sombre ici plutot que dans
+   chaque composant. */
+.maplibregl-ctrl-group {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--line) !important;
+}
+.maplibregl-ctrl-group button {
+  filter: invert(1) brightness(0.9);
+}
+.maplibregl-popup-content {
+  background: var(--bg-card) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--line) !important;
+}
+.maplibregl-popup-tip {
+  border-top-color: var(--bg-card) !important;
+  border-bottom-color: var(--bg-card) !important;
+}
+
+@layer components {
+  .input {
+    border-radius: 0.6rem;
+    border: 1px solid var(--line);
+    background: var(--bg-elevated);
+    padding: 0.55rem 0.75rem;
+    font-size: 0.9rem;
+    color: var(--ink);
+  }
+  .input:focus {
+    outline: 2px solid var(--cyan);
+    outline-offset: -1px;
+  }
+
+  .btn-primary {
+    border-radius: 0.6rem;
+    background: var(--cyan);
+    color: var(--cyan-ink);
+    font-family: var(--font-head);
+    font-weight: 600;
+    padding: 0.65rem 1rem;
+    font-size: 0.9rem;
+  }
+  .btn-primary:disabled {
+    opacity: 0.6;
+  }
+
+  .btn-google {
+    border-radius: 0.6rem;
+    border: 1px solid var(--line);
+    background: var(--bg-elevated);
+    color: var(--ink);
+    text-align: center;
+    padding: 0.6rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .mc-marker {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-head);
+    font-weight: 700;
+  }
+  .mc-marker--cluster {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    background: var(--cyan);
+    color: var(--cyan-ink);
+    font-size: 13px;
+    box-shadow: 0 4px 14px oklch(0.78 0.13 215 / 0.35);
+  }
+  .mc-marker--pin {
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    background: var(--ink);
+    border: 2px solid var(--bg);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  }
+  .mc-marker--bounty {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    background: var(--red);
+    border: 2px solid var(--bg);
+    transform: rotate(45deg);
+    box-shadow: 0 0 10px oklch(0.64 0.19 25 / 0.6);
+  }
 }
