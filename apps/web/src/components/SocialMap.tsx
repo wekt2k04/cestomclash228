@@ -34,10 +34,24 @@ export function SocialMap() {
   const [selectedPin, setSelectedPin] = useState<PinView | null>(null);
   const [selectedBounty, setSelectedBounty] = useState<BountyView | null>(null);
   const [creating, setCreating] = useState(false);
+  const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error">(
+    "loading",
+  );
+  const [mapErrorDetail, setMapErrorDetail] = useState<string | null>(null);
 
   // Initialisation de la carte - une seule fois.
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
+
+    if (!("WebGLRenderingContext" in window)) {
+      // Detection ponctuelle au montage (pas un abonnement a un systeme
+      // externe qui change dans le temps) - meme raison que les lectures
+      // localStorage dans auth-context.tsx/audio-context.tsx.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setMapStatus("error");
+      setMapErrorDetail("WebGL indisponible sur ce navigateur/appareil.");
+      return;
+    }
 
     const map = new MapLibreMap({
       container: containerRef.current,
@@ -49,8 +63,19 @@ export function SocialMap() {
     map.addControl(new NavigationControl({ showCompass: false }), "top-right");
     mapRef.current = map;
 
+    // MapLibre echoue souvent en silence (style/tuile non chargee) sans
+    // exception JS visible - on rend l'echec explicite plutot que de
+    // laisser un ecran vide sans explication.
+    map.on("error", (e) => {
+      setMapStatus("error");
+      setMapErrorDetail(e.error?.message ?? "Erreur de chargement de la carte.");
+    });
+
     const refresh = () => void refreshData(map);
-    map.on("load", refresh);
+    map.on("load", () => {
+      setMapStatus("ready");
+      refresh();
+    });
     map.on("moveend", refresh);
 
     return () => {
@@ -70,12 +95,18 @@ export function SocialMap() {
     const qs = bboxQueryString(bbox);
     const precisionMeters = precisionMetersForZoom(map.getZoom());
 
-    const [clusterData, bountyData] = await Promise.all([
-      apiFetch<PinCluster[]>(`/pins/clusters?${qs}&precisionMeters=${precisionMeters}`),
-      apiFetch<BountyView[]>(`/bounties?${qs}&status=open`),
-    ]);
-    setClusters(clusterData);
-    setBounties(bountyData);
+    try {
+      const [clusterData, bountyData] = await Promise.all([
+        apiFetch<PinCluster[]>(`/pins/clusters?${qs}&precisionMeters=${precisionMeters}`),
+        apiFetch<BountyView[]>(`/bounties?${qs}&status=open`),
+      ]);
+      setClusters(clusterData);
+      setBounties(bountyData);
+    } catch (err) {
+      // Echec de chargement des donnees (API injoignable, CORS...) - la
+      // carte elle-meme reste utilisable, seuls les marqueurs manquent.
+      console.error("Echec du chargement des Pins/Bounties :", err);
+    }
   }
 
   // Rendu imperatif des marqueurs - MapLibre n'a pas de binding React
@@ -131,6 +162,16 @@ export function SocialMap() {
   return (
     <div className="relative flex-1">
       <div ref={containerRef} className="h-full w-full" />
+
+      {mapStatus !== "ready" && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-bg px-6 text-center">
+          <p className="max-w-xs text-sm text-ink-muted">
+            {mapStatus === "loading"
+              ? "Chargement de la carte…"
+              : `La carte n'a pas pu se charger : ${mapErrorDetail}`}
+          </p>
+        </div>
+      )}
 
       <button
         type="button"
