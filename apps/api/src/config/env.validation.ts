@@ -15,7 +15,9 @@ export const envValidationSchema = Joi.object({
   GOOGLE_CLIENT_SECRET: Joi.string().allow('').default(''),
   GOOGLE_CALLBACK_URL: Joi.string().uri().allow('').default(''),
 
-  WEB_ORIGIN: Joi.string().uri().default('http://localhost:3000'),
+  // Liste d'origines separees par des virgules (voir main.ts) - pas de
+  // validation .uri() stricte car ce n'est plus une seule URI.
+  WEB_ORIGIN: Joi.string().default('http://localhost:3000'),
 
   // Email qui recoit automatiquement le role national a l'inscription -
   // amorce la toute premiere assignation de role (bootstrap), voir

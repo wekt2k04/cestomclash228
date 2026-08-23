@@ -13,8 +13,8 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/decorators/current-user.decorator';
 import { BountiesService } from './bounties.service';
 import { CreateBountyDto } from './dto/create-bounty.dto';
-import { BboxQueryDto, toBBox } from '../common/bbox';
-import { BountyStatus } from './bounty-status.enum';
+import { toBBox } from '../common/bbox';
+import { ListBountiesQueryDto } from './dto/list-bounties-query.dto';
 
 @Controller('bounties')
 export class BountiesController {
@@ -27,11 +27,8 @@ export class BountiesController {
   }
 
   @Get()
-  findAll(
-    @Query() query: BboxQueryDto,
-    @Query('status') status?: BountyStatus,
-  ) {
-    return this.bounties.findAll(toBBox(query), status);
+  findAll(@Query() query: ListBountiesQueryDto) {
+    return this.bounties.findAll(toBBox(query), query.status);
   }
 
   @Get(':id')

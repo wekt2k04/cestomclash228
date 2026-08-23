@@ -4,10 +4,20 @@ Dernière mise à jour : 2026-08-23.
 
 ## État actuel
 
-**Le noyau MVP (backend + frontend) est écrit, buildé et lint-propre de bout en bout.** Le
-backend est vérifié réellement (vrai serveur, vraie base, curl). Le frontend est vérifié
-structurellement (build/lint, routes qui répondent 200, aucune erreur serveur) mais **pas
-vérifié visuellement dans un navigateur** — voir "À faire en priorité" ci-dessous.
+**Le noyau MVP (backend + frontend) est écrit, buildé et lint-propre de bout en bout, et
+l'utilisateur a commencé à le tester dans un vrai navigateur** (app exposée sur le réseau local,
+PC + téléphone). Un premier bug réel a déjà été trouvé de cette façon et corrigé (voir entrée
+2026-08-23 dans `LOG.md`) — exactement le genre de chose que `build`/`lint`/tests ne révèlent
+pas. Continuer ce round de vérification visuelle avant d'aller plus loin.
+
+Pour exposer l'app sur le réseau local (PC + téléphone sur le même Wi-Fi) :
+`apps/web/.env.local` a `NEXT_PUBLIC_API_URL` pointé sur l'IP LAN de la machine (pas
+`localhost`), `apps/api/.env` a `WEB_ORIGIN` en liste séparée par des virgules
+(`http://localhost:3000,http://<IP_LAN>:3000`), et `apps/web` doit être lancé avec
+`npx next dev -H 0.0.0.0` (pas juste `npm run dev`) pour écouter sur toutes les interfaces.
+L'IP LAN change si la machine change de réseau — la retrouver avec
+`Get-NetIPAddress -AddressFamily IPv4` (interface Wi-Fi, pas les adaptateurs virtuels
+VirtualBox/WSL/Hyper-V) et mettre à jour les deux fichiers `.env*` en conséquence.
 
 Fait dans cette session (voir `.claude/HANDOFF/LOG.md` pour le détail complet, entrée par
 entrée) :
@@ -66,10 +76,22 @@ l'utilisateur de tester lui-même et rapporter ce qu'il voit.
    sponsoring, pont WhatsApp) — seulement si l'utilisateur élargit le périmètre.
 
 Pour lancer l'environnement de dev : `docker compose -f infra/docker-compose.yml up -d`, puis
-`cd apps/api && npm run start:dev` (port 3001), puis `cd apps/web && npm run dev` (port 3000,
-`.env.local` déjà configuré). **RAM machine de dev serrée** (1,4-1,6 Go libres sur 15,7 Go avec
-les 3 en même temps, constaté le 2026-08-22/23) : ne pas laisser les 3 tourner en continu sans
-raison, arrêter `apps/web` après une session de test plutôt que de le laisser ouvert.
+`cd apps/api && npm run start:dev` (port 3001), puis `cd apps/web && npx next dev -H 0.0.0.0`
+(port 3000 — `-H 0.0.0.0` pour rester accessible depuis le téléphone, voir ci-dessus ; `.env.local`
+déjà configuré). **RAM machine de dev serrée** (1,4-2,9 Go libres sur 15,7 Go selon l'état, voir
+piège ci-dessous) : ne pas laisser les 3 tourner en continu sans raison, arrêter `apps/web` après
+une session de test plutôt que de le laisser ouvert.
+
+## Piège constaté : processus Node orphelins qui s'accumulent
+
+Trouvé le 2026-08-23 : 9 processus Node tournaient en même temps (3 instances complètes du
+serveur API en concurrence), faisant chuter la RAM libre à ~1,4 Go. Cause probable : un
+redémarrage qui tue seulement le process tenant le port (trouvé via `netstat`) sans tuer toute
+sa chaîne parent (`npm` → `nest --watch` → `dist/main`), laissant des orphelins tourner. Avant
+de relancer un serveur qui semble bloqué : `Get-CimInstance Win32_Process -Filter
+"Name='node.exe'"` pour voir TOUTE la liste avec leurs `CommandLine`, identifier les chaînes
+dupliquées, tuer tous les PID concernés (pas juste celui du `netstat`), puis relancer un seul
+process propre.
 
 ## Piège constaté : ne jamais lancer `npm run build` pendant que `start:dev` tourne
 

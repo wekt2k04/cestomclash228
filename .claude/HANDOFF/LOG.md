@@ -193,3 +193,33 @@ doit lancer `cd apps/web && npm run dev` et tester lui-même le parcours (voir N
 
 Serveur de dev Next.js arrêté après ce check (pas laissé tourner en continu à côté de
 Docker+NestJS — RAM machine toujours serrée, ~1,4-1,6 Go libres avec les 3 en même temps).
+
+## 2026-08-23 — Exposition réseau (PC + téléphone) + nettoyage + bug réel trouvé en vrai navigateur
+
+- CORS étendu à une liste blanche séparée par des virgules (`WEB_ORIGIN`) pour autoriser
+  simultanément `localhost:3000` (PC) et l'IP LAN de la machine (PC + téléphone sur le même
+  Wi-Fi) sans désactiver la protection CORS. `apps/web/.env.local` pointe `NEXT_PUBLIC_API_URL`
+  vers l'IP LAN plutôt que `localhost` (sinon un appareil distant appellerait "lui-même").
+- **Trouvé en nettoyant** : 9 processus Node orphelins accumulés au fil de la session (3
+  instances complètes du serveur API tournaient en même temps, chacune avec son propre
+  `npm`→`nest --watch`→`dist/main`). RAM libre remontée de ~1,4 Go à 2,9 Go après les avoir tués
+  et relancé un seul process propre. Cause probable : des redémarrages précédents où seul le
+  process tenant le port avait été tué (via `netstat`/PID), laissant les process parents/enfants
+  orphelins tourner sans jamais libérer leurs propres ressources.
+- Accroc transitoire : `next dev -H 0.0.0.0` a échoué une fois avec `EBUSY` sur un fichier dans
+  `.next/dev/types/` — verrouillage probable d'OneDrive (le repo est dans un dossier synchronisé
+  OneDrive) sur un fichier généré. Résolu par un simple relancement ; à surveiller si ça se
+  reproduit — pourrait justifier d'exclure `node_modules/`/`.next/` de la synchronisation OneDrive.
+- **Bug réel trouvé par l'utilisateur en utilisant l'app dans un vrai navigateur** (exactement le
+  scénario que je ne pouvais pas tester moi-même, faute d'outil navigateur) : `GET /bounties?...
+  &status=open` renvoyait 400 `"property status should not exist"`. Cause : `bounties.controller.ts`
+  avait `@Query() query: BboxQueryDto` ET `@Query('status') status?: ...` sur le même handler — le
+  `ValidationPipe` global (whitelist + forbidNonWhitelisted) valide TOUT l'objet query contre le
+  premier DTO, qui ne déclarait pas `status`, donc le rejette, sans se soucier qu'un second
+  décorateur comptait le récupérer séparément. Corrigé en étendant `BboxQueryDto` avec un
+  `ListBountiesQueryDto` incluant `status`, un seul `@Query()` sur le handler.
+- **Vérifié réellement** : requête exacte qui plantait rejouée après le fix → 200 (localhost et
+  IP LAN). `npm run lint`/`test` (26/26) toujours verts. C'est un bon rappel concret que
+  `build`/`lint`/tests unitaires ne remplacent pas l'usage réel — ce bug n'était détectable que
+  par une vraie requête HTTP avec les bons paramètres, ce que ni les tests mockés ni la lecture
+  du code n'auraient révélé aussi vite.

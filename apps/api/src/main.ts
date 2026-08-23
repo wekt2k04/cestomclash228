@@ -9,7 +9,14 @@ async function bootstrap() {
   const config = app.get(ConfigService);
 
   app.use(helmet());
-  app.enableCors({ origin: config.getOrThrow<string>('WEB_ORIGIN') });
+  // Liste blanche separee par des virgules - permet d'ouvrir simultanement
+  // localhost (PC) et l'IP LAN (PC + telephone sur le meme reseau) sans
+  // desactiver CORS. Voir docs/STACK.md.
+  const webOrigins = config
+    .getOrThrow<string>('WEB_ORIGIN')
+    .split(',')
+    .map((o) => o.trim());
+  app.enableCors({ origin: webOrigins });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
