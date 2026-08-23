@@ -18,6 +18,15 @@ export function Header() {
       </Link>
 
       <div className="flex items-center gap-3">
+        <a
+          href="https://playonloop.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Musique : « Battle March » par PlayOnLoop, licence CC-BY 3.0"
+          className="hidden text-[10px] text-ink-faint hover:text-ink-muted sm:inline"
+        >
+          Musique : PlayOnLoop
+        </a>
         <MuteToggle />
         {loading ? null : user ? (
           <div className="flex items-center gap-2">

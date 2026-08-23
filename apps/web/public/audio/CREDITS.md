@@ -1,16 +1,22 @@
 # Crédits audio
 
-Téléchargé le 2026-08-23 depuis
-[Short Loops Background Music Pack](https://opengameart.org/content/short-loops-background-music-pack)
-sur OpenGameArt.org.
+## Piste active : `epic.wav`
 
-- **Licence : CC0 (domaine public)** — utilisation libre, aucune attribution requise.
-- `calm.ogg` = "A Brand New Wisdom.ogg" (source) — ambiance contemplative, piste par défaut
-  (exploration de la Social-Map).
-- `urgent.ogg` = "Winter Dust.ogg" (source) — ambiance plus tendue, prévue pour un contexte de
-  Bounty proche de l'expiration (voir `AudioMood` dans `src/lib/audio-context.tsx`).
+"Battle March - Epic Orchestral Music Loop" par **PlayOnLoop** (Playonloop.com), téléchargé le
+2026-08-23 depuis [OpenGameArt.org](https://opengameart.org/content/battle-march-epic-orchestral-music-loop).
 
-Format Ogg Vorbis : lu nativement par Chrome/Firefox/Edge/Android. **Pas lu par Safari/iOS**
-(WebKit ne supporte pas Ogg Vorbis) — limitation connue, non bloquante pour le MVP vu le public
-cible (smartphones d'entrée de gamme, majoritairement Android — voir `docs/LEAN_CANVAS.md`),
-mais à traiter avant un déploiement large (ajouter une version `.mp3` en `<source>` de repli).
+- **Licence : CC-BY 3.0** — utilisation libre, **attribution requise** : crédit sous forme de
+  lien vers Playonloop.com (exigence exacte de l'auteur : *"Just place a credit link to
+  Playonloop.com if you intend to use this music!"*). Rester visible quelque part dans l'appli
+  (page crédits/à propos) avant tout déploiement public.
+- Choisi après retour utilisateur du 2026-08-23 : la première piste (contemplative) ne
+  correspondait pas à l'énergie recherchée — référence donnée : le thème "Arise" de Solo
+  Leveling (épique, intense). "Battle March" est décrit par l'auteur comme adapté aux jeux de
+  rôle/stratégie et aux scènes de bataille cinématographiques.
+- Jouée à faible volume (0.18) pour rester une ambiance de fond, pas un premier plan.
+
+## Historique (retiré le 2026-08-23)
+
+Première piste essayée : "Short Loops Background Music Pack" (CC0, OpenGameArt.org) —
+`calm.ogg`/`urgent.ogg`, jugée trop "contemplative" par l'utilisateur. Remplacée, plus dans le
+dépôt.

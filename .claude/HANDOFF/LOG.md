@@ -223,3 +223,31 @@ Docker+NestJS — RAM machine toujours serrée, ~1,4-1,6 Go libres avec les 3 en
   `build`/`lint`/tests unitaires ne remplacent pas l'usage réel — ce bug n'était détectable que
   par une vraie requête HTTP avec les bons paramètres, ce que ni les tests mockés ni la lecture
   du code n'auraient révélé aussi vite.
+
+## 2026-08-23 — Refonte de l'ambiance sonore (retours utilisateur successifs)
+
+- **"Le son ne joue pas du tout sur téléphone"** : cause probable identifiée — `audio.play()`
+  était appelé depuis un `useEffect` réagissant à un changement de state React, pas
+  directement dans le gestionnaire d'événement natif du geste utilisateur. Les navigateurs
+  mobiles sont plus stricts que desktop sur ce point (le détour par un re-render arrive trop
+  tard pour "compter" comme faisant partie du geste). Corrigé en appelant la lecture de façon
+  synchrone dans le handler `pointerdown`/`keydown`/`touchend` lui-même.
+- **Style musical** : la première piste (contemplative, CC0) ne correspondait pas à l'attente —
+  référence donnée par l'utilisateur : le thème "Arise" de Solo Leveling (épique, intense).
+  Remplacée par "Battle March - Epic Orchestral Music Loop" (PlayOnLoop, **CC-BY 3.0** — lien de
+  crédit ajouté dans le Header, visible, requis par la licence). Volume abaissé à 0.18 (demande
+  explicite : "faible niveau").
+- **"Sois un ingénieur du son, qu'on ne remarque pas la notion cyclique"** : remplacé le simple
+  `<audio loop>` (saut sec à 0:00) par un moteur de boucle en Web Audio API
+  (`AudioContext`/`AudioBufferSourceNode`/`GainNode`) avec fondu enchaîné de 1,5s de part et
+  d'autre du point de bouclage — deux cycles se chevauchent brièvement (l'un finit en fondu de
+  sortie pendant que l'autre démarre en fondu d'entrée), un vrai crossfade plutôt qu'une coupure
+  audible. Piste préchargée/décodée en tâche de fond dès le montage (pas besoin de geste pour un
+  simple fetch), pour que la lecture démarre instantanément une fois le geste reçu.
+- Accroc de lint rencontré : la règle `react-hooks/refs` (nouvelle, stricte) refuse même le
+  pattern `if (!ref.current) ref.current = ...` qu'elle recommande elle-même dans son message
+  d'erreur — corrigé avec `useState(() => new LoopEngine())` (instance stable, pas de state
+  setter jamais appelé) plutôt qu'un ref initialisé pendant le rendu.
+- **Vérifié** : `npm run lint`/`build` verts, fichier audio servi (200, taille exacte). **Non
+  vérifié** : le rendu sonore réel sur téléphone après ce fix (pas d'outil audio/navigateur pour
+  l'écouter moi-même) — à confirmer par l'utilisateur.
