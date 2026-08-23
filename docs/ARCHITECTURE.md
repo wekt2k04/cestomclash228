@@ -73,9 +73,11 @@ polish du noyau MVP sur la Social-Map.
   une petite state machine de "mood", pas du code dispersé par écran.
 - **Contrôle utilisateur permanent** (mute/volume visible, préférence persistée en localStorage)
   — jamais de son imposé sans échappatoire facile (usage en bibliothèque, en cours).
-- **Bloquant réel** : il faut de vrais fichiers audio (libres de droits ou composés) — à fournir
-  ou choisir avec l'utilisateur (Pixabay Audio, Freesound CC0, itch.io) quand on construit
-  l'écran Social-Map. L'architecture ci-dessus peut être posée avant d'avoir les fichiers.
+- **Activé le 2026-08-23** : deux pistes CC0 (domaine public) récupérées sur OpenGameArt.org —
+  `apps/web/public/audio/{calm,urgent}.ogg`, crédits et licence dans
+  `apps/web/public/audio/CREDITS.md`. Format Ogg Vorbis : **pas lu par Safari/iOS** (WebKit ne
+  le supporte pas) — limitation connue, non bloquante vu le public cible (Android très
+  majoritaire), à corriger avant un déploiement large (ajouter un fallback `.mp3`).
 
 ## Différé (hors noyau MVP, ne pas construire avant qu'on y revienne explicitement)
 
