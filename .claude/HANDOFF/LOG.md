@@ -285,3 +285,16 @@ d'outil navigateur) — à confirmer par l'utilisateur sur PC et téléphone.
 
 Documentation mise à jour en conséquence : `docs/STACK.md`, `docs/ARCHITECTURE.md`,
 `docs/VISION.md`, `docs/RESUME_FONCTIONNEL.md`.
+
+**Bug réel trouvé par l'utilisateur immédiatement après** (erreur d'hydratation React copiée
+depuis l'overlay Next.js) : les compteurs de présence utilisaient un vrai `Math.random()` dans
+le `useState` paresseux de `MoroccoMap`. `MoroccoMap` est un Client Component mais reste
+**rendu côté serveur** pour le HTML initial puis réhydraté côté client — `Math.random()`
+produit une valeur différente à chaque appel, donc le serveur et le client calculaient des
+nombres différents pour chaque ville, ce que React refuse (`r`/`fontSize`/texte différents,
+exactement le genre d'erreur que le message React cite lui-même : "Math.random() which changes
+each time it's called"). Corrigé en remplaçant par un hash déterministe du nom de la ville
+(`seededPresence`) — même résultat des deux côtés à chaque fois, garanti par construction, tout
+en gardant l'effet visuel "pas encore de vraies données" demandé. Vérifié réellement : deux
+requêtes `curl` successives sur `/` renvoient exactement le même nombre pour Rabat (59), avant
+le fix elles auraient différé à chaque rendu.

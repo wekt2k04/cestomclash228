@@ -11,12 +11,21 @@ import { CITIES, MOROCCO_OUTLINE_PATH, MOROCCO_VIEWBOX } from "@/lib/morocco-geo
 // dependance reseau externe (pas de tuiles, pas de style distant) et
 // s'adapte nativement a la taille de l'ecran via viewBox.
 //
-// Compteurs par ville volontairement aleatoires pour l'instant (demande
-// explicite : "pour le moment mets des chiffres aleatoires") - generes une
-// seule fois au montage, pas a chaque rendu. A remplacer par de vraies
-// donnees (ex: utilisateurs actifs par ville) quand ce sera precise.
-function randomPresence(): number {
-  return Math.floor(Math.random() * 97) + 3;
+// Compteurs par ville volontairement pas-encore-reels pour l'instant
+// (demande explicite : "pour le moment mets des chiffres aleatoires") - mais
+// PAS un vrai Math.random() : ce composant est rendu cote serveur (SSR) puis
+// hydrate cote client, et Math.random() donnerait une valeur differente a
+// chaque environnement -> mismatch d'hydratation garanti (constate en usage
+// reel, voir .claude/HANDOFF/LOG.md). Un hash deterministe du nom de la
+// ville donne le meme resultat des deux cotes, tout en ayant l'air varie/
+// pas-encore-reel comme demande. A remplacer par de vraies donnees
+// (ex: utilisateurs actifs par ville) quand ce sera precise.
+function seededPresence(seed: string): number {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  }
+  return 3 + (hash % 97);
 }
 
 export function MoroccoMap({
@@ -25,7 +34,7 @@ export function MoroccoMap({
   onSelectCity: (cityName: string) => void;
 }) {
   const [presence] = useState<Record<string, number>>(() =>
-    Object.fromEntries(CITIES.map((c) => [c.name, randomPresence()])),
+    Object.fromEntries(CITIES.map((c) => [c.name, seededPresence(c.name)])),
   );
   const [hovered, setHovered] = useState<string | null>(null);
 
