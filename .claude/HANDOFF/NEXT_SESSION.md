@@ -4,24 +4,31 @@ Dernière mise à jour : 2026-08-23.
 
 ## État actuel
 
-**Le noyau MVP (backend + frontend) est écrit, buildé et lint-propre de bout en bout, testé en
-conditions réelles sur PC et téléphone (réseau local).** Plusieurs allers-retours avec
-l'utilisateur ce 2026-08-23 ont déjà fait bouger des choses réelles (voir `LOG.md` pour le détail
-de chaque entrée) :
+**Le noyau MVP (backend + frontend) est écrit, buildé, lint-propre, et a déjà survécu à
+plusieurs cycles réels de test PC/téléphone.** Lire `.claude/HANDOFF/LOG.md` pour le détail
+entrée par entrée, et **`.claude/HANDOFF/WORKFLOW_STATUS.md` pour l'état vérifié vs restant à
+confirmer, workflow par workflow** — c'est la référence à jour, plus fiable qu'un résumé narratif
+qui dérive avec le temps (ce fichier lui-même a été corrigé le 2026-08-23 après avoir affirmé à
+tort des choses déjà obsolètes — MapLibre, audio "inerte" — voir plus bas).
 
-1. Un vrai bug d'API trouvé et corrigé (`/bounties?status=...` rejeté à tort).
-2. L'ambiance sonore entièrement refaite : ne jouait pas du tout sur téléphone (fix : appel
-   synchrone dans le geste utilisateur, pas via un effet React), style musical changé pour
-   quelque chose de plus épique (référence donnée : "Arise" de Solo Leveling), et un vrai moteur
-   de boucle Web Audio API avec fondu enchaîné (pas de coupure audible au bouclage).
-3. **La carte interactive (MapLibre) a été entièrement remplacée** par une carte SVG stylisée du
-   Maroc avec présence par ville (chiffres aléatoires pour l'instant) — elle ne s'affichait pas
-   de façon fiable sur téléphone. Voir `docs/ARCHITECTURE.md` § Visualisation carte pour le
-   détail. Le backend Pins/Bounties/PostGIS n'a pas changé.
+Technos actuelles (**pas** ce qui a été décidé au cadrage initial, voir plus bas) :
+- Carte : **SVG inline stylisé** (contour Maroc + 12 villes), **pas** MapLibre — remplacé le
+  2026-08-23, MapLibre ne s'affichait pas de façon fiable sur mobile. Voir
+  `docs/ARCHITECTURE.md` § Visualisation carte.
+- Audio : moteur Web Audio API maison (`LoopEngine`), piste MP3 unique "Battle March"
+  (PlayOnLoop, CC-BY 3.0), ducking + ombre de déverrouillage mobile. Voir `docs/ARCHITECTURE.md`
+  § Ambiance sonore.
+- UI : passe complète de recherche NN/g appliquée le 2026-08-23 (formulaires, sheets, carte,
+  feedback système) — voir la grosse entrée correspondante dans `LOG.md`.
 
-**Prochaine étape immédiate : confirmation visuelle par l'utilisateur** que la nouvelle carte et
-le son fonctionnent maintenant (toujours pas d'outil navigateur dans cette session pour le
-vérifier soi-même).
+**Point actif en attente de confirmation utilisateur** : le son ne démarrait toujours pas sur
+téléphone après un premier correctif (passage en MP3) ; cause racine re-diagnostiquée
+(`pointerdown` volait le geste à `touchend`, moins fiable pour débloquer un `AudioContext` sur
+mobile) et corrigée le 2026-08-23, **mais jamais confirmée sur un téléphone réel** — aucun outil
+navigateur/audio disponible dans cette session pour le vérifier soi-même. Si l'utilisateur
+rapporte que ça ne marche toujours pas : l'hypothèse suivante est l'interrupteur silencieux
+matériel iOS (indétectable en JS, non contournable autrement que par un contrôle manuel visible
+— déjà en place via `MuteToggle`).
 
 Pour exposer l'app sur le réseau local (PC + téléphone sur le même Wi-Fi) :
 `apps/web/.env.local` a `NEXT_PUBLIC_API_URL` pointé sur l'IP LAN de la machine (pas
@@ -32,60 +39,42 @@ L'IP LAN change si la machine change de réseau — la retrouver avec
 `Get-NetIPAddress -AddressFamily IPv4` (interface Wi-Fi, pas les adaptateurs virtuels
 VirtualBox/WSL/Hyper-V) et mettre à jour les deux fichiers `.env*` en conséquence.
 
-Fait dans cette session (voir `.claude/HANDOFF/LOG.md` pour le détail complet, entrée par
-entrée) :
+## À faire en priorité
 
-- Cadrage : analyse du canevas stratégique (`docs/LEAN_CANVAS.md`), docs (`VISION.md`,
-  `STACK.md`, `ARCHITECTURE.md`), 3 agents dans `.claude/agents/`, identité visuelle publiée
-  (logo, palette, typo, mockup) : https://claude.ai/code/artifact/8b4c18c8-4a9b-4aa5-83a0-9d4059931a55
-- Backend `apps/api` (NestJS) complet : `database`/`health`, `cities` (12 villes marocaines
-  seedées avec coordonnées), `users`, `roles` (RBAC national/local), `auth` (email+mdp + Google
-  OAuth câblé, JWT, rate-limiting), `pins` (Social-Map, ville déduite par plus-proche-voisin
-  PostGIS, clustering réel), `bounties` (cycle de vie complet, réclamation atomique, expiration
-  serveur). 26/26 tests passent.
-- Frontend `apps/web` complet : pages `/`, `/login`, `/signup`, `/auth/callback`, `SocialMap`
-  (MapLibre GL JS + style CARTO dark-matter), création/réclamation/résolution de Bounties et
-  Pins, `AuthProvider`/`AudioProvider`.
-- Premier jet du pitch deck : `pitch/MindClash228-Pitch.pptx` (régénérable via
-  `node pitch/generate-deck.mjs`, voir `pitch/README.md`).
-- `docs/RESUME_FONCTIONNEL.md` : résumé en langage métier de ce qui a été construit, destiné à
-  l'utilisateur — demandé explicitement, à tenir à jour à chaque évolution notable.
-
-## À faire en priorité : vérification visuelle réelle
-
-Cette session n'avait pas d'outil de navigateur connecté (Claude in Chrome proposé mais
-l'utilisateur a choisi de continuer sans lors de l'installation — **ne pas re-proposer**). Tout
-le frontend a donc été vérifié par `build`/`lint`/logs serveur, jamais à l'œil. Prochaine
-session : si Claude in Chrome est connecté (`/chrome`), lancer `apps/web` et parcourir
-réellement : affichage de la carte (le style CARTO charge-t-il bien, les marqueurs sont-ils
-positionnés correctement), création d'un Pin et d'une Bounty, réclamation/résolution, signup/
-login/logout, callback Google (si des clés réelles sont fournies). Sinon, demander à
-l'utilisateur de tester lui-même et rapporter ce qu'il voit.
+1. **Confirmation utilisateur** : le son sur téléphone (voir ci-dessus) et, plus largement,
+   toute la passe UX NN/g du 2026-08-23 (jamais vue à l'œil — build/lint/curl seulement). Voir
+   `WORKFLOW_STATUS.md` pour la liste précise des lignes ⛔/⚠️ à faire confirmer.
+2. **Avant tout nouvel incrément** : invoquer la méthode de `.claude/agents/workflow-audit.md`
+   (manuellement si l'agent custom n'est toujours pas reconnu, voir piège plus bas) — identifier
+   les workflows touchés, ré-exécuter leur commande de référence, mettre à jour
+   `WORKFLOW_STATUS.md` dans le même commit que le code. Créé le 2026-08-23 suite à
+   l'accumulation de régressions non détectées par lint/build seul (audio cassé 3 fois de suite,
+   hydratation React, validation de query param, technologie de carte entière remplacée).
 
 ## Décisions actées (ne pas re-demander)
 
-- Palier **Système**. Stack : Next.js + NestJS + PostgreSQL/PostGIS + MapLibre GL JS. Auth :
-  email+mot de passe (hashé, rate-limité) + Google OAuth. Tout en local pour l'instant (pas de
-  comptes cloud, pas de remote git). Périmètre du premier incrément : noyau ultra-serré
-  (Social-Map + Bounties + auth + RBAC à 2 niveaux) — détail dans `docs/VISION.md`.
+- Palier **Système**. Stack : Next.js + NestJS + PostgreSQL/PostGIS. Carte et audio : voir
+  "État actuel" ci-dessus (ont changé depuis le cadrage initial). Auth : email+mot de passe
+  (hashé, rate-limité) + Google OAuth (câblé, pas de vraies clés — non bloquant). Tout en local
+  pour l'instant (pas de comptes cloud, pas de remote git). Périmètre du premier incrément :
+  noyau ultra-serré (Social-Map + Bounties + auth + RBAC à 2 niveaux) — détail dans
+  `docs/VISION.md`.
 - RBAC spatial : scope basé sur la cible de la ressource (pas le GPS live de l'acteur). Pouvoir
   national volontairement limité (pas d'action destructrice unilatérale) — implémenté
   concrètement dans `roles.service.ts` ET `pins.service.ts`/`bounties.service.ts`, pas juste
   documenté. Détail dans `docs/ARCHITECTURE.md`.
-- Ambiance sonore contextuelle actée comme faisant partie du noyau MVP (pas roadmap) —
-  architecture posée (`AudioProvider`), **inerte** tant qu'il n'y a pas de vrais fichiers audio.
+- Ambiance sonore actée comme faisant partie du noyau MVP (pas roadmap), activée et fonctionnelle
+  (desktop confirmé, mobile en attente de reconfirmation — voir plus haut).
 
-## Prochaine étape (une fois la vérification visuelle faite)
+## Prochaine étape (une fois la confirmation utilisateur obtenue)
 
-1. Si des bugs visuels/UX apparaissent : corriger, avec la même discipline (vérifié → commit →
-   `LOG.md`).
+1. Si des bugs visuels/UX apparaissent au test réel : corriger, avec la même discipline
+   (workflow-audit → vérifié → commit → `LOG.md` + `WORKFLOW_STATUS.md`).
 2. Régénérer `pitch/MindClash228-Pitch.pptx` avec (1) une vraie capture d'écran à la place du
    placeholder Démo, (2) l'"ask" de la slide de closing précisé avec l'utilisateur, (3) un
    aperçu visuel réel du fichier (aucun outil PowerPoint/LibreOffice disponible ici — jamais
    inspecté à l'œil non plus, voir `pitch/README.md`).
-3. Fichiers audio réels à choisir avec l'utilisateur pour activer `AudioProvider` (voir
-   `docs/ARCHITECTURE.md`).
-4. Fonctionnalités hors noyau (Ghost Mode, Reality-Vlogs, modération anti-brigading complète,
+3. Fonctionnalités hors noyau (Ghost Mode, Reality-Vlogs, modération anti-brigading complète,
    sponsoring, pont WhatsApp) — seulement si l'utilisateur élargit le périmètre.
 
 Pour lancer l'environnement de dev : `docker compose -f infra/docker-compose.yml up -d`, puis
@@ -114,19 +103,22 @@ hot-reload rapide, deux instances entrent en concurrence sur le port (`EADDRINUS
 "stale" en arrière-plan pendant que le watcher a crashé silencieusement. Pas un bug produit —
 juste ne plus faire les deux en parallèle. Le watcher donne déjà le statut de compilation dans
 son log (chercher "Found 0 errors") ; `lint`/`test` restent sûrs à lancer à côté (ils ne touchent
-pas `dist/`). Si le serveur ne répond plus après une série d'éditions rapprochées : vérifier
+pas `dist/`). Côté `apps/web`, `npm run lint` et `npx tsc --noEmit` sont de même sûrs à lancer
+pendant que `next dev` tourne — évite `npm run build` en parallèle pour la même raison. Si le
+serveur ne répond plus après une série d'éditions rapprochées : vérifier
 `netstat -ano | grep :3001` (ou `:3000` côté web), tuer tout PID trouvé, relancer proprement.
 
 ## Problème connu à vérifier
 
-Les 3 agents custom dans `.claude/agents/` (`security-review`, `architecture-review`,
-`critical-logic-tests`) ne sont **pas reconnus** par l'outil Agent dans cette session
-(`Agent type 'critical-logic-tests' not found. Available agents: claude, claude-code-guide,
-Explore, general-purpose, Plan, statusline-setup` — constaté le 2026-08-22). Contournement
-utilisé à chaque fois : agent `general-purpose` avec le contenu du fichier `.claude/agents/*.md`
-collé dans le prompt (a bien fonctionné pour les tests RBAC et Bounties). À vérifier en session
-future : version de Claude Code, format attendu, ou besoin d'un redémarrage de session pour que
-les agents créés en cours de route soient détectés.
+Les agents custom dans `.claude/agents/` (`security-review`, `architecture-review`,
+`critical-logic-tests`, et le nouveau `workflow-audit` créé le 2026-08-23) ne sont **pas
+reconnus** par l'outil Agent dans cette session (`Agent type 'critical-logic-tests' not found.
+Available agents: claude, claude-code-guide, Explore, general-purpose, Plan, statusline-setup` —
+constaté le 2026-08-22, toujours vrai le 2026-08-23). Contournement utilisé à chaque fois : soit
+suivre la méthode décrite dans le fichier `.claude/agents/*.md` directement, soit un agent
+`general-purpose` avec son contenu collé dans le prompt. À vérifier en session future : version
+de Claude Code, format attendu, ou besoin d'un redémarrage de session pour que les agents créés
+en cours de route soient détectés.
 
 ## Décisions en attente (à trancher avec l'utilisateur le moment venu, pas avant)
 
@@ -138,6 +130,7 @@ les agents créés en cours de route soient détectés.
 - Anti-brigading : comment la "ville" d'un compte est déterminée de façon non falsifiable (hors
   périmètre MVP — idem).
 - Repo distant GitHub : à créer si/quand un besoin de collaboration ou de CI apparaît.
-- Fichiers audio réels pour l'ambiance sonore (voir `docs/ARCHITECTURE.md`).
 - Pont WhatsApp de viralité (voir `docs/VISION.md`) : dépend de Reality-Vlogs, hors MVP.
 - L'"ask" de la slide de closing du pitch deck (modalités du concours CréaAfrica inconnues).
+- Vraie métrique de "présence par ville" sur la carte (actuellement des chiffres déterministes
+  mais arbitraires, pas branchés sur une donnée réelle).
