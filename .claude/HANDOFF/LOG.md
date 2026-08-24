@@ -549,3 +549,17 @@ par l'utilisateur.
   (score composite pondéré façon Altman Z-score avec verrou dur sur la sécurité, relance max 2×).
 - **Non vérifié à ce stade** : aucune ligne de code des 4 fonctionnalités n'existe encore — ce plan
   est une conception, pas une implémentation. Rien à logguer "fait" avant l'Incrément 0.
+- **2026-08-25 — Infra revue, plus de VPS/domaine payant** : en posant les 3 questions bloquantes
+  restantes, l'utilisateur a refusé tout paiement/carte bancaire pour le déploiement. Or le VPS
+  n'était nécessaire que pour héberger Redis (déjà retiré du périmètre, Ghost Mode simple choisi)
+  et le stockage vidéo — remplacé par un trio 100% palier gratuit : Vercel (front, inchangé) +
+  Render (API, déploie le même `Dockerfile` déjà prévu) + Supabase (Postgres+PostGIS **et**
+  Storage pour les vidéos, un seul compte pour les deux). Aucune carte bancaire, aucun nom de
+  domaine à acheter (sous-domaines automatiques). Root cause de la confusion initiale : le plan
+  avait interprété "tout auto-hébergé sur un seul serveur" comme excluant tout service managé,
+  alors que le vrai besoin de l'utilisateur était "pas de nouveau paiement", pas "pas de service
+  tiers" — les deux ne coïncident pas quand un palier gratuit existe. Limites assumées et
+  documentées (pas cachées) : Render gratuit s'endort après 15min d'inactivité (30-60s de réveil),
+  Supabase gratuit se met en pause après ~1 semaine (réveil manuel dashboard, à faire avant le
+  pitch). `docs/PLAN_EXTENSION.md` Incréments 1a et 6 réécrits en conséquence, 3 décisions
+  bloquantes maintenant toutes résolues — l'Incrément 0 peut démarrer.

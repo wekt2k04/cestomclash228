@@ -47,9 +47,12 @@ chacun complets/démontrables, jamais un squelette à moitié fait (méthode dé
    classe de bugs "marche en local, casse en prod") mais ralentit la boucle de dev (il faut lancer
    `migration:run` après chaque changement de schéma). Alternative : garder `synchronize` actif en
    dev, `false` seulement en prod. **Bloque l'Incrément 0.**
-3. **VPS + nom de domaine** : nécessite un accès/budget que je n'ai pas — actions réservées à
-   l'utilisateur (créer un compte hébergeur, acheter un domaine). **Bloque l'Incrément 1a**, mais
-   aucun autre incrément n'en dépend — peut se faire en parallèle du reste.
+3. ~~VPS + nom de domaine~~ **RÉSOLU 2026-08-25** : l'utilisateur ne veut aucun paiement/carte
+   bancaire. Remplacé par un hébergement 100% palier gratuit (voir Incrément 1a réécrit) — plus
+   simple aussi, ça redevient cohérent avec la cible originale de `docs/STACK.md` (Vercel +
+   Render/Supabase) plutôt que l'auto-hébergement VPS. Reste à faire par l'utilisateur : créer 3
+   comptes gratuits (Vercel, Render, Supabase — email ou GitHub, aucune carte demandée), 2 min
+   chacun, étapes exactes données au moment de l'incrément.
 4. Différées sans bloquer le plan : manifest PWA/service worker (absent malgré le nom "PWA" partout
    dans les docs — coût faible à ajouter si voulu, hors périmètre demandé) ; marqueurs individuels
    de Pins sponsorisés directement sur la carte SVG (nécessite une fonction de projection lat/lng
@@ -120,32 +123,49 @@ vierge ET sur la base de dev actuelle. Agent : `architecture-review`.
 
 ---
 
-## Incrément 1a — Amorce déploiement
+## Incrément 1a — Amorce déploiement (100% palier gratuit, révisé 2026-08-25)
 
-**Fichiers** : `apps/api/Dockerfile` (build multi-stage, Node ≥20.9), `apps/api/.dockerignore`,
-`infra/docker-compose.prod.yml` (séparé du `docker-compose.yml` de dev — services `postgres`,
-`api`, `caddy`, volumes `postgres-data`/`vlogs-data`/`caddy-data`), `infra/Caddyfile` (reverse
-proxy TLS auto Let's Encrypt).
+**Révisé** : le plan initial proposait un VPS payant + nom de domaine acheté, pour auto-héberger
+Redis et le stockage vidéo. Décision utilisateur du 2026-08-25 : aucun paiement/carte bancaire.
+Redis n'était déjà plus nécessaire (Ghost Mode version simple, voir Décision ouverte #1 résolue) —
+remplacé par 3 services à palier gratuit, sans carte bancaire, chacun donnant un sous-domaine
+automatique (pas de nom de domaine à acheter) :
 
-**Actions utilisateur nécessaires** (je ne peux pas les faire moi-même) : créer un remote GitHub
-(actuellement aucun) ; provisionner un VPS Docker (Hetzner CX22 ~4-5€/mois ou DigitalOcean Basic
-~6$/mois — un vrai VPS est la seule option qui supporte `docker compose` multi-service+volumes
-sans traduction vers un format PaaS propriétaire) ; acheter un nom de domaine (Let's Encrypt
-n'émet pas de certificat pour une IP nue) ; créer le projet Vercel pour le frontend.
+| Composant | Service | Remplace |
+|---|---|---|
+| Frontend | Vercel | (inchangé par rapport au plan initial) |
+| API (NestJS) | Render (déploie directement depuis `apps/api/Dockerfile`, déjà prévu) | VPS + Caddy |
+| Postgres + PostGIS | Supabase (PostGIS supporté nativement sur le palier gratuit) | Postgres auto-hébergé |
+| Stockage vidéo (Incrément 6) | Supabase Storage (même compte que la DB) | volume disque local |
+
+**Fichiers** : `apps/api/Dockerfile` (build multi-stage, Node ≥20.9 — inchangé, Render le
+consomme directement), `apps/api/.dockerignore`. `infra/docker-compose.prod.yml` et
+`infra/Caddyfile` du plan initial ne sont plus nécessaires (Render gère TLS/sous-domaine/reverse
+proxy automatiquement) — `infra/docker-compose.yml` (dev local) reste inchangé.
+
+**Actions utilisateur nécessaires** (je ne peux pas les faire moi-même — pas d'outil navigateur
+dans cette session) : créer un remote GitHub (actuellement aucun, nécessaire pour connecter
+Render/Vercel) ; créer un compte Vercel, un compte Render, un compte Supabase (email ou GitHub,
+2 min chacun, aucune carte demandée). Étapes exactes détaillées au moment de lancer cet incrément.
+
+**2 limites réelles à accepter pour un usage "démo pitch"** (pas cachées) : le service Render
+gratuit s'endort après 15 min d'inactivité (première requête après pause : 30-60s le temps du
+redémarrage) ; le projet Supabase gratuit se met en pause après ~1 semaine d'inactivité (réveil
+manuel d'un clic dans leur dashboard — à faire la veille du pitch).
 
 **Confirmé par vérification directe du code** : le frontend est 100% CSR (`"use client"` partout
 dans `page.tsx`/`CityOverview.tsx`/`Hero.tsx`, aucun appel serveur au build) — Vercel n'a jamais
-besoin d'atteindre le VPS au build, seulement `NEXT_PUBLIC_API_URL` au runtime navigateur. Split
-Vercel (front) / VPS (back) confirmé comme la bonne option, pas d'alternative meilleure trouvée.
+besoin d'atteindre l'API au build, seulement `NEXT_PUBLIC_API_URL` au runtime navigateur.
 
 **Docs à corriger dans ce même incrément** (état réel fait foi) : `docs/STACK.md` section "Cible
-de déploiement" (remplace Vercel+Railway+Supabase+Upstash+R2 par VPS+Docker Compose+Caddy+Vercel) ;
-`docs/ARCHITECTURE.md` section "Scale-to-zero" (noter que l'auto-hébergement à coût plat remplace
-l'hypothèse scale-to-zero d'origine, et pourquoi).
+de déploiement" (remplace VPS+Docker Compose+Caddy par Vercel+Render+Supabase — qui rejoint en fait
+la cible originale de ce document, avant le détour VPS) ; `docs/ARCHITECTURE.md` section
+"Scale-to-zero" (confirmer que cette hypothèse tient à nouveau, contrairement au VPS à coût plat
+envisagé un temps).
 
-**Vérification** : `curl https://api.<domaine>/health` (vraie connexion DB via Terminus, déjà
-câblé), `curl https://api.<domaine>/cities`, frontend Vercel atteint l'API sans CORS bloqué.
-Agent : `architecture-review`.
+**Vérification** : `curl https://<projet>.onrender.com/health` (vraie connexion DB via Terminus,
+déjà câblé), `curl .../cities`, frontend Vercel atteint l'API sans CORS bloqué. Agent :
+`architecture-review`.
 
 ---
 
@@ -278,18 +298,26 @@ anonyme avant claim."
 
 ## Incrément 6 — Reality-Vlogs
 
+**Révisé 2026-08-25** : stockage vidéo sur **Supabase Storage** (bucket S3-compatible du même
+compte gratuit que la DB, voir Incrément 1a) plutôt qu'un volume disque local — conséquence directe
+du passage à un hébergement 100% gratuit sans VPS. Le champ `videoPath` devient l'URL/clé retournée
+par Supabase Storage plutôt qu'un chemin de fichier local ; `GET /vlogs/:id/video` redirige ou
+proxy vers cette URL au lieu d'un `res.sendFile` sur disque. Nécessite `@supabase/supabase-js` en
+dépendance backend (seule vraie nouvelle dépendance runtime introduite par ce revirement).
+
 **Schéma** : nouveau `apps/api/src/vlogs/entities/vlog.entity.ts` (table `vlogs`) : `authorId`
 (pas de Ghost Mode sur les vlogs, non demandé), `title`, `location` (geography Point, convention
-Pin/Bounty), `cityId` (déduite via `CitiesService.findNearest`), `videoPath` (nom généré serveur,
-jamais le nom client — évite path traversal), `durationSeconds` (informatif, non vérifié serveur),
-`fileSizeBytes`, `mimeType`.
+Pin/Bounty), `cityId` (déduite via `CitiesService.findNearest`), `videoPath` (clé Supabase Storage,
+générée serveur, jamais dérivée du nom de fichier client — évite path traversal/collision),
+`durationSeconds` (informatif, non vérifié serveur), `fileSizeBytes`, `mimeType`.
 
 **Backend** : nouveau module `apps/api/src/vlogs/` — `POST /vlogs` (JwtAuthGuard +
-`FileInterceptor`, `multer` déjà résolvable en transitive de `@nestjs/platform-express`, aucune
-nouvelle dépendance runtime, seulement `@types/multer` en dev) ; `GET /vlogs` (public, bbox) ;
-`GET /vlogs/:id/video` (`res.sendFile`, Express gère nativement `Range` pour le scrubbing vidéo) ;
-`DELETE /vlogs/:id` (auteur ou local via `requireCityScope`) ; `env.validation.ts` →
-`VLOGS_STORAGE_PATH`, `VLOGS_MAX_FILE_SIZE_MB` ; migration `CreateVlogs`.
+`FileInterceptor` en mémoire, `multer` déjà résolvable en transitive de `@nestjs/platform-express`,
+upload du buffer vers Supabase Storage via `@supabase/supabase-js`) ; `GET /vlogs` (public, bbox) ;
+`GET /vlogs/:id/video` (redirige vers l'URL publique/signée Supabase Storage) ; `DELETE /vlogs/:id`
+(auteur ou local via `requireCityScope`, supprime aussi l'objet Storage) ; `env.validation.ts` →
+`SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `VLOGS_MAX_FILE_SIZE_MB` (remplace `VLOGS_STORAGE_PATH`) ;
+migration `CreateVlogs`.
 
 **Décision assumée** : pas de validation serveur de durée (15-60s du canevas) — nécessiterait
 `ffprobe`/`ffmpeg` (binaire natif de plus dans l'image Docker), complexité non justifiée sous 2

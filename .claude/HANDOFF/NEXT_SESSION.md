@@ -19,10 +19,11 @@ où on en est réellement, à tenir à jour à chaque incrément terminé (ne pa
 consommation tokens des agents) et `quality-gate` (score composite qualité à seuils stricts,
 relance jusqu'à 2× si échec).
 
-3 décisions bloquantes encore ouvertes avant de coder (détail dans `docs/PLAN_EXTENSION.md` §
-Décisions ouvertes) : Ghost Mode version simple ou purgatoire d'upvotes (bloque l'Incrément 5),
-`synchronize:false` partout y compris en dev ou prod seulement (bloque l'Incrément 0), qui/quand
-pour le VPS + nom de domaine (bloque l'Incrément 1a, aucun autre incrément n'en dépend).
+Les 3 décisions bloquantes sont maintenant toutes résolues (2026-08-25) : Ghost Mode version
+simple (pas de purgatoire d'upvotes, pas de Redis) ; `synchronize:false` partout y compris en dev ;
+déploiement 100% palier gratuit (Vercel + Render + Supabase, ni VPS ni domaine payant — voir
+`docs/PLAN_EXTENSION.md` Incrément 1a réécrit). **L'Incrément 0 (dette technique : RBAC centralisé
++ migrations réelles) peut démarrer.**
 
 ## État antérieur (noyau MVP — toujours vrai, base du chantier ci-dessus)
 
