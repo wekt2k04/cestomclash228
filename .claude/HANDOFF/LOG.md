@@ -470,3 +470,37 @@ réécriture de login/signup (200, contenu attendu présent). **Non vérifiable 
 visuel réel et toute interaction tactile/clavier réelle — voir
 `.claude/HANDOFF/WORKFLOW_STATUS.md` pour le détail ligne par ligne de ce qui reste à confirmer
 par l'utilisateur.
+
+## 2026-08-24 — Retour utilisateur : rendu réel jugé mauvais, refonte visuelle engagée
+
+- **Confirmation concrète du risque que `workflow-audit.md` existe pour couvrir** : tout le lint/
+  build/curl de la passe NN/g du 2026-08-23 était vert, mais le premier vrai regard utilisateur
+  juge le rendu "très mauvais" — preuve directe que "ça compile" ne dit rien de "c'est bon à
+  regarder". Aucune ligne ⛔/⚠️ de `WORKFLOW_STATUS.md` n'a été repeinte en ✅ sans nouvelle preuve.
+- **Diagnostic avant d'agir** (jamais supposé) : relecture de l'Artifact d'identité visuelle
+  publié le 2026-08-22 (palette "tactique + accents drapeau togolais", Chakra Petch/IBM Plex Sans)
+  comparée à `globals.css` — les tokens sont bien câblés, **ce n'est pas un problème de branding
+  manquant**. Le vrai problème trouvé en lisant le code : le bouton "+" flottant
+  (`CityOverview.tsx`) n'a aucun label visible, seulement une icône SVG et un `aria-label` (lecteur
+  d'écran seul) — personne ne peut savoir ce qu'il fait sans taper à l'aveugle, sur mobile comme
+  sur desktop. Le `Hero` ajouté le 2026-08-23 pour rendre l'accueil engageant existe bien mais ne
+  suffit visiblement toujours pas une fois vu en vrai.
+- **Décisions actées avec l'utilisateur** (à ne pas re-demander) :
+  - Direction visuelle : **s'éloigner du sombre/tactique vers quelque chose de plus
+    gamifié/coloré** (références déjà citées dans `docs/VISION.md` : Piano Tiles, Shadow Fight) —
+    pas juste une meilleure exécution de l'identité actuelle.
+  - La carte ne doit **pas** être la toute première chose vue à l'ouverture — il faut d'abord
+    quelque chose qui explique à quoi sert le produit et comment s'en servir.
+  - Méthode demandée, dans l'ordre : agents dédiés → fonctionnalités voulues (l'utilisateur a
+    "beaucoup d'idées" à détailler) → pré-design → design → code complet → audit/incrément. Le
+    prochain échange doit recueillir ses idées de fonctionnalités avant tout maquettage.
+  - Toute proposition doit se baser sur `docs/VISION.md`/`docs/LEAN_CANVAS.md` (le cadrage déjà
+    acté), pas des idées génériques déconnectées du produit réel.
+- **Créé `.claude/agents/product-designer.md`** — agent dédié à produire une maquette visuelle
+  **réelle** (Artifact canvas via le skill `design`), jamais une description textuelle. Conçu pour
+  être invoqué en plusieurs instances parallèles (angles créatifs différents dans le prompt de
+  chacune, pas dans l'agent lui-même) afin de comparer plusieurs directions — répond à la demande
+  explicite de l'utilisateur d'agents "rigoureux et chirurgicaux, en parallèle". Contraintes
+  codées dans l'agent pour ne pas reproduire les erreurs déjà identifiées : label visible
+  obligatoire sur tout bouton, cible tactile ≥44px, jamais d'invention de fonctionnalité hors
+  cadrage. Pas encore invoqué — la phase "fonctionnalités" doit être close avant le pré-design.
