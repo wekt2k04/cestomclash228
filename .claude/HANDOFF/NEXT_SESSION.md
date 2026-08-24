@@ -1,8 +1,30 @@
 # NEXT_SESSION
 
-Dernière mise à jour : 2026-08-23.
+Dernière mise à jour : 2026-08-25.
 
-## État actuel
+## Chantier en cours — voir `docs/PLAN_EXTENSION.md`
+
+Retour utilisateur du 2026-08-24 sur le rendu réel de l'app ("très mauvais" — boutons sans label
+visible, accueil pas engageant) a déclenché un élargissement de périmètre majeur : 4 fonctionnalités
+sorties de "roadmap/pitch uniquement" pour être construites avec vraie logique serveur (Ghost Mode,
+Reality-Vlogs, Modération anti-brigading, Sponsoring), + refonte visuelle (direction plus
+gamifiée/colorée), + premier déploiement en ligne. Plan complet, séquencé en 7 incréments avec
+schéma/fichiers/tests exacts, dans **`docs/PLAN_EXTENSION.md`** — lire ce document en premier,
+avant de continuer quoi que ce soit sur ce chantier. Son tableau "État d'avancement" en haut dit
+où on en est réellement, à tenir à jour à chaque incrément terminé (ne pas laisser dériver, comme
+ça a déjà été trouvé plusieurs fois sur ce projet).
+
+2 agents projet supplémentaires à créer avant l'incrément 0 (demande explicite utilisateur du
+2026-08-24, détail complet dans `docs/PLAN_EXTENSION.md` § Phase 0) : `token-steward` (suivi de
+consommation tokens des agents) et `quality-gate` (score composite qualité à seuils stricts,
+relance jusqu'à 2× si échec).
+
+3 décisions bloquantes encore ouvertes avant de coder (détail dans `docs/PLAN_EXTENSION.md` §
+Décisions ouvertes) : Ghost Mode version simple ou purgatoire d'upvotes (bloque l'Incrément 5),
+`synchronize:false` partout y compris en dev ou prod seulement (bloque l'Incrément 0), qui/quand
+pour le VPS + nom de domaine (bloque l'Incrément 1a, aucun autre incrément n'en dépend).
+
+## État antérieur (noyau MVP — toujours vrai, base du chantier ci-dessus)
 
 **Le noyau MVP (backend + frontend) est écrit, buildé, lint-propre, et a déjà survécu à
 plusieurs cycles réels de test PC/téléphone.** Lire `.claude/HANDOFF/LOG.md` pour le détail

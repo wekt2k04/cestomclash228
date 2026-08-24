@@ -504,3 +504,48 @@ par l'utilisateur.
   codées dans l'agent pour ne pas reproduire les erreurs déjà identifiées : label visible
   obligatoire sur tout bouton, cible tactile ≥44px, jamais d'invention de fonctionnalité hors
   cadrage. Pas encore invoqué — la phase "fonctionnalités" doit être close avant le pré-design.
+
+## 2026-08-24/25 — Plan détaillé pour 4 fonctionnalités + refonte + déploiement
+
+- Utilisateur a choisi (QCM en 2 manches) de construire pour de vrai les 4 fonctionnalités jusque
+  là "roadmap/pitch uniquement" (Ghost Mode, Reality-Vlogs, Modération anti-brigading, Sponsoring),
+  avec la même rigueur que Bounties, en couverture large (tout visible à l'écran), en parallèle
+  d'une refonte visuelle (direction gamifiée/colorée, accueil qui explique le produit avant la
+  carte) et d'un premier déploiement en ligne. Décisions actées dans ce round : anonymat Ghost
+  Mode invisible à TOUS les rôles (même national/local, pas seulement au public) ; sponsoring en
+  logique réelle sans vrai paiement ; infra auto-hébergée sur un seul serveur (pas de nouveaux
+  comptes SaaS type Upstash/R2) ; délai réel <2 semaines mais explicitement pas la contrainte
+  prioritaire pour l'utilisateur — la qualité et l'envergure priment.
+- 3 agents d'exploration parallèles (`Explore`, ~75k tokens chacun) ont vérifié en direct
+  l'état réel du backend (schéma, RBAC, pattern `bounties`), du frontend (`DetailSheet`,
+  `CreateSheet`, `auth-context`, `audio-context`, `MoroccoMap`) et de l'infra (docker-compose,
+  STACK.md, .env, absence totale de Dockerfile/CI/remote git) avant tout plan — pas de supposition.
+- Un agent `Plan` (~244k tokens, 92 lectures/greps réels) a ensuite conçu le séquençage complet,
+  avec 9 décisions de conception non triviales tranchées et justifiées plutôt que laissées en
+  ambiguïté : masquage de l'auteur Ghost Mode par projection SQL conditionnelle (pas de nouvelle
+  colonne, `authorId` reste toujours le vrai auteur) + `viewerIsRealAuthor` calculé serveur pour
+  que l'auteur seul voie son bouton de révélation sans jamais exposer son id ; action nommée
+  `reveal` (jamais `claim`, pour ne pas collisionner avec la sémantique Bounty) ; anti-brigading
+  identifié comme **prérequis réel** de Ghost Mode (aujourd'hui un rôle local supprime un Pin de sa
+  ville sans aucun signalement préalable — un levier plus fort qu'un post anonyme non protégé) ;
+  Redis retiré du périmètre (aucune des 4 fonctionnalités telles que cadrées n'en a besoin, facile
+  à réintroduire si besoin réel) ; deux index uniques partiels Postgres nécessaires pour dédupliquer
+  les signalements (un `UNIQUE` composite classique ne bloque pas quand une des deux colonnes cible
+  est NULL) ; split Vercel(front)/VPS(back) confirmé par lecture du code (frontend 100% CSR, jamais
+  d'appel serveur au build).
+- Écarts trouvés par rapport à ce qui était supposé : `Bounty` n'a aujourd'hui aucune route de
+  suppression/modération (donc pas un bug à corriger, juste un manque de câblage à préparer) ;
+  `/health` vérifie déjà une vraie connexion Postgres via Terminus (réutilisable tel quel) ; aucun
+  manifest PWA/service worker n'existe malgré le nom "PWA" partout dans les docs (noté comme
+  question ouverte, pas construit silencieusement) ; `multer` déjà résolvable en dépendance
+  transitive, aucune nouvelle dépendance runtime nécessaire pour l'upload vidéo.
+- Plan complet écrit dans `docs/PLAN_EXTENSION.md` (persistant dans le repo — le fichier de travail
+  du mode Plan de Claude Code vit hors-repo dans le profil utilisateur, se serait perdu entre
+  sessions sinon). 3 décisions encore bloquantes avant de coder, listées en tête de ce document :
+  Ghost Mode simple vs. purgatoire d'upvotes, `synchronize:false` en dev ou prod seulement, timing
+  VPS/domaine.
+- **Créé `.claude/agents/token-steward.md` et `.claude/agents/quality-gate.md`** — demande
+  explicite utilisateur, méthode et formules détaillées dans `docs/PLAN_EXTENSION.md` § Phase 0
+  (score composite pondéré façon Altman Z-score avec verrou dur sur la sécurité, relance max 2×).
+- **Non vérifié à ce stade** : aucune ligne de code des 4 fonctionnalités n'existe encore — ce plan
+  est une conception, pas une implémentation. Rien à logguer "fait" avant l'Incrément 0.
