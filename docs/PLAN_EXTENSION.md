@@ -27,7 +27,7 @@ chacun complets/démontrables, jamais un squelette à moitié fait (méthode dé
 
 | # | Incrément | Statut |
 |---|---|---|
-| 0 | Dette technique (RBAC centralisé + migrations réelles) | ⬜ pas commencé |
+| 0 | Dette technique (RBAC centralisé + migrations réelles) | ✅ fait 2026-08-25, audité par `architecture-review` (2 problèmes trouvés et corrigés avant commit) |
 | 1a | Amorce déploiement (VPS + Docker + domaine + Vercel) | ⬜ pas commencé — bloqué sur infra externe (voir Décisions ouvertes) |
 | 1b | Exploration design (`product-designer`, parallèle) | ⬜ pas commencé |
 | 2 | Refonte visuelle (code) | ⬜ pas commencé |
@@ -98,11 +98,26 @@ c'est l'orchestrateur (session Claude) qui redéclenche le travail corrigé.
 ## Incrément 0 — Dette technique (bloquant, tout le reste en dépend)
 
 **RBAC — centraliser `pins.service.ts::remove()`**
-- `apps/api/src/pins/pins.service.ts` : remplacer la comparaison inline
-  (`role?.scope === RoleScope.LOCAL && role.cityId === pin.cityId`) par
-  `this.roles.requireCityScope(userId, pin.cityId)` — comportement observable identique.
-- `apps/api/src/pins/pins.service.spec.ts` : adapter les 5 tests existants (mock
-  `requireCityScope`) en gardant exactement les mêmes verdicts pass/fail.
+- **Corrigé 2026-08-25 par `architecture-review`** : la version initiale de ce plan prescrivait
+  `this.roles.requireCityScope(userId, pin.cityId)` comme remplacement "comportement identique" —
+  **c'était faux et aurait introduit une vraie faille** : `requireCityScope`/`canActOnCity`
+  retournent `true` pour **tout** rôle national quelle que soit la ville ciblée (légitime pour un
+  scope de lecture générale), ce qui aurait donné au national un pouvoir de suppression unilatérale
+  — contradiction directe avec la doctrine actée ("aucune action destructrice unilatérale par un
+  seul rôle national", `docs/ARCHITECTURE.md`). Le code réel a évité ce piège : deux nouvelles
+  méthodes dédiées et testées dans `apps/api/src/roles/roles.service.ts`,
+  `isLocalModeratorForCity(userId, targetCityId)` / `requireLocalModerationScope(userId,
+  targetCityId)`, qui excluent explicitement le national. **Ne jamais utiliser
+  `requireCityScope`/`canActOnCity` pour un contrôle de suppression/modération** — ce sont deux
+  primitives à usages différents, pas interchangeables.
+- `apps/api/src/pins/pins.service.ts` : appelle `this.roles.isLocalModeratorForCity(userId,
+  pin.cityId)` — comportement observable identique à l'ancienne comparaison inline, vérifié
+  caractère pour caractère par `architecture-review`.
+- `apps/api/src/pins/pins.service.spec.ts` : les 5 tests existants adaptés (mock
+  `isLocalModeratorForCity` au lieu de `findByUserId`), mêmes verdicts pass/fail.
+- `apps/api/src/roles/roles.service.spec.ts` : nouveaux tests dédiés sur `isLocalModeratorForCity`/
+  `requireLocalModerationScope`, dont un test de non-régression explicite vérifiant qu'un rôle
+  national retourne bien `false` (contrairement à `canActOnCity`).
 - `apps/api/src/bounties/bounties.module.ts` : importer `RolesModule` (câblage préparatoire,
   premier usage réel en Incrément 4).
 
@@ -118,8 +133,24 @@ c'est l'orchestrateur (session Claude) qui redéclenche le travail corrigé.
 - Règle pour tous les incréments suivants : toute entité/colonne nouvelle vient avec 1 migration
   dédiée nommée clairement.
 
-**Vérification** : `npm run test` (26/26 + tests adaptés) verts, `migration:run` réussit sur base
-vierge ET sur la base de dev actuelle. Agent : `architecture-review`.
+**Trouvé par `architecture-review` en auditant ce même incrément, corrigé avant commit** : aucun
+index spatial GiST n'a jamais existé sur `pins.location`/`bounties.location`/`cities.centerPoint`
+(`synchronize:true` n'en crée pas sans `@Index` déclaré) — un commentaire dans `cities.service.ts`
+affirmait pourtant le contraire (corrigé). `findNearest()` (appelée à chaque création de
+Pin/Bounty) faisait un scan séquentiel complet de `cities`. Migration
+`AddSpatialIndexes` ajoutée : GiST sur les 3 colonnes géo + btree sur `pins.cityId`/
+`bounties.cityId` (anticipe le filtrage par ville de `listQuarantine()`, Incrément 4). Vérifié par
+`EXPLAIN` sur la vraie base de dev que le planificateur utilise bien le nouvel index (`Index Scan
+using "IDX_cities_center_point"`), pas juste que l'index existe.
+
+**Vérification réelle effectuée** : `npm run test` 32/32 (26 existants + 6 nouveaux) ; cycle complet
+`migration:run` → `migration:revert` → `migration:run` sur DEUX conteneurs Postgres+PostGIS
+vraiment vierges et isolés (jamais `infra-postgres-1`) ; backfill sans perte de données de la base
+de dev existante (table `migrations` créée + baseline marqué "déjà appliqué" sans rejouer son SQL,
+`AddSpatialIndexes` appliquée pour de vrai dessus) ; `EXPLAIN` confirmant l'usage réel du nouvel
+index. Agent : `architecture-review`, invoqué réellement (pas simulé) — a trouvé et fait corriger
+2 problèmes réels avant ce commit (voir ci-dessus), confirmé qu'aucun autre endroit du code n'a le
+même risque RBAC.
 
 ---
 
@@ -289,6 +320,16 @@ auteur peut toujours supprimer le sien sans condition) ; fast-follow identique s
 le...", bouton de révélation conditionné à `viewerIsRealAuthor`, jamais `user?.id === authorId` qui
 est structurellement inutilisable ici puisque `authorId` est masqué).
 
+**Point de vigilance signalé par `architecture-review` (audit Incrément 0, 2026-08-25)** :
+`apps/web/src/components/PinDetail.tsx` réimplique indépendamment la même règle d'autorisation que
+`pins.service.ts::remove()` juste pour afficher/masquer le bouton de suppression (`user?.id ===
+pin.authorId || (role?.scope === "local" && role.cityId === pin.cityId)`) — aujourd'hui cohérent
+avec le backend, mais exactement le pattern que `docs/ARCHITECTURE.md` documente comme à éviter
+("logique de scope centralisée, pas dupliquée"). Quand `remove()` sera durci ici pour exiger
+`quarantinedAt IS NOT NULL` sur un Pin anonyme non révélé, ce composant devra être mis à jour dans
+le même incrément, sous peine d'afficher/masquer le bouton à tort sans qu'aucun test ne le détecte
+(le backend reste l'autorité réelle, donc pas une faille de sécurité — juste un bouton menteur).
+
 **Vérification impérative** : cycle réel confirmant qu'aucune réponse API (avec ou sans token) ne
 fuite jamais le vrai auteur avant révélation. Agent **impératif** : `security-review` — mandat
 documenté exact : "aucun log, réponse API ou export n'expose la correspondance auteur réel ↔ post
@@ -341,7 +382,7 @@ déguisé est un vecteur XSS/RCE classique) + `architecture-review`.
 
 | Incrément | Build/lint/test | Vérification manuelle réelle | Agent(s) |
 |---|---|---|---|
-| 0 | ✓ | `migration:run` base vierge + existante | `architecture-review` |
+| 0 | ✓ 32/32 | run/revert/run sur 2 bases vierges isolées + backfill dev + `EXPLAIN` | `architecture-review` ✅ fait |
 | 1a | ✓ | `curl` HTTPS réel `/health`, `/cities` | `architecture-review` |
 | 1b | — | Artifact regardé par l'utilisateur | — |
 | 2 | ✓ | Test réel PC/téléphone (⛔ tant que non confirmé) | `workflow-audit` |

@@ -5,7 +5,7 @@ import { City } from './entities/city.entity';
 
 // Villes universitaires marocaines ou la diaspora togolaise est presente -
 // liste de depart pour le MVP, extensible sans redeploiement via de vraies
-// migrations plus tard (voir docs/STACK.md sur synchronize:true).
+// migrations (voir apps/api/src/database/migrations/).
 // Coordonnees approximatives du centre-ville (lat, lng) - servent a deriver
 // la ville d'un Pin/Bounty par plus-proche-voisin, pas de vraies frontieres
 // administratives pour le MVP (voir docs/ARCHITECTURE.md).
@@ -62,7 +62,10 @@ export class CitiesService implements OnModuleInit {
   }
 
   // Deduit la ville la plus proche d'un point donne (voisin le plus proche
-  // via l'operateur PostGIS <->, s'appuie sur l'index spatial).
+  // via l'operateur PostGIS <->, s'appuie sur l'index spatial GiST cree par
+  // la migration AddSpatialIndexes - avant elle, ce chemin faisait un scan
+  // sequentiel complet de "cities" a CHAQUE creation de Pin/Bounty, trouve
+  // par architecture-review le 2026-08-25).
   async findNearest(lat: number, lng: number): Promise<City | null> {
     const rows: Array<{ id: string; name: string }> = await this.cities.query(
       `SELECT id, name FROM cities

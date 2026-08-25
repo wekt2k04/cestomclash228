@@ -5,7 +5,6 @@ import { PinsService } from './pins.service';
 import { Pin } from './entities/pin.entity';
 import { CitiesService } from '../cities/cities.service';
 import { RolesService } from '../roles/roles.service';
-import { RoleScope } from '../roles/role-scope.enum';
 
 // Cible uniquement remove() : la logique de permission (auteur / role local
 // dans SA ville / role national volontairement exclu de la suppression
@@ -16,7 +15,7 @@ import { RoleScope } from '../roles/role-scope.enum';
 describe('PinsService.remove', () => {
   let service: PinsService;
   let pinsRepo: { findOne: jest.Mock; delete: jest.Mock; query: jest.Mock };
-  let rolesService: { findByUserId: jest.Mock };
+  let rolesService: { isLocalModeratorForCity: jest.Mock };
 
   const makePin = (overrides: Partial<Pin> = {}): Pin =>
     ({
@@ -28,7 +27,7 @@ describe('PinsService.remove', () => {
 
   beforeEach(async () => {
     pinsRepo = { findOne: jest.fn(), delete: jest.fn(), query: jest.fn() };
-    rolesService = { findByUserId: jest.fn() };
+    rolesService = { isLocalModeratorForCity: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -57,20 +56,21 @@ describe('PinsService.remove', () => {
     await service.remove('author-1', 'pin-1');
 
     expect(pinsRepo.delete).toHaveBeenCalledWith({ id: 'pin-1' });
-    expect(rolesService.findByUserId).not.toHaveBeenCalled();
+    expect(rolesService.isLocalModeratorForCity).not.toHaveBeenCalled();
   });
 
   it('un rôle local peut supprimer un Pin dans SA ville', async () => {
     pinsRepo.findOne.mockResolvedValueOnce(
       makePin({ authorId: 'someone-else', cityId: 'city-rabat' }),
     );
-    rolesService.findByUserId.mockResolvedValueOnce({
-      scope: RoleScope.LOCAL,
-      cityId: 'city-rabat',
-    });
+    rolesService.isLocalModeratorForCity.mockResolvedValueOnce(true);
 
     await service.remove('moderator-1', 'pin-1');
 
+    expect(rolesService.isLocalModeratorForCity).toHaveBeenCalledWith(
+      'moderator-1',
+      'city-rabat',
+    );
     expect(pinsRepo.delete).toHaveBeenCalledWith({ id: 'pin-1' });
   });
 
@@ -78,10 +78,11 @@ describe('PinsService.remove', () => {
     pinsRepo.findOne.mockResolvedValueOnce(
       makePin({ authorId: 'someone-else', cityId: 'city-rabat' }),
     );
-    rolesService.findByUserId.mockResolvedValueOnce({
-      scope: RoleScope.LOCAL,
-      cityId: 'city-marrakech',
-    });
+    // isLocalModeratorForCity encapsule desormais la comparaison de ville -
+    // ce test verifie le verdict cote PinsService (false = hors perimetre),
+    // le detail "pourquoi false" (ville differente) est teste dans
+    // roles.service.spec.ts.
+    rolesService.isLocalModeratorForCity.mockResolvedValueOnce(false);
 
     await expect(service.remove('moderator-1', 'pin-1')).rejects.toBeInstanceOf(
       ForbiddenException,
@@ -93,10 +94,11 @@ describe('PinsService.remove', () => {
     pinsRepo.findOne.mockResolvedValueOnce(
       makePin({ authorId: 'someone-else', cityId: 'city-rabat' }),
     );
-    rolesService.findByUserId.mockResolvedValueOnce({
-      scope: RoleScope.NATIONAL,
-      cityId: null,
-    });
+    // isLocalModeratorForCity(national, ...) resout toujours false - verifie
+    // explicitement dans roles.service.spec.ts. Ici on verifie que
+    // PinsService.remove() respecte bien ce verdict (ne contourne pas via
+    // une autre voie pour le national).
+    rolesService.isLocalModeratorForCity.mockResolvedValueOnce(false);
 
     await expect(
       service.remove('national-admin', 'pin-1'),
@@ -108,7 +110,7 @@ describe('PinsService.remove', () => {
     pinsRepo.findOne.mockResolvedValueOnce(
       makePin({ authorId: 'someone-else', cityId: 'city-rabat' }),
     );
-    rolesService.findByUserId.mockResolvedValueOnce(null);
+    rolesService.isLocalModeratorForCity.mockResolvedValueOnce(false);
 
     await expect(service.remove('random-user', 'pin-1')).rejects.toBeInstanceOf(
       ForbiddenException,

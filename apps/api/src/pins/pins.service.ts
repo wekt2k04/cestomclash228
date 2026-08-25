@@ -8,7 +8,6 @@ import { Repository } from 'typeorm';
 import { Pin } from './entities/pin.entity';
 import { CitiesService } from '../cities/cities.service';
 import { RolesService } from '../roles/roles.service';
-import { RoleScope } from '../roles/role-scope.enum';
 import { CreatePinDto } from './dto/create-pin.dto';
 import type { BBox } from '../common/bbox';
 
@@ -156,9 +155,10 @@ export class PinsService {
       return;
     }
 
-    const role = await this.roles.findByUserId(userId);
-    const isLocalModeratorHere =
-      role?.scope === RoleScope.LOCAL && role.cityId === pin.cityId;
+    const isLocalModeratorHere = await this.roles.isLocalModeratorForCity(
+      userId,
+      pin.cityId,
+    );
     if (!isLocalModeratorHere) {
       throw new ForbiddenException('Vous ne pouvez pas supprimer ce Pin.');
     }

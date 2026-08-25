@@ -28,7 +28,9 @@ Prérequis pour les commandes ci-dessous : API sur `localhost:3001`, Web sur `lo
 | Claim Bounty — double claim refusé (409, pas de race) | 2026-08-23 | ✅ |
 | Resolve Bounty par l'auteur (200) | 2026-08-23 | ✅ |
 | Suite de tests unitaires (`roles`/`pins`/`bounties`.service.spec.ts) | 2026-08-23 | ✅ (26/26) |
-| RBAC — pouvoir limité national (aucune action destructrice unilatérale) | jamais re-testé en direct depuis l'implémentation initiale | ⚠️ |
+| RBAC — pouvoir limité national (aucune action destructrice unilatérale) | 2026-08-25 — centralisé (`RolesService.isLocalModeratorForCity`), re-testé (6 nouveaux tests dédiés incl. exclusion national), audité par `architecture-review` | ✅ |
+| Migrations TypeORM (remplace `synchronize`) | 2026-08-25 — baseline + `AddSpatialIndexes`, cycle run/revert/run vérifié sur 2 bases vierges isolées, dev backfillée sans perte | ✅ |
+| Index spatiaux GiST (pins/bounties/cities) | 2026-08-25 — créés, usage réel confirmé par `EXPLAIN` sur la base de dev | ✅ |
 | Google OAuth (`/auth/google`) | — | ⛔ (pas de credentials Google réels configurés — connu, non bloquant) |
 
 **Commande de référence** (cycle complet auth+pins+bounties, compte jetable) :

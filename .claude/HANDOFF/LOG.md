@@ -563,3 +563,43 @@ par l'utilisateur.
   Supabase gratuit se met en pause après ~1 semaine (réveil manuel dashboard, à faire avant le
   pitch). `docs/PLAN_EXTENSION.md` Incréments 1a et 6 réécrits en conséquence, 3 décisions
   bloquantes maintenant toutes résolues — l'Incrément 0 peut démarrer.
+
+## 2026-08-25 — Incrément 0 terminé : RBAC centralisé + migrations TypeORM réelles
+
+- **RBAC** : `pins.service.ts::remove()` appelait une comparaison inline
+  (`role?.scope === LOCAL && role.cityId === pin.cityId`) au lieu de `RolesService`. Ajouté
+  `RolesService.isLocalModeratorForCity()`/`requireLocalModerationScope()` — **délibérément pas**
+  `requireCityScope()`/`canActOnCity()` existants, qui retournent `true` pour tout rôle national
+  quelle que soit la ville (correct pour un scope de lecture, aurait été une vraie faille de
+  sécurité ici : pouvoir de suppression unilatérale national, contraire à la doctrine actée).
+  6 nouveaux tests dans `roles.service.spec.ts`, 5 tests existants de `pins.service.spec.ts`
+  adaptés (mêmes verdicts, comportement identique vérifié caractère pour caractère).
+- **Migrations réelles** : `synchronize` passé à `false` inconditionnellement (était `true` en
+  dev). Nouveau `data-source.ts` (DataSource CLI autonome, `dotenv` ajouté en devDependency).
+  Migration baseline générée et testée contre un **conteneur Postgres+PostGIS vierge isolé** (pas
+  la base de dev) — **bug réel trouvé avant qu'il ne devienne silencieux** : la migration
+  auto-générée ne créait pas explicitement les extensions `postgis`/`uuid-ossp` (`synchronize`
+  les créait en douce jusqu'ici) ; aurait échoué sur un vrai déploiement neuf (Supabase). Corrigé
+  (`CREATE EXTENSION IF NOT EXISTS` explicite), re-testé sur un DEUXIÈME conteneur vraiment
+  vierge. Base de dev existante migrée sans perte : table `migrations` backfillée avec le
+  baseline marqué "déjà appliqué" (schéma déjà identique via `synchronize`), jamais rejoué le SQL
+  dessus — confirmé par `migration:run` → "No migrations are pending".
+- **Audit réel par `architecture-review`** (pas simulé, invoqué en tâche de fond) : a confirmé
+  la distinction RBAC correcte et le SEUL endroit du code à risque (grep exhaustif : aucun autre
+  usage de `requireCityScope`/`canActOnCity` dans le repo) ; a trouvé et fait corriger 2 problèmes
+  réels avant ce commit : (1) `docs/PLAN_EXTENSION.md` prescrivait littéralement `requireCityScope`
+  comme solution — le code avait bien évité ce piège mais le doc restait une mine active pour une
+  session future, corrigé ; (2) **aucun index spatial GiST n'a jamais existé** sur
+  `pins.location`/`bounties.location`/`cities.centerPoint` (`synchronize` n'en crée pas sans
+  `@Index` déclaré) — `findNearest()` (appelée à chaque création de Pin/Bounty) faisait un scan
+  séquentiel complet de `cities`, un commentaire affirmait pourtant l'inverse à tort (corrigé).
+  Nouvelle migration `AddSpatialIndexes` (GiST ×3 + btree sur `cityId` ×2, anticipe le filtrage
+  par ville de l'Incrément 4), testée en cycle run/revert/run sur un troisième conteneur vierge,
+  appliquée pour de vrai sur la base de dev, usage confirmé par `EXPLAIN` (`Index Scan using
+  "IDX_cities_center_point"`) — pas juste vérifié que l'index existe.
+- Point de vigilance non bloquant signalé pour l'Incrément 5 (pas d'action requise maintenant) :
+  `PinDetail.tsx` réimplique la même règle RBAC côté frontend juste pour l'affichage du bouton —
+  cohérent aujourd'hui, à garder synchronisé quand `remove()` sera durci pour Ghost Mode.
+- **Vérifié réellement** : `npm run test` 32/32, `npm run lint` propre, `tsc --noEmit` propre,
+  API relancée et re-testée en direct (`/health`, `/cities`) après chaque changement de schéma.
+  **L'Incrément 0 est fait et audité — l'Incrément 1 (déploiement + design) peut démarrer.**

@@ -19,11 +19,20 @@ où on en est réellement, à tenir à jour à chaque incrément terminé (ne pa
 consommation tokens des agents) et `quality-gate` (score composite qualité à seuils stricts,
 relance jusqu'à 2× si échec).
 
-Les 3 décisions bloquantes sont maintenant toutes résolues (2026-08-25) : Ghost Mode version
-simple (pas de purgatoire d'upvotes, pas de Redis) ; `synchronize:false` partout y compris en dev ;
-déploiement 100% palier gratuit (Vercel + Render + Supabase, ni VPS ni domaine payant — voir
-`docs/PLAN_EXTENSION.md` Incrément 1a réécrit). **L'Incrément 0 (dette technique : RBAC centralisé
-+ migrations réelles) peut démarrer.**
+Les 3 décisions bloquantes sont résolues (2026-08-25) : Ghost Mode version simple (pas de
+purgatoire d'upvotes, pas de Redis) ; `synchronize:false` partout y compris en dev ; déploiement
+100% palier gratuit (Vercel + Render + Supabase, ni VPS ni domaine payant).
+
+**Incrément 0 terminé et audité (2026-08-25)** : RBAC centralisé (`RolesService.
+isLocalModeratorForCity`, distinct de `requireCityScope` — voir `LOG.md` pour pourquoi c'est
+important, ne pas confondre les deux), migrations TypeORM réelles (baseline + `AddSpatialIndexes`,
+testées run/revert/run sur bases vierges isolées, dev backfillée sans perte). Audité réellement par
+`architecture-review`, 2 problèmes trouvés et corrigés avant commit. Détail complet dans
+`docs/PLAN_EXTENSION.md` et `.claude/HANDOFF/LOG.md`.
+
+**Prochaine étape : Incrément 1** (`docs/PLAN_EXTENSION.md`) — 1a déploiement (créer comptes
+Vercel/Render/Supabase, gratuits, 2 min chacun) en parallèle de 1b (invoquer `product-designer` en
+plusieurs instances pour la refonte visuelle).
 
 ## État antérieur (noyau MVP — toujours vrai, base du chantier ci-dessus)
 

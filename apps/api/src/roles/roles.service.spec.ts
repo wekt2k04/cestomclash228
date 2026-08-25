@@ -200,4 +200,71 @@ describe('RolesService', () => {
       );
     });
   });
+
+  // Distinct de canActOnCity : un role national ne doit JAMAIS etre
+  // considere comme moderateur local, y compris sur une ville "cible" -
+  // c'est la difference qui justifie l'existence de cette methode separee
+  // (voir commentaire dans roles.service.ts). Introduit en meme temps que
+  // la centralisation de PinsService.remove() (etait duplique en inline).
+  describe('isLocalModeratorForCity', () => {
+    it('retourne FALSE pour un role national, meme sur une ville "cible" arbitraire (contrairement a canActOnCity)', async () => {
+      repo.findOne.mockResolvedValueOnce(
+        makeRole({ scope: RoleScope.NATIONAL, cityId: null }),
+      );
+
+      await expect(
+        service.isLocalModeratorForCity('user-1', 'city-x'),
+      ).resolves.toBe(false);
+    });
+
+    it('retourne true pour un role local ciblant exactement sa propre ville', async () => {
+      repo.findOne.mockResolvedValueOnce(
+        makeRole({ scope: RoleScope.LOCAL, cityId: 'city-a' }),
+      );
+
+      await expect(
+        service.isLocalModeratorForCity('user-1', 'city-a'),
+      ).resolves.toBe(true);
+    });
+
+    it('retourne false pour un role local ciblant une autre ville', async () => {
+      repo.findOne.mockResolvedValueOnce(
+        makeRole({ scope: RoleScope.LOCAL, cityId: 'city-a' }),
+      );
+
+      await expect(
+        service.isLocalModeratorForCity('user-1', 'city-b'),
+      ).resolves.toBe(false);
+    });
+
+    it('retourne false pour un utilisateur sans role du tout', async () => {
+      repo.findOne.mockResolvedValueOnce(null);
+
+      await expect(
+        service.isLocalModeratorForCity('user-1', 'city-a'),
+      ).resolves.toBe(false);
+    });
+  });
+
+  describe('requireLocalModerationScope', () => {
+    it('leve ForbiddenException quand isLocalModeratorForCity serait false', async () => {
+      repo.findOne.mockResolvedValueOnce(
+        makeRole({ scope: RoleScope.NATIONAL, cityId: null }),
+      );
+
+      await expect(
+        service.requireLocalModerationScope('user-1', 'city-a'),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('resout sans erreur quand isLocalModeratorForCity serait true', async () => {
+      repo.findOne.mockResolvedValueOnce(
+        makeRole({ scope: RoleScope.LOCAL, cityId: 'city-a' }),
+      );
+
+      await expect(
+        service.requireLocalModerationScope('user-1', 'city-a'),
+      ).resolves.toBeUndefined();
+    });
+  });
 });

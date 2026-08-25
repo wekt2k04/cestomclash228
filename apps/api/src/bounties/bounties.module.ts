@@ -4,9 +4,10 @@ import { Bounty } from './entities/bounty.entity';
 import { BountiesService } from './bounties.service';
 import { BountiesController } from './bounties.controller';
 import { CitiesModule } from '../cities/cities.module';
+import { RolesModule } from '../roles/roles.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Bounty]), CitiesModule],
+  imports: [TypeOrmModule.forFeature([Bounty]), CitiesModule, RolesModule],
   controllers: [BountiesController],
   providers: [BountiesService],
   exports: [BountiesService],

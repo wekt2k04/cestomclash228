@@ -89,6 +89,30 @@ export class RolesService {
     }
   }
 
+  // Distinct de canActOnCity/requireCityScope : ceux-ci autorisent le role
+  // national PARTOUT (usage lecture/scope general). La moderation locale
+  // (suppression de contenu) exclut deliberement le national - voir la
+  // doctrine en tete de ce fichier ("aucune action destructrice unilaterale
+  // par un seul role national"). Ne jamais utiliser requireCityScope pour
+  // un controle de suppression/moderation - utiliser ceci a la place.
+  async isLocalModeratorForCity(
+    userId: string,
+    targetCityId: string,
+  ): Promise<boolean> {
+    const role = await this.findByUserId(userId);
+    return role?.scope === RoleScope.LOCAL && role.cityId === targetCityId;
+  }
+
+  async requireLocalModerationScope(
+    userId: string,
+    targetCityId: string,
+  ): Promise<void> {
+    const allowed = await this.isLocalModeratorForCity(userId, targetCityId);
+    if (!allowed) {
+      throw new ForbiddenException('Vous ne pouvez pas modérer ce contenu.');
+    }
+  }
+
   async getOrThrow(userId: string): Promise<Role> {
     const role = await this.findByUserId(userId);
     if (!role) throw new NotFoundException('Aucun rôle pour cet utilisateur.');
