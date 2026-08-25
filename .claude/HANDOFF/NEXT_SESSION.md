@@ -34,6 +34,11 @@ testées run/revert/run sur bases vierges isolées, dev backfillée sans perte).
 Vercel/Render/Supabase, gratuits, 2 min chacun) en parallèle de 1b (invoquer `product-designer` en
 plusieurs instances pour la refonte visuelle).
 
+**1b tenté le 2026-08-25, échoué — à relancer** : 3 instances `product-designer` lancées en
+parallèle (angles "arcade rétro", "chaleureux façon Duolingo", "afro-futuriste") ont toutes échoué
+avec "session limit" côté plateforme (reset 2:50am Africa/Casablanca), pas un problème de fond -
+aucune maquette produite, à relancer telles quelles (mêmes 3 briefs) une fois la limite levée.
+
 ## État antérieur (noyau MVP — toujours vrai, base du chantier ci-dessus)
 
 **Le noyau MVP (backend + frontend) est écrit, buildé, lint-propre, et a déjà survécu à
