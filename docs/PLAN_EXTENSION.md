@@ -29,7 +29,7 @@ chacun complets/démontrables, jamais un squelette à moitié fait (méthode dé
 |---|---|---|
 | 0 | Dette technique (RBAC centralisé + migrations réelles) | ✅ fait 2026-08-25, audité par `architecture-review` (2 problèmes trouvés et corrigés avant commit) |
 | 1a | Amorce déploiement (VPS + Docker + domaine + Vercel) | ⬜ pas commencé — bloqué sur infra externe (voir Décisions ouvertes) |
-| 1b | Exploration design (`product-designer`, parallèle) | ⬜ pas commencé |
+| 1b | Exploration design (`product-designer`, parallèle) | ⚠️ 3/3 maquettes réelles publiées (2026-08-30, sur plusieurs relances — voir `LOG.md`), en attente du choix de direction par l'utilisateur avant l'Incrément 2 |
 | 2 | Refonte visuelle (code) | ⬜ pas commencé |
 | 3 | Sponsoring (Pins dorés) | ⬜ pas commencé |
 | 4 | Modération anti-brigading | ⬜ pas commencé |

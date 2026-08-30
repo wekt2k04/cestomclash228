@@ -50,10 +50,19 @@ WCAG vérifié par calcul, bug bouton-sans-label corrigé) :
 https://claude.ai/code/artifact/85a08f7c-5cb2-413e-8abd-d26a2af5413e. Afro-futuriste relancé à la
 suite, en attente de retour.
 
-**Bilan 1b à cette date** : 2/3 maquettes réelles publiées (arcade rétro, chaleureux Duolingo) ;
-afro-futuriste en cours. Une fois les 3 réunies, l'utilisateur doit choisir une direction avant
-l'Incrément 2 (code de la refonte visuelle) — décision explicitement laissée à l'utilisateur
-(CLAUDE.md §2), ne pas trancher à sa place.
+**Incrément 1b terminé (2026-08-30) : les 3 maquettes réelles sont publiées.**
+- Arcade rétro : https://claude.ai/code/artifact/6685f371-1a01-4bec-807a-cd59f79f2857
+- Chaleureux façon Duolingo : https://claude.ai/code/artifact/85a08f7c-5cb2-413e-8abd-d26a2af5413e
+- Afro-futuriste vibrant : https://claude.ai/code/artifact/9d460df4-301b-4484-a162-109eb17d99e6
+
+Chacune couvre les 3 écrans prioritaires (accueil / carte+panneau / créer un Pin-Bounty), corrige
+le bug bouton-sans-label, respecte les cibles tactiles ≥44px, et reste ancrée dans le vocabulaire
+produit réel (Pins/Bounties/villes/copie du Lean Canvas, rien d'inventé). Décision explicitement
+laissée à l'utilisateur (CLAUDE.md §2) : choisir une direction (ou en combiner des éléments) avant
+de lancer l'Incrément 2 (code de la refonte visuelle) — ne pas trancher à sa place. Plusieurs
+questions ouvertes signalées par les agents (contour Maroc réel vs carte-réseau abstraite pour
+l'afro-futuriste, densité des labels de villes pour le Duolingo, accueil = page séparée ou même
+scroll que `CityOverview.tsx`) à trancher avec l'utilisateur au moment du choix.
 
 ## État antérieur (noyau MVP — toujours vrai, base du chantier ci-dessus)
 
