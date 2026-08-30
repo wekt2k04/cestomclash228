@@ -43,8 +43,10 @@ suite ont échoué **à nouveau** (même cause, reset avancé à 7:50am Africa/C
 été retouchée très peu après le succès du canary. Aucune maquette "Duolingo"/"afro-futuriste" ne
 s'est jamais matérialisée à cette date.
 
-**Session du 2026-08-30 (5 jours plus tard)** : limite de plateforme largement expirée entre
-temps. Relance des 2 briefs manquants en cours.
+**Session du 2026-08-30** : relance des 2 briefs manquants (Duolingo, afro-futuriste) en
+parallèle — a échoué une 3e fois (reset 6:40pm Africa/Casablanca). Toujours aucune maquette
+produite pour ces deux directions à cette date. Prochaine tentative : une seule instance à la
+fois (canary), pas les 2 en parallèle, pour ne pas re-saturer la limite immédiatement.
 
 ## État antérieur (noyau MVP — toujours vrai, base du chantier ci-dessus)
 
