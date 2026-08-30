@@ -1,7 +1,9 @@
 # VISION — MindClash 228
 
-**Cible :** Concours CréaAfrica (démo, échéance < 1 mois) puis déploiement réel pour CESTOM
-(Communauté des Étudiants et Stagiaires Togolais au Maroc).
+**Cible :** Concours CréaAfrica puis déploiement réel pour CESTOM (Communauté des Étudiants et
+Stagiaires Togolais au Maroc). Logistique concrète du concours (calendrier, livrables, critères de
+notation) dans [docs/CONCOURS.md](CONCOURS.md) — **livrable PowerPoint dû le 2026-09-03 23:59**,
+échéance bien plus proche que "< 1 mois" ne le laissait penser.
 
 Canevas stratégique complet : [docs/LEAN_CANVAS.md](LEAN_CANVAS.md).
 Identité visuelle : voir le lien publié dans `.claude/HANDOFF/NEXT_SESSION.md`.
