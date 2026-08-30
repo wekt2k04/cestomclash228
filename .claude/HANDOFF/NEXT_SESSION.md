@@ -44,9 +44,16 @@ suite ont échoué **à nouveau** (même cause, reset avancé à 7:50am Africa/C
 s'est jamais matérialisée à cette date.
 
 **Session du 2026-08-30** : relance des 2 briefs manquants (Duolingo, afro-futuriste) en
-parallèle — a échoué une 3e fois (reset 6:40pm Africa/Casablanca). Toujours aucune maquette
-produite pour ces deux directions à cette date. Prochaine tentative : une seule instance à la
-fois (canary), pas les 2 en parallèle, pour ne pas re-saturer la limite immédiatement.
+parallèle — a échoué une 3e fois (reset 6:40pm Africa/Casablanca). Canary solo relancé ensuite
+("chaleureux façon Duolingo" seul) : **réussi** — maquette réelle publiée (3 écrans, contraste
+WCAG vérifié par calcul, bug bouton-sans-label corrigé) :
+https://claude.ai/code/artifact/85a08f7c-5cb2-413e-8abd-d26a2af5413e. Afro-futuriste relancé à la
+suite, en attente de retour.
+
+**Bilan 1b à cette date** : 2/3 maquettes réelles publiées (arcade rétro, chaleureux Duolingo) ;
+afro-futuriste en cours. Une fois les 3 réunies, l'utilisateur doit choisir une direction avant
+l'Incrément 2 (code de la refonte visuelle) — décision explicitement laissée à l'utilisateur
+(CLAUDE.md §2), ne pas trancher à sa place.
 
 ## État antérieur (noyau MVP — toujours vrai, base du chantier ci-dessus)
 
