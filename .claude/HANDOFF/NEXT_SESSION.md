@@ -34,10 +34,17 @@ testées run/revert/run sur bases vierges isolées, dev backfillée sans perte).
 Vercel/Render/Supabase, gratuits, 2 min chacun) en parallèle de 1b (invoquer `product-designer` en
 plusieurs instances pour la refonte visuelle).
 
-**1b tenté le 2026-08-25, échoué — à relancer** : 3 instances `product-designer` lancées en
-parallèle (angles "arcade rétro", "chaleureux façon Duolingo", "afro-futuriste") ont toutes échoué
-avec "session limit" côté plateforme (reset 2:50am Africa/Casablanca), pas un problème de fond -
-aucune maquette produite, à relancer telles quelles (mêmes 3 briefs) une fois la limite levée.
+**1b — historique du 2026-08-25** : 1er lot de 3 instances `product-designer` en parallèle
+(angles "arcade rétro", "chaleureux façon Duolingo", "afro-futuriste") a échoué en bloc avec
+"session limit" côté plateforme (reset 2:50am Africa/Casablanca). Un canary solo relancé ensuite
+("arcade rétro" seul) a réussi — maquette réelle publiée :
+https://claude.ai/code/artifact/6685f371-1a01-4bec-807a-cd59f79f2857. Les 2 autres relancées à la
+suite ont échoué **à nouveau** (même cause, reset avancé à 7:50am Africa/Casablanca) — la limite a
+été retouchée très peu après le succès du canary. Aucune maquette "Duolingo"/"afro-futuriste" ne
+s'est jamais matérialisée à cette date.
+
+**Session du 2026-08-30 (5 jours plus tard)** : limite de plateforme largement expirée entre
+temps. Relance des 2 briefs manquants en cours.
 
 ## État antérieur (noyau MVP — toujours vrai, base du chantier ci-dessus)
 
