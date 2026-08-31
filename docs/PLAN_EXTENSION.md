@@ -36,7 +36,7 @@ chacun complets/démontrables, jamais un squelette à moitié fait (méthode dé
 | 4 | Modération anti-brigading | ⬜ **repoussé après le 3/09** — hors critères de notation de la phase éliminatoire |
 | 5 | Ghost Mode | ⬜ **repoussé après le 3/09** — idem |
 | 6 | Reality-Vlogs | ⬜ **repoussé après le 3/09** — idem |
-| BP | Business Plan détaillé + PPT 3-4 slides + vidéo 1min | ⬜ pas commencé — **priorité la plus haute**, échéance dure 2026-09-03 23:59, voir Pivot |
+| BP | Business Plan détaillé + PPT 3-4 slides + vidéo 1min | ⚠️ Business Plan détaillé écrit (`docs/BUSINESS_PLAN.md`, 17 sections, TAM/SAM/SOM, projections, SWOT, risques) + PPT 4 slides régénéré (`pitch/CestomClash228-Pitch.pptx`, vérifié structurellement seulement). **Restent : chiffres marché réels de l'utilisateur, "ask" au jury, inspection visuelle du PPT, vidéo 1min pas commencée.** Échéance dure 2026-09-03 23:59 |
 
 ## Décisions ouvertes (à trancher avant de lancer l'incrément concerné)
 
