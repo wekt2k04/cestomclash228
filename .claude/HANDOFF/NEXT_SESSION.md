@@ -1,6 +1,28 @@
 # NEXT_SESSION
 
-Dernière mise à jour : 2026-08-25.
+Dernière mise à jour : 2026-08-31.
+
+## Pivot concours (2026-08-31) — lire avant tout le reste
+
+Échéance réelle communiquée : **PPT dû le 2026-09-03 23:59**, détail complet dans
+`docs/CONCOURS.md`. Ça a redéfini les priorités — voir `docs/PLAN_EXTENSION.md` § "Pivot
+2026-08-31" pour le détail complet (renommage `CestomClash228`, modèle économique en 3 phases,
+Sponsoring v2, Notation). État à cette date :
+
+- **Villes réelles CESTOM** : corrigées partout (6 villes, effectifs réels, source cestom.org) —
+  `apps/web/src/lib/morocco-geo.ts`, `apps/api/src/cities/cities.service.ts`,
+  `apps/web/src/components/MoroccoMap.tsx`, base de dev nettoyée. Terminé et vérifié.
+- **Business Plan détaillé** (`docs/BUSINESS_PLAN.md`, 17 sections) : SAM réel chiffré (650),
+  SOM calculé (150-200 Année 1). Reste `[À COMPLÉTER]` : section 15 (ask au concours — l'utilisateur
+  a demandé ce que ça signifie, expliqué en conversation, sa réponse n'est pas encore arrivée).
+- **PPT** (`pitch/CestomClash228-Pitch.pptx`, 4 slides) : reformaté avec mini-carte réelle des 6
+  villes + icônes suite au retour "trop monotone, fade, pas d'images". **Jamais inspecté
+  visuellement** (aucun outil PowerPoint ici) — priorité pour l'utilisateur : ouvrir le fichier et
+  vérifier qu'aucun texte/forme ne déborde, en particulier la mini-carte de la Slide 3 (positions
+  calculées, jamais vues à l'écran).
+- **Pas encore fait** : Sponsoring v2 (code réel, preuve de virement + vérificateur), Notation
+  (code réel), script vidéo vendeur, vidéo elle-même, décision finale sur le contour de la carte
+  produit (réel vs abstrait vs hybride — toujours ouverte).
 
 ## Chantier en cours — voir `docs/PLAN_EXTENSION.md`
 
