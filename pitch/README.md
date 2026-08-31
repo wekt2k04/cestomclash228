@@ -21,17 +21,24 @@ node generate-deck.mjs
 ## Structure (4 slides, header/footer identiques sur chaque slide)
 
 1. Couverture — nom, tagline, accroche produit.
-2. Problème → Solution (mapping 1:1, 3 lignes).
-3. Modèle économique & marché — 3 phases de revenu (Sponsoring vérifié / commission / licence),
-   encart marché avec chiffres en attente.
-4. Traction & demande — ce qui est réel aujourd'hui, ask au jury (à compléter).
+2. Problème → Solution (mapping 1:1, 3 lignes, icône "!" / "+" sur chaque carte, accent de fond
+   discret).
+3. Modèle économique & marché — 3 phases de revenu numérotées (icône 1/2/3), **mini-carte réelle
+   des 6 villes CESTOM** (cercles proportionnels à `sqrt(effectif)`, positions relatives réelles)
+   avec le total 650 membres mis en avant (source cestom.org).
+4. Traction & demande — ce qui est réel aujourd'hui, ask au jury (à compléter), accent de fond
+   discret.
 
-## État connu à ce jour (2026-08-31)
+## État connu à ce jour (2026-08-31, mis à jour après ajout des éléments visuels)
 
-- **Slide 3, encart marché** et **Slide 4, encart "Ce qu'on demande"** contiennent des
-  placeholders explicites `[À compléter]` — chiffres de marché réels et modalités exactes du
-  concours (financement/mentorat/autre) non connus à ce jour. **Ne jamais déposer ce fichier au
-  jury avec ces placeholders non résolus.**
+- **Slide 4, encart "Ce qu'on demande"** contient encore un placeholder explicite `[À compléter]`
+  — modalités exactes du concours (financement/mentorat/autre) non connues à ce jour. **Ne jamais
+  déposer ce fichier au jury avec ce placeholder non résolu.** Le placeholder chiffres de marché
+  (Slide 3) est résolu : SAM réel (650, cestom.org) maintenant affiché via la mini-carte.
+- Ajout d'éléments visuels suite au retour "trop monotone, fade, pas d'images" : icônes cercle+
+  glyphe (pas d'image externe ni police d'icônes — zéro risque de rendu cassé), mini-carte de
+  données réelle (Slide 3), accents de fond à faible opacité (Slides 2 et 4). Toujours uniquement
+  des formes simples (cercles, rectangles) — pas de chemin vectoriel complexe non vérifiable.
 - Palette reprise telle quelle du deck précédent (dark bg + rouge/or/vert/cyan) — **pas encore
   alignée** sur la direction afro-futuriste retenue le 2026-08-31 pour la refonte visuelle du
   produit (Incrément 2, `docs/PLAN_EXTENSION.md`). Alignement visuel = amélioration de suivi, pas
@@ -41,7 +48,8 @@ node generate-deck.mjs
   verrait une substitution silencieuse). Bahnschrift garde un registre technique proche de
   Chakra Petch.
 - Fichier vérifié **structurellement seulement** (zip valide, exactement 4 `ppt/slides/slideN.xml`
-  présents, tailles de contenu non triviales) — **pas inspecté visuellement**, aucun outil de
-  rendu PowerPoint/LibreOffice disponible dans cet environnement. À ouvrir et corriger si un
-  chevauchement ou un débordement de texte apparaît (plusieurs blocs de texte sont denses pour
-  tenir 4 slides — le risque de débordement est réel, pas hypothétique).
+  présents, tailles de contenu en nette hausse après l'ajout des visuels — cohérent avec le
+  contenu ajouté) — **pas inspecté visuellement**, aucun outil de rendu PowerPoint/LibreOffice
+  disponible dans cet environnement. À ouvrir et corriger en priorité : la mini-carte de la Slide 3
+  et les icônes des Slides 2-3 (positionnement calculé, jamais vu à l'écran) — le risque de
+  chevauchement est réel, pas hypothétique, plus élevé qu'avant vu la densité ajoutée.

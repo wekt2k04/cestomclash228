@@ -31,6 +31,42 @@ const FONT_BODY = 'Segoe UI';
 const BRAND = 'CESTOMCLASH228';
 const TAGLINE = 'Explore. Partage. Level-up.';
 
+// Les 6 vraies villes CESTOM (source cestom.org, capture du 2026-08-31) — x/y dupliques de
+// apps/web/src/lib/morocco-geo.ts (meme duplication assumee que ce fichier fait deja avec
+// apps/api/src/cities/cities.service.ts : petite table statique, pas de pipeline TS partage avec
+// ce script Node autonome).
+const CITY_POINTS = [
+  { name: 'Rabat', x: 506.9, y: 139.79, members: 220 },
+  { name: 'Casablanca', x: 471.04, y: 161.25, members: 180 },
+  { name: 'Marrakech', x: 452.3, y: 254.38, members: 95 },
+  { name: 'Fès', x: 595.12, y: 139.21, members: 85 },
+  { name: 'Tanger', x: 555.18, y: 56.48, members: 40 },
+  { name: 'Oujda', x: 743.13, y: 107.89, members: 30 },
+];
+const CITY_TOTAL = CITY_POINTS.reduce((sum, c) => sum + c.members, 0);
+
+// Icone simple : cercle plein + glyphe texte (pas d'image externe, pas de police d'icones — zero
+// risque de rendu casse sur une machine sans la bonne police).
+function iconDot(s, x, y, d, color, glyph) {
+  s.addShape(pptx.ShapeType.ellipse, { x, y, w: d, h: d, fill: { color } });
+  s.addText(glyph, {
+    x, y, w: d, h: d, align: 'center', valign: 'middle',
+    fontFace: FONT_HEAD, fontSize: d * 44, bold: true, color: COLOR.bg,
+  });
+}
+
+// Accent de fond discret : grand cercle a faible opacite, en partie hors-cadre sur le bord droit,
+// entre la zone de titre et le footer (ne chevauche ni l'un ni l'autre). Formes simples uniquement
+// (pas de chemin vectoriel complexe) - aucun outil de rendu PowerPoint disponible pour verifier
+// visuellement, voir pitch/README.md.
+function edgeAccent(s, color) {
+  s.addShape(pptx.ShapeType.ellipse, {
+    x: W - 1.3, y: 2.6, w: 3.6, h: 3.6,
+    fill: { color, transparency: 92 },
+    line: { type: 'none' },
+  });
+}
+
 const pptx = new PptxGenJS();
 pptx.defineLayout({ name: 'CC228', width: 13.333, height: 7.5 });
 pptx.layout = 'CC228';
@@ -202,6 +238,7 @@ function titleBlock(s, title, subtitle) {
 // ---------- 2. Probleme -> Solution ----------
 {
   const s = baseSlide();
+  edgeAccent(s, COLOR.cyan);
   titleBlock(s, 'Le problème, et notre réponse directe', "Chaque problème identifié a une réponse produit concrète — pas un vœu pieux");
   const rows = [
     [
@@ -230,6 +267,7 @@ function titleBlock(s, title, subtitle) {
       x: MARGIN, y, w: (W - MARGIN * 2 - 0.5) / 2, h: rowH, rectRadius: 0.07,
       fill: { color: COLOR.bgElevated }, line: { color: COLOR.red, width: 1 },
     });
+    iconDot(s, MARGIN + (W - MARGIN * 2 - 0.5) / 2 - 0.5, y + 0.14, 0.32, COLOR.red, '!');
     s.addText(probH, {
       x: MARGIN + 0.25, y: y + 0.12, w: (W - MARGIN * 2 - 0.5) / 2 - 0.5, h: 0.4,
       fontFace: FONT_HEAD, fontSize: 13, bold: true, color: COLOR.red,
@@ -243,6 +281,7 @@ function titleBlock(s, title, subtitle) {
       x: x2, y, w: (W - MARGIN * 2 - 0.5) / 2, h: rowH, rectRadius: 0.07,
       fill: { color: COLOR.bgElevated }, line: { color: COLOR.green, width: 1 },
     });
+    iconDot(s, x2 + (W - MARGIN * 2 - 0.5) / 2 - 0.5, y + 0.14, 0.32, COLOR.green, '+');
     s.addText(solH, {
       x: x2 + 0.25, y: y + 0.12, w: (W - MARGIN * 2 - 0.5) / 2 - 0.5, h: 0.4,
       fontFace: FONT_HEAD, fontSize: 13, bold: true, color: COLOR.green,
@@ -269,26 +308,58 @@ function titleBlock(s, title, subtitle) {
   phases.forEach(([tag, h, body, color], i) => {
     const x = MARGIN + i * (colW + 0.3);
     s.addShape(pptx.ShapeType.rect, { x, y: 2.15, w: colW, h: 0.06, fill: { color } });
+    iconDot(s, x + colW - 0.36, 2.28, 0.3, color, String(i + 1));
     s.addText(tag, {
-      x, y: 2.3, w: colW, h: 0.3, fontFace: FONT_BODY, fontSize: 10, color,
+      x, y: 2.3, w: colW - 0.4, h: 0.3, fontFace: FONT_BODY, fontSize: 10, color,
     });
     s.addText(h, {
       x, y: 2.6, w: colW, h: 0.65, fontFace: FONT_HEAD, fontSize: 14, bold: true, color: COLOR.ink, valign: 'top',
     });
     s.addText(body, {
-      x, y: 3.3, w: colW, h: 1.8, fontFace: FONT_BODY, fontSize: 10.5, color: COLOR.inkMuted, valign: 'top', lineSpacingMultiple: 1.2,
+      x, y: 3.3, w: colW, h: 1.7, fontFace: FONT_BODY, fontSize: 10.5, color: COLOR.inkMuted, valign: 'top', lineSpacingMultiple: 1.2,
     });
   });
+
+  // Mini-carte reelle des 6 villes CESTOM (remplace l'encart texte plat "chiffres a confirmer" -
+  // on a maintenant un vrai SAM chiffre, voir docs/BUSINESS_PLAN.md). Positions x/y projetees dans
+  // la zone de carte par interpolation lineaire independante sur chaque axe (deformation mineure
+  // acceptable pour un mini-schema, pas une carte de precision - meme logique que le SVG produit).
+  const mapBoxX = MARGIN, mapBoxY = 5.35, mapBoxW = 3.9, mapBoxH = 1.55;
   s.addShape(pptx.ShapeType.roundRect, {
-    x: MARGIN, y: 5.5, w: W - MARGIN * 2, h: 1.15, rectRadius: 0.08,
+    x: mapBoxX, y: mapBoxY, w: mapBoxW, h: mapBoxH, rectRadius: 0.08,
     fill: { color: COLOR.bgCard }, line: { color: COLOR.line, width: 1 },
   });
+  const xs = CITY_POINTS.map((c) => c.x), ys = CITY_POINTS.map((c) => c.y);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const minY = Math.min(...ys), maxY = Math.max(...ys);
+  const padIn = 0.55;
+  const plotX0 = mapBoxX + padIn, plotX1 = mapBoxX + mapBoxW - padIn - 0.35;
+  const plotY0 = mapBoxY + 0.32, plotY1 = mapBoxY + mapBoxH - 0.32;
+  const maxMembers = Math.max(...CITY_POINTS.map((c) => c.members));
+  const minMembers = Math.min(...CITY_POINTS.map((c) => c.members));
+  CITY_POINTS.forEach((c) => {
+    const px = plotX0 + ((c.x - minX) / (maxX - minX)) * (plotX1 - plotX0);
+    const py = plotY0 + ((c.y - minY) / (maxY - minY)) * (plotY1 - plotY0);
+    // Rayon proportionnel a sqrt(membres) - meme logique que MoroccoMap.tsx (evite d'ecraser
+    // visuellement les petites villes face a Rabat/Casablanca).
+    const t = (Math.sqrt(c.members) - Math.sqrt(minMembers)) / (Math.sqrt(maxMembers) - Math.sqrt(minMembers));
+    const r = 0.055 + t * 0.075;
+    s.addShape(pptx.ShapeType.ellipse, {
+      x: px - r, y: py - r, w: r * 2, h: r * 2,
+      fill: { color: COLOR.gold }, line: { color: COLOR.bg, width: 0.75 },
+    });
+    s.addText(c.name, {
+      x: px - 0.55, y: py + r + 0.02, w: 1.1, h: 0.16, align: 'center',
+      fontFace: FONT_BODY, fontSize: 6.5, color: COLOR.inkMuted,
+    });
+  });
   s.addText([
-    { text: 'Marché ciblé : ', options: { bold: true, color: COLOR.ink } },
-    { text: 'communauté étudiante togolaise au Maroc, structurée autour de la CESTOM. [Chiffres à confirmer avant dépôt final — voir docs/BUSINESS_PLAN.md]', options: { color: COLOR.inkMuted } },
+    { text: String(CITY_TOTAL), options: { bold: true, fontSize: 26, color: COLOR.gold, breakLine: true } },
+    { text: 'membres CESTOM, 6 villes', options: { fontSize: 11, color: COLOR.ink, breakLine: true } },
+    { text: 'Source : cestom.org', options: { fontSize: 9, color: COLOR.inkMuted } },
   ], {
-    x: MARGIN + 0.3, y: 5.5, w: W - MARGIN * 2 - 0.6, h: 1.15, valign: 'middle',
-    fontFace: FONT_BODY, fontSize: 12.5, lineSpacingMultiple: 1.3,
+    x: mapBoxX + mapBoxW + 0.3, y: mapBoxY, w: W - MARGIN - (mapBoxX + mapBoxW + 0.3), h: mapBoxH,
+    valign: 'middle', fontFace: FONT_HEAD, lineSpacingMultiple: 1.15,
   });
   footer(s, '03 · Business model & marché');
 }
@@ -296,6 +367,7 @@ function titleBlock(s, title, subtitle) {
 // ---------- 4. Traction & demande ----------
 {
   const s = baseSlide();
+  edgeAccent(s, COLOR.gold);
   titleBlock(s, "Ce qui est réel aujourd'hui, et ce qu'on demande");
   const real = [
     'Carte, demandes d\'aide, authentification, gouvernance à 2 niveaux — code fonctionnel, testé (32/32 tests automatisés)',
