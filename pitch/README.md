@@ -1,7 +1,12 @@
-# Pitch deck — MindClash 228
+# Pitch deck — CestomClash228
 
-`MindClash228-Pitch.pptx` est généré par `generate-deck.mjs` à partir du contenu de
-`docs/LEAN_CANVAS.md` et des décisions actées dans `docs/VISION.md`/`docs/ARCHITECTURE.md`.
+`CestomClash228-Pitch.pptx` est généré par `generate-deck.mjs`. **Remplace `MindClash228-
+Pitch.pptx` (supprimé du repo le 2026-08-31)** — reformaté de 11 slides à **4 slides** pour
+coller au format réel du concours CréaAfrica (5 minutes de pitch, voir `docs/CONCOURS.md`), suite
+au renommage `MindClash 228` → `CestomClash228` acté le même jour. Contenu tiré de
+`docs/BUSINESS_PLAN.md` (le business plan détaillé est un document séparé, pas intégré au PPT —
+décision explicite de l'utilisateur), `docs/VISION.md` et `docs/PLAN_EXTENSION.md` § Pivot
+2026-08-31.
 
 ## Régénérer
 
@@ -11,19 +16,32 @@ npm install   # une seule fois
 node generate-deck.mjs
 ```
 
-Écrase `MindClash228-Pitch.pptx` en place.
+Écrase `CestomClash228-Pitch.pptx` en place.
 
-## État connu à ce jour (2026-08-22)
+## Structure (4 slides, header/footer identiques sur chaque slide)
 
-- **Slide 5 (Démo)** est un placeholder honnête — pas de vraie capture d'écran, le noyau MVP
-  (Social-Map/Bounties/Auth/RBAC) n'est pas encore terminé côté frontend. À remplacer par une
-  vraie capture dès que l'écran Social-Map tourne.
-- **Slide 11 (Closing)** a un "ask" entre crochets à remplir — je ne connais pas les modalités
-  exactes du concours CréaAfrica (financement, mentorat, autre).
-- Polices : Bahnschrift + Segoe UI (polices Windows standard) plutôt que Chakra Petch/IBM Plex
-  Sans de l'identité visuelle web — PowerPoint n'embarque pas les Google Fonts par défaut, et un
-  jury sur une machine sans ces polices verrait une substitution silencieuse. Bahnschrift a un
-  registre technique proche de Chakra Petch.
-- Fichier vérifié structurellement (zip valide, 11 slides, images intégrées) mais **pas
-  inspecté visuellement** — pas d'outil de rendu PowerPoint/LibreOffice disponible dans cet
-  environnement. À ouvrir et corriger si un chevauchement ou un débordement apparaît.
+1. Couverture — nom, tagline, accroche produit.
+2. Problème → Solution (mapping 1:1, 3 lignes).
+3. Modèle économique & marché — 3 phases de revenu (Sponsoring vérifié / commission / licence),
+   encart marché avec chiffres en attente.
+4. Traction & demande — ce qui est réel aujourd'hui, ask au jury (à compléter).
+
+## État connu à ce jour (2026-08-31)
+
+- **Slide 3, encart marché** et **Slide 4, encart "Ce qu'on demande"** contiennent des
+  placeholders explicites `[À compléter]` — chiffres de marché réels et modalités exactes du
+  concours (financement/mentorat/autre) non connus à ce jour. **Ne jamais déposer ce fichier au
+  jury avec ces placeholders non résolus.**
+- Palette reprise telle quelle du deck précédent (dark bg + rouge/or/vert/cyan) — **pas encore
+  alignée** sur la direction afro-futuriste retenue le 2026-08-31 pour la refonte visuelle du
+  produit (Incrément 2, `docs/PLAN_EXTENSION.md`). Alignement visuel = amélioration de suivi, pas
+  bloquant pour le contenu.
+- Polices : Bahnschrift + Segoe UI (polices Windows standard, pas les Google Fonts de l'identité
+  web — PowerPoint ne les embarque pas par défaut, un jury sur une machine sans ces polices
+  verrait une substitution silencieuse). Bahnschrift garde un registre technique proche de
+  Chakra Petch.
+- Fichier vérifié **structurellement seulement** (zip valide, exactement 4 `ppt/slides/slideN.xml`
+  présents, tailles de contenu non triviales) — **pas inspecté visuellement**, aucun outil de
+  rendu PowerPoint/LibreOffice disponible dans cet environnement. À ouvrir et corriger si un
+  chevauchement ou un débordement de texte apparaît (plusieurs blocs de texte sont denses pour
+  tenir 4 slides — le risque de débordement est réel, pas hypothétique).
