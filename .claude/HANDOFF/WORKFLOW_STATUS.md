@@ -17,7 +17,7 @@ Prérequis pour les commandes ci-dessous : API sur `localhost:3001`, Web sur `lo
 
 | Workflow | Dernière vérification | Statut |
 |---|---|---|
-| `GET /cities` (liste publique) | 2026-08-23 | ✅ |
+| `GET /cities` (liste publique) | 2026-08-31 — liste réduite aux 6 vraies villes CESTOM (source cestom.org), 6 anciennes villes fictives supprimées de la base de dev après vérification qu'aucun Pin/Bounty/Role/User n'y référait, re-testé via curl réel | ✅ |
 | Garde JWT (`GET /auth/me` sans token → 401) | 2026-08-23 | ✅ |
 | `GET /pins`, `GET /bounties?status=open` (lecture publique + filtre query) | 2026-08-23 | ✅ |
 | Signup → Login → `/auth/me` (cycle complet) | 2026-08-23 | ✅ |

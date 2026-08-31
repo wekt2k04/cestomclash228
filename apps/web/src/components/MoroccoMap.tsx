@@ -11,15 +11,9 @@ import { CITIES, MOROCCO_OUTLINE_PATH, MOROCCO_VIEWBOX } from "@/lib/morocco-geo
 // dependance reseau externe (pas de tuiles, pas de style distant) et
 // s'adapte nativement a la taille de l'ecran via viewBox.
 //
-// Compteurs par ville volontairement pas-encore-reels pour l'instant
-// (demande explicite : "pour le moment mets des chiffres aleatoires") - mais
-// PAS un vrai Math.random() : ce composant est rendu cote serveur (SSR) puis
-// hydrate cote client, et Math.random() donnerait une valeur differente a
-// chaque environnement -> mismatch d'hydratation garanti (constate en usage
-// reel, voir .claude/HANDOFF/LOG.md). Un hash deterministe du nom de la
-// ville donne le meme resultat des deux cotes, tout en ayant l'air varie/
-// pas-encore-reel comme demande. A remplacer par de vraies donnees
-// (ex: utilisateurs actifs par ville) quand ce sera precise.
+// Compteurs par ville = effectif CESTOM reel (CityGeo.members, source
+// cestom.org - voir morocco-geo.ts), plus le hash deterministe factice
+// utilise avant le 2026-08-31 (l'utilisateur a fourni les vrais chiffres).
 // Chaque ville est un <g role="button" tabIndex={0}> plutot qu'un simple
 // onClick - un <g> SVG sans ça n'est ni focusable ni activable au clavier,
 // gap d'accessibilite reel (NN/g : toute action doit rester operable au
@@ -27,23 +21,13 @@ import { CITIES, MOROCCO_OUTLINE_PATH, MOROCCO_VIEWBOX } from "@/lib/morocco-geo
 // plus role="img" (qui suppose un contenu graphique plat, non interactif -
 // incompatible avec des enfants focusables) ; son aria-label suffit a
 // donner le contexte d'ensemble, chaque marqueur porte le sien.
-function seededPresence(seed: string): number {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) {
-    hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
-  }
-  return 3 + (hash % 97);
-}
 
 // 3 paliers discrets plutot qu'une interpolation continue - recherche NN/g
 // (Fork 3) : la taille d'un encodage visuel continu est difficile a comparer
 // precisement a l'oeil (un cercle 17% plus grand qu'un autre ne "se voit"
 // pas comme tel), alors que quelques paliers nettement distincts se
 // perçoivent et se comparent immediatement. Rayon max volontairement modere
-// (19px, pas 28px comme avant) : avec les 12 villes de morocco-geo.ts, deux
-// cercles a 19px de rayon se touchent a partir de 38px d'ecart entre
-// centres - toutes les paires de villes proches ont ete verifiees/ajustees
-// pour rester au-dessus de ce seuil (voir commentaire dans morocco-geo.ts).
+// (19px, pas 28px comme avant).
 const RADIUS_TIERS = [11, 15, 19] as const;
 
 export function MoroccoMap({
@@ -51,17 +35,22 @@ export function MoroccoMap({
 }: {
   onSelectCity: (cityName: string) => void;
 }) {
-  const [presence] = useState<Record<string, number>>(() =>
-    Object.fromEntries(CITIES.map((c) => [c.name, seededPresence(c.name)])),
-  );
   const [hovered, setHovered] = useState<string | null>(null);
 
+  const presence = Object.fromEntries(CITIES.map((c) => [c.name, c.members]));
   const counts = CITIES.map((c) => presence[c.name]);
   const minCount = Math.min(...counts);
   const maxCount = Math.max(...counts);
+  // Racine carree plutot que lineaire : 220 vs 30 membres = ratio brut 7.3x,
+  // qui ecraserait visuellement les petites villes si applique directement
+  // au rayon. sqrt() ramene le ratio a ~2.7x, plus lisible - la taille du
+  // cercle reste un encodage grossier (3 paliers) donc l'echelle exacte
+  // compte moins que la fonction ne pas ecraser les extremes.
   const radiusFor = (count: number) => {
     if (maxCount === minCount) return RADIUS_TIERS[1];
-    const t = (count - minCount) / (maxCount - minCount);
+    const t =
+      (Math.sqrt(count) - Math.sqrt(minCount)) /
+      (Math.sqrt(maxCount) - Math.sqrt(minCount));
     if (t < 1 / 3) return RADIUS_TIERS[0];
     if (t < 2 / 3) return RADIUS_TIERS[1];
     return RADIUS_TIERS[2];

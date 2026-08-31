@@ -120,15 +120,16 @@ suffisent d'après l'utilisateur).
 
 ### Questions non résolues (à trancher avant de coder la carte / le RBAC financier)
 
-- Liste exacte des villes où la CESTOM a une présence réelle (l'utilisateur pense ~6, mais
-  `apps/web/src/lib/morocco-geo.ts` contient 12 villes génériques jamais vérifiées contre une vraie
-  liste CESTOM — **demandé à l'utilisateur, pas encore reçu**).
+- ~~Liste exacte des villes CESTOM~~ **RÉSOLU 2026-08-31** : 6 villes réelles, effectifs exacts
+  fournis par l'utilisateur (capture d'écran cestom.org) — Rabat 220, Casablanca 180, Marrakech 95,
+  Fès 85, Tanger 40, Oujda 30 (total 650). `morocco-geo.ts`/`cities.service.ts` corrigés, base de
+  dev nettoyée des 6 villes fictives, business plan mis à jour avec le vrai SAM.
 - Contour du Maroc réel vs carte-réseau abstraite sur la carte (voir l'échange détaillé dans la
   conversation du 2026-08-31 — l'hybride silhouette discrète + traitement réseau est une option
-  proposée mais pas encore confirmée).
-- Chiffres réels de marché (effectifs CESTOM, croissance annuelle) pour le Business Plan — non
-  fournis à ce jour, à obtenir de l'utilisateur ou à présenter comme estimation explicitement
-  marquée comme telle (jamais inventer un chiffre non sourcé dans un document remis à un jury).
+  proposée mais pas encore confirmée). Toujours ouvert — ne bloque pas le reste.
+- ~~Chiffres réels de marché~~ **PARTIELLEMENT RÉSOLU 2026-08-31** : SAM réel = 650 (ci-dessus).
+  Reste ouvert : l'"ask" exact au concours (l'utilisateur a demandé ce que ça signifie, pas encore
+  répondu une fois la définition donnée).
 
 ---
 

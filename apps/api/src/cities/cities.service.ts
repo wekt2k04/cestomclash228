@@ -3,25 +3,21 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { City } from './entities/city.entity';
 
-// Villes universitaires marocaines ou la diaspora togolaise est presente -
-// liste de depart pour le MVP, extensible sans redeploiement via de vraies
-// migrations (voir apps/api/src/database/migrations/).
-// Coordonnees approximatives du centre-ville (lat, lng) - servent a deriver
-// la ville d'un Pin/Bounty par plus-proche-voisin, pas de vraies frontieres
-// administratives pour le MVP (voir docs/ARCHITECTURE.md).
+// Les 6 villes ou la CESTOM a reellement une section (source : cestom.org,
+// capture d'ecran utilisateur du 2026-08-31 - remplace une liste de 12
+// villes marocaines generiques jamais verifiees contre la vraie presence
+// CESTOM). Coordonnees approximatives du centre-ville (lat, lng) - servent
+// a deriver la ville d'un Pin/Bounty par plus-proche-voisin, pas de vraies
+// frontieres administratives pour le MVP (voir docs/ARCHITECTURE.md).
+// Dupliquee dans apps/web/src/lib/morocco-geo.ts (CITIES, qui porte aussi
+// l'effectif reel par ville pour l'affichage) - garder les deux en phase.
 const SEED_CITIES: Array<{ name: string; lat: number; lng: number }> = [
   { name: 'Rabat', lat: 34.0209, lng: -6.8416 },
   { name: 'Casablanca', lat: 33.5731, lng: -7.5898 },
   { name: 'Marrakech', lat: 31.6295, lng: -7.9811 },
   { name: 'Fès', lat: 34.0331, lng: -5.0003 },
   { name: 'Tanger', lat: 35.7595, lng: -5.834 },
-  { name: 'Ifrane', lat: 33.5228, lng: -5.1106 },
-  { name: 'Safi', lat: 32.2994, lng: -9.2372 },
-  { name: 'Agadir', lat: 30.4278, lng: -9.5981 },
   { name: 'Oujda', lat: 34.6867, lng: -1.9114 },
-  { name: 'Kénitra', lat: 34.261, lng: -6.5802 },
-  { name: 'Meknès', lat: 33.8935, lng: -5.5473 },
-  { name: 'El Jadida', lat: 33.2316, lng: -8.5007 },
 ];
 
 @Injectable()
