@@ -28,13 +28,15 @@ chacun complets/démontrables, jamais un squelette à moitié fait (méthode dé
 | # | Incrément | Statut |
 |---|---|---|
 | 0 | Dette technique (RBAC centralisé + migrations réelles) | ✅ fait 2026-08-25, audité par `architecture-review` (2 problèmes trouvés et corrigés avant commit) |
-| 1a | Amorce déploiement (VPS + Docker + domaine + Vercel) | ⬜ pas commencé — bloqué sur infra externe (voir Décisions ouvertes) |
-| 1b | Exploration design (`product-designer`, parallèle) | ⚠️ 3/3 maquettes réelles publiées (2026-08-30, sur plusieurs relances — voir `LOG.md`), en attente du choix de direction par l'utilisateur avant l'Incrément 2 |
-| 2 | Refonte visuelle (code) | ⬜ pas commencé |
-| 3 | Sponsoring (Pins dorés) | ⬜ pas commencé |
-| 4 | Modération anti-brigading | ⬜ pas commencé |
-| 5 | Ghost Mode | ⬜ pas commencé |
-| 6 | Reality-Vlogs | ⬜ pas commencé |
+| 1a | Amorce déploiement (Vercel/Render/Supabase gratuits) | ⬜ pas commencé — repoussé après le 3/09 (voir Pivot ci-dessous), pas nécessaire pour les livrables concours |
+| 1b | Exploration design (`product-designer`, parallèle) | ✅ 3/3 maquettes publiées 2026-08-30, **direction choisie 2026-08-31 : afro-futuriste vibrant** (https://claude.ai/code/artifact/9d460df4-301b-4484-a162-109eb17d99e6) — questions ouvertes sur le trace carte encore en cours de tranchage, voir Pivot |
+| 2 | Refonte visuelle (code) | ⬜ pas commencé — **reciblé** sur les écrans qui apparaîtront dans la vidéo concours, pas toute l'app |
+| 3 | Sponsoring (Pins dorés) | ⬜ pas commencé — **redéfini en "Sponsoring v2"** (preuve de virement + rôle vérificateur), priorité haute avant le 3/09, voir Pivot |
+| 3bis | Notation d'un service rendu (nouveau, ajouté 2026-08-31) | ⬜ pas commencé — priorité haute avant le 3/09, voir Pivot |
+| 4 | Modération anti-brigading | ⬜ **repoussé après le 3/09** — hors critères de notation de la phase éliminatoire |
+| 5 | Ghost Mode | ⬜ **repoussé après le 3/09** — idem |
+| 6 | Reality-Vlogs | ⬜ **repoussé après le 3/09** — idem |
+| BP | Business Plan détaillé + PPT 3-4 slides + vidéo 1min | ⬜ pas commencé — **priorité la plus haute**, échéance dure 2026-09-03 23:59, voir Pivot |
 
 ## Décisions ouvertes (à trancher avant de lancer l'incrément concerné)
 
@@ -58,6 +60,75 @@ chacun complets/démontrables, jamais un squelette à moitié fait (méthode dé
    de Pins sponsorisés directement sur la carte SVG (nécessite une fonction de projection lat/lng
    qui n'existe pas — le Sponsoring de l'Incrément 3 reste "réel et visible en liste", pas sur la
    carte) ; credentials Google OAuth réels (non bloquant, email+mot de passe suffit).
+
+---
+
+## Pivot 2026-08-31 — échéance concours réelle et changement de philosophie
+
+L'utilisateur a communiqué la logistique réelle du concours (détail complet dans
+`docs/CONCOURS.md`) : **PPT dû le 2026-09-03 23:59**, phase éliminatoire le week-end suivant (5 min
+de pitch + 5-7 min de questions portant sur problématique/solution/**business plan chiffré**/marché
+ciblé, explicitement **pas d'angle bénévolat**), 5 projets retenus pour une finale de 3 min. Ça
+redéfinit les priorités du reste de ce plan : **le business plan et les livrables concours passent
+avant les fonctionnalités produit**, la démo live n'est pas exigée à l'élimination (PPT + vidéo
+suffisent d'après l'utilisateur).
+
+### Décisions actées ce jour (ne pas re-demander)
+
+1. **Renommage** : `MindClash 228` → **`CestomClash228`**, partout (code, docs, PPT). Pas encore
+   propagé dans le code/les 3 maquettes existantes au moment d'écrire ceci — à faire, pas bloquant
+   pour le contenu du PPT/business plan qui peut utiliser le nouveau nom directement.
+2. **Direction visuelle retenue** : afro-futuriste vibrant (sur les 3 maquettes de l'Incrément 1b).
+   Détail carte encore en cours de discussion avec l'utilisateur (contour réel vs abstrait,
+   villes réelles CESTOM à confirmer — voir "Questions non résolues" plus bas).
+3. **3 livrables concours, tous requis** :
+   - PPT de présentation, **3-4 slides max** (format 5 minutes), mêmes header/footer sur chaque
+     slide avec les métadonnées du projet (nom, tagline).
+   - **Business Plan détaillé, document séparé** du PPT (pas juste des slides intégrées).
+   - Vidéo courte (~1 min), idéal si un scroll/maquette du produit est montré, avec un script
+     "vendeur" mettant en avant la facilité de prise en main — l'utilisateur veut que le produit
+     soit **self-explained** (bulles d'aide "?" pour expliquer les concepts type Pin/Bounty in-app).
+4. **Sponsoring v2 (remplace le Sponsoring simple prévu à l'Incrément 3)** : mécanisme de
+   monétisation réel mais sans passerelle de paiement (cohérent avec "zéro carte bancaire, zéro
+   service payant" déjà acté pour le déploiement). Flux : un payeur veut un privilège (ex. Pin mis
+   en avant) → fait un **virement bancaire réel** vers un compte CESTOM dédié → **upload une preuve
+   (capture d'écran)** dans l'app → une entité `SponsorshipRequest` (payeur, montant déclaré, image
+   preuve, statut pending/approved/rejected) est créée → un rôle **vérificateur** (voir point 5)
+   approuve/rejette → si approuvé, le privilège s'active (badge "sponsorisé"/visibilité boostée).
+   Storage image : réutiliser le compte Supabase Storage déjà prévu pour Reality-Vlogs (Incrément
+   1a), pas un nouveau service.
+5. **Rôle vérificateur simplifié** : l'utilisateur a explicitement écarté la notion de "bureau"
+   CESTOM pour ce rôle ("on revient à un service où je suis le chef") — **pas** un nouveau rang RBAC
+   spatial complexe. Traitement retenu : un flag `isVerifier` simple sur `User` (ou réutilisation du
+   scope `national` existant sans lien à une ville, à trancher au moment du code — les deux sont
+   équivalents en complexité, le national existant est réutilisable tel quel).
+6. **Notation d'un service rendu** : vraie fonctionnalité (pas une promesse roadmap). Champ note
+   1-5 (+ commentaire optionnel) ajouté au moment de `resolveBounty` par l'auteur du Bounty, notant
+   la personne qui a résolu. Visible sur un profil (à créer si inexistant — vérifier l'état réel du
+   frontend avant de coder).
+7. **Ordre de priorité retenu pour les ~3 jours restants** : (1) Business Plan + contenu PPT —
+   échéance dure, poids de notation le plus lourd ; (2) Sponsoring v2 + Notation, seules additions
+   de code motivées directement par le pitch ; (3) refonte visuelle **ciblée** sur les écrans
+   filmés dans la vidéo, pas toute l'app ; (4) vidéo + script vendeur, filmée en dernier une fois
+   qu'il y a quelque chose de propre à montrer. Ghost Mode/Anti-brigading/Reality-Vlogs repoussés
+   après le 3/09 (hors critères de notation communiqués, l'utilisateur ne s'y est pas opposé quand
+   proposé).
+8. **Aucun service externe payant** confirmé au 2026-08-31 : Vercel/Render/Supabase/Google OAuth,
+   tous gratuits sans carte bancaire — reconfirmé à l'utilisateur qui posait la question, et
+   cohérent avec le choix "preuve de virement + vérificateur" plutôt qu'une vraie passerelle de
+   paiement pour Sponsoring v2.
+
+### Questions non résolues (à trancher avant de coder la carte / le RBAC financier)
+
+- Liste exacte des villes où la CESTOM a une présence réelle (l'utilisateur pense ~6, mais
+  `apps/web/src/lib/morocco-geo.ts` contient 12 villes génériques jamais vérifiées contre une vraie
+  liste CESTOM — **demandé à l'utilisateur, pas encore reçu**).
+- Contour du Maroc réel vs carte-réseau abstraite sur la carte (voir l'échange détaillé dans la
+  conversation du 2026-08-31 — l'hybride silhouette discrète + traitement réseau est une option
+  proposée mais pas encore confirmée).
+- Chiffres réels de marché (effectifs CESTOM, croissance annuelle) pour le Business Plan — non
+  fournis à ce jour, à obtenir de l'utilisateur ou à présenter comme estimation explicitement
+  marquée comme telle (jamais inventer un chiffre non sourcé dans un document remis à un jury).
 
 ---
 
