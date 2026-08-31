@@ -86,8 +86,9 @@ logicielle sur un terrain social déjà mûr, pas un problème d'adoption social
 | Périmètre | Définition | Taille |
 |---|---|---|
 | **TAM** (marché total adressable) | Toute diaspora étudiante africaine structurée autour d'une association reconnue, au Maroc et au-delà (vision Phase 3, licence du modèle) | `[À COMPLÉTER — ordre de grandeur estimable via le nombre d'étudiants subsahariens au Maroc, statistiques ministérielles marocaines de l'enseignement supérieur si disponibles]` |
-| **SAM** (marché disponible, notre segment réaliste) | Communauté étudiante togolaise au Maroc, structurée autour de la CESTOM | `[À COMPLÉTER — effectif CESTOM réel]` |
-| **SOM** (marché captable à 12-18 mois) | Part du SAM qu'on peut réalistement convertir en utilisateurs actifs sur la première année, compte tenu de la distribution via le réseau CESTOM existant | **Méthode** : SOM = SAM × taux d'adoption hypothèse. Un taux de 30-40 % est une hypothèse de départ défendable pour un outil distribué via un canal communautaire de confiance déjà utilisé quotidiennement (WhatsApp CESTOM) — à ajuster avec un vrai taux d'adoption observé après un premier trimestre d'usage réel, pas à présenter comme mesuré au jury tant que ce n'est pas le cas. |
+| **SAM** (marché disponible, notre segment réaliste) | Communauté étudiante togolaise au Maroc, structurée autour de la CESTOM | **650 membres, chiffre réel** (source : cestom.org, capture d'écran du 2026-08-31 — répartition Rabat 220, Casablanca 180, Marrakech 95, Fès 85, Tanger 40, Oujda 30, les 6 villes où la CESTOM a une section) |
+| **Portée Année 1** (hypothèse de notoriété, distincte du SAM) | Nombre de membres du SAM qui auront connaissance de la plateforme durant la première année, avant même de l'utiliser | **500 (hypothèse de travail donnée par le porteur de projet)** — soit 77 % du SAM réel (650), cohérent avec une distribution via le canal WhatsApp CESTOM déjà utilisé quotidiennement par la quasi-totalité des membres |
+| **SOM** (marché captable à 12-18 mois) | Part de la portée Année 1 qui devient réellement utilisateur actif | **Méthode** : SOM = Portée × taux d'adoption. Taux de 30-40 % = hypothèse de départ défendable pour un outil distribué via un canal de confiance déjà utilisé quotidiennement — à ajuster avec un vrai taux observé après un premier trimestre d'usage réel. **SOM ≈ 500 × 30-40 % ≈ 150 à 200 utilisateurs actifs en Année 1.** |
 
 ### 4.2 Segments d'utilisateurs (repris et affinés de `docs/VISION.md`)
 
@@ -210,7 +211,7 @@ pas quand les hypothèses sont mises à jour.*
 
 | Variable | Formule | Hypothèse de départ |
 |---|---|---|
-| Utilisateurs actifs Année 1 | SOM (Section 4.1) | `[H1] = SAM × [30-40 %]` |
+| Utilisateurs actifs Année 1 | SOM (Section 4.1) | **150 à 200** (650 réel → 500 portée hypothèse → 30-40 % adoption hypothèse — chaîne détaillée Section 4.1) |
 | Sponsors payants / mois | Utilisateurs actifs × taux d'attractivité pour un sponsor local | `[H2] — à valider : ratio observé dans des programmes de visibilité locale comparables (aucune donnée interne encore disponible)` |
 | Revenu mensuel Phase 1 | Sponsors payants/mois × prix moyen d'un Sponsoring | `[H2] × [H3, Section 6.1]` |
 | Revenu Année 1 | Revenu mensuel × 12, avec montée en charge progressive (pas un revenu plein dès le mois 1) | Modéliser une rampe (ex. 20 % du régime de croisière au T1, 100 % au T4) plutôt qu'un chiffre plat — plus honnête et plus défendable devant un jury technique |
