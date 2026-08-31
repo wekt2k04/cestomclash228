@@ -8,15 +8,25 @@ au renommage `MindClash 228` → `CestomClash228` acté le même jour. Contenu t
 décision explicite de l'utilisateur), `docs/VISION.md` et `docs/PLAN_EXTENSION.md` § Pivot
 2026-08-31.
 
-## Régénérer
+## Régénérer et vérifier
 
 ```
 cd pitch
 npm install   # une seule fois
 node generate-deck.mjs
+python verify_deck.py   # conda base (lxml) - voir ci-dessous
 ```
 
-Écrase `CestomClash228-Pitch.pptx` en place.
+Écrase `CestomClash228-Pitch.pptx` en place. **Toujours lancer `verify_deck.py` après une
+régénération** — c'est la seule vérification disponible dans cet environnement (pas d'outil de
+rendu PowerPoint/LibreOffice). Le script ouvre le pptx comme un zip OOXML (`lxml`, pas besoin de
+`python-pptx`) et vérifie : intégrité du zip, XML bien formé par slide, aucune forme qui dépasse
+le cadre du slide, aucun chevauchement >25% entre boîtes de texte. Code de sortie 1 si un problème
+est trouvé. **A déjà trouvé un vrai défaut** le 2026-08-31 : les labels de ville "Rabat"/
+"Casablanca" sur la mini-carte (Slide 3) se chevauchaient (villes géographiquement proches,
+labels centrés sous chaque point) — corrigé en remplaçant les labels individuels par une légende
+textuelle unique à droite de la carte (voir `generate-deck.mjs`, plus aucun risque de collision
+géométrique par construction).
 
 ## Structure (4 slides, header/footer identiques sur chaque slide)
 
@@ -47,9 +57,13 @@ node generate-deck.mjs
   web — PowerPoint ne les embarque pas par défaut, un jury sur une machine sans ces polices
   verrait une substitution silencieuse). Bahnschrift garde un registre technique proche de
   Chakra Petch.
-- Fichier vérifié **structurellement seulement** (zip valide, exactement 4 `ppt/slides/slideN.xml`
-  présents, tailles de contenu en nette hausse après l'ajout des visuels — cohérent avec le
-  contenu ajouté) — **pas inspecté visuellement**, aucun outil de rendu PowerPoint/LibreOffice
-  disponible dans cet environnement. À ouvrir et corriger en priorité : la mini-carte de la Slide 3
-  et les icônes des Slides 2-3 (positionnement calculé, jamais vu à l'écran) — le risque de
-  chevauchement est réel, pas hypothétique, plus élevé qu'avant vu la densité ajoutée.
+- Fichier vérifié par `verify_deck.py` (zip valide, XML bien formé, aucun dépassement de cadre,
+  aucun chevauchement de texte >25%, 0 problème sur la dernière exécution) — **toujours pas
+  d'inspection visuelle réelle possible** (aucun outil de rendu PowerPoint/LibreOffice
+  disponible ici). Le script vérifie la géométrie calculée, pas le rendu final (polices,
+  anti-aliasing, retour à la ligne exact du texte) — une relecture visuelle par l'utilisateur
+  reste recommandée avant dépôt, mais le risque de chevauchement grossier est maintenant
+  activement testé plutôt que simplement espéré.
+- Accents français vérifiés au niveau des octets (UTF-8 correct, ex. `è` = U+00E8) après qu'un
+  terminal ait affiché des caractères mal rendus (`�`) — confirmé artefact d'affichage du
+  terminal, pas une corruption réelle du fichier.

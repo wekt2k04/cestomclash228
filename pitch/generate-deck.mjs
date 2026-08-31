@@ -348,15 +348,22 @@ function titleBlock(s, title, subtitle) {
       x: px - r, y: py - r, w: r * 2, h: r * 2,
       fill: { color: COLOR.gold }, line: { color: COLOR.bg, width: 0.75 },
     });
-    s.addText(c.name, {
-      x: px - 0.55, y: py + r + 0.02, w: 1.1, h: 0.16, align: 'center',
-      fontFace: FONT_BODY, fontSize: 6.5, color: COLOR.inkMuted,
-    });
+    // Pas de label de nom par ville sur la mini-carte : verifie par script Python (conda base,
+    // lxml) le 2026-08-31 que des paires geographiquement proches (Rabat/Casablanca) produisaient
+    // un chevauchement de boites de texte >25% une fois les labels centres sous chaque point -
+    // les noms vont dans la legende textuelle a droite (un seul bloc de texte fluide, aucun risque
+    // de collision geometrique) plutot que des labels positionnes individuellement.
   });
+  const legend = CITY_POINTS
+    .slice()
+    .sort((a, b) => b.members - a.members)
+    .map((c) => `${c.name} ${c.members}`)
+    .join('  ·  ');
   s.addText([
     { text: String(CITY_TOTAL), options: { bold: true, fontSize: 26, color: COLOR.gold, breakLine: true } },
     { text: 'membres CESTOM, 6 villes', options: { fontSize: 11, color: COLOR.ink, breakLine: true } },
-    { text: 'Source : cestom.org', options: { fontSize: 9, color: COLOR.inkMuted } },
+    { text: legend, options: { fontSize: 8.5, color: COLOR.inkMuted, breakLine: true } },
+    { text: 'Source : cestom.org', options: { fontSize: 8, color: COLOR.inkMuted } },
   ], {
     x: mapBoxX + mapBoxW + 0.3, y: mapBoxY, w: W - MARGIN - (mapBoxX + mapBoxW + 0.3), h: mapBoxH,
     valign: 'middle', fontFace: FONT_HEAD, lineSpacingMultiple: 1.15,

@@ -36,7 +36,7 @@ chacun complets/démontrables, jamais un squelette à moitié fait (méthode dé
 | 4 | Modération anti-brigading | ⬜ **repoussé après le 3/09** — hors critères de notation de la phase éliminatoire |
 | 5 | Ghost Mode | ⬜ **repoussé après le 3/09** — idem |
 | 6 | Reality-Vlogs | ⬜ **repoussé après le 3/09** — idem |
-| BP | Business Plan détaillé + PPT 3-4 slides + vidéo 1min | ⚠️ Business Plan détaillé (17 sections, SAM réel 650 chiffré) + PPT 4 slides avec mini-carte réelle des 6 villes CESTOM et icônes (plus "monotone/fade", retour utilisateur traité). **Restent : "ask" au jury (utilisateur a demandé une explication, en attente de sa réponse), inspection visuelle du PPT (jamais vue à l'écran, risque de chevauchement réel), vidéo 1min pas commencée.** Échéance dure 2026-09-03 23:59 |
+| BP | Business Plan détaillé + PPT 3-4 slides + vidéo 1min | ⚠️ Business Plan détaillé (17 sections, SAM réel 650 chiffré) + PPT 4 slides avec mini-carte réelle des 6 villes CESTOM et icônes, vérifié par `pitch/verify_deck.py` (script Python/lxml ajouté le 2026-08-31 — a trouvé et permis de corriger un vrai chevauchement de labels). **Restent : "ask" au jury (utilisateur a demandé une explication, en attente de sa réponse), relecture visuelle humaine du PPT (le script vérifie la géométrie, pas le rendu final), vidéo 1min pas commencée.** Échéance dure 2026-09-03 23:59 |
 
 ## Décisions ouvertes (à trancher avant de lancer l'incrément concerné)
 
