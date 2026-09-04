@@ -17,7 +17,7 @@ const ibmPlexSans = IBM_Plex_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "MindClash 228",
+  title: "CestomClash228",
   description:
     "Explore. Partage. Level-up. Le moteur de survie géolocalisé de la diaspora étudiante togolaise au Maroc.",
 };

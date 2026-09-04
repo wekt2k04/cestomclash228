@@ -230,7 +230,7 @@ function TabButton({
       aria-pressed={active}
       className={`flex-1 rounded-lg border px-2 py-2 text-xs font-medium ${
         active
-          ? "border-cyan bg-cyan text-cyan-ink"
+          ? "border-terracotta bg-terracotta text-terracotta-ink"
           : "border-line bg-bg-elevated text-ink-muted"
       }`}
     >

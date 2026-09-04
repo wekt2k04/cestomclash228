@@ -70,7 +70,7 @@ export default function SignupPage() {
   return (
     <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-6 px-6 py-12">
       <div>
-        <h1 className="font-head text-2xl font-bold text-ink">Rejoindre MindClash 228</h1>
+        <h1 className="font-head text-2xl font-bold text-ink">Rejoindre CestomClash228</h1>
         <p className="mt-1 text-sm text-ink-muted">
           Explore. Partage. Level-up.
         </p>
@@ -174,7 +174,7 @@ export default function SignupPage() {
 
       <p className="text-center text-sm text-ink-muted">
         Déjà un compte ?{" "}
-        <Link href="/login" className="text-cyan">
+        <Link href="/login" className="text-terracotta">
           Se connecter
         </Link>
       </p>

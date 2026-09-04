@@ -1,19 +1,24 @@
 @import "tailwindcss";
 
-/* Identite visuelle MindClash 228 - memes tokens que la planche de marque
-   publiee (voir .claude/HANDOFF/NEXT_SESSION.md pour le lien). App
-   entierement sombre par design (pas de mode clair - l'esthetique "tactique"
-   fait partie du produit, pas une preference d'affichage). */
+/* Identite visuelle CestomClash228 - direction "afro-futuriste vibrant" retenue le
+   2026-08-31 (voir docs/PLAN_EXTENSION.md § Pivot). Valeurs reprises EXACTEMENT de la
+   maquette choisie (https://claude.ai/code/artifact/9d460df4-301b-4484-a162-109eb17d99e6,
+   lue le 2026-08-31 pour extraire les tokens reels, pas devinees) : rouge/or/vert du drapeau
+   togolais inchanges (deja identiques dans la maquette - confirme independamment, pas juste
+   repris du rapport de l'agent design), fond+encre repasses d'un bleu-gris froid (teinte 260)
+   a un anthracite/aubergine chaud (teinte 35-55), --cyan devient --terracotta (nouvel accent
+   interactif principal, oklch(0.70 0.16 45)). App entierement sombre par design (pas de mode
+   clair - l'esthetique fait partie du produit, pas une preference d'affichage). */
 :root {
-  --bg: oklch(0.17 0.02 260);
-  --bg-elevated: oklch(0.22 0.02 260);
-  --bg-card: oklch(0.25 0.018 262);
-  --line: oklch(0.34 0.02 260 / 0.55);
-  --ink: oklch(0.96 0.008 90);
-  --ink-muted: oklch(0.68 0.02 260);
-  --ink-faint: oklch(0.52 0.02 260);
-  --cyan: oklch(0.78 0.13 215);
-  --cyan-ink: oklch(0.16 0.02 260);
+  --bg: oklch(0.16 0.035 35);
+  --bg-elevated: oklch(0.21 0.03 35);
+  --bg-card: oklch(0.245 0.028 38);
+  --line: oklch(0.42 0.045 40 / 0.55);
+  --ink: oklch(0.96 0.01 70);
+  --ink-muted: oklch(0.74 0.025 55);
+  --ink-faint: oklch(0.56 0.02 50);
+  --terracotta: oklch(0.70 0.16 45);
+  --terracotta-ink: oklch(0.15 0.02 40);
   --red: oklch(0.64 0.19 25);
   --gold: oklch(0.8 0.15 85);
   --green: oklch(0.7 0.16 152);
@@ -30,8 +35,8 @@
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
   --color-ink-faint: var(--ink-faint);
-  --color-cyan: var(--cyan);
-  --color-cyan-ink: var(--cyan-ink);
+  --color-terracotta: var(--terracotta);
+  --color-terracotta-ink: var(--terracotta-ink);
   --color-red: var(--red);
   --color-gold: var(--gold);
   --color-green: var(--green);
@@ -51,7 +56,7 @@ body {
 }
 
 a {
-  color: var(--cyan);
+  color: var(--terracotta);
 }
 a:hover {
   color: var(--ink);
@@ -67,14 +72,14 @@ a:hover {
     color: var(--ink);
   }
   .input:focus {
-    outline: 2px solid var(--cyan);
+    outline: 2px solid var(--terracotta);
     outline-offset: -1px;
   }
 
   .btn-primary {
     border-radius: 0.6rem;
-    background: var(--cyan);
-    color: var(--cyan-ink);
+    background: var(--terracotta);
+    color: var(--terracotta-ink);
     font-family: var(--font-head);
     font-weight: 600;
     padding: 0.65rem 1rem;

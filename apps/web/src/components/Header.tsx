@@ -13,7 +13,7 @@ export function Header() {
       <Link href="/" className="flex items-center gap-2">
         <MindClashMark size={26} />
         <span className="font-head text-[15px] font-bold tracking-wide text-ink">
-          MINDCLASH <span className="text-gold">228</span>
+          CESTOMCLASH<span className="text-gold">228</span>
         </span>
       </Link>
 
@@ -51,7 +51,7 @@ export function Header() {
             </Link>
             <Link
               href="/signup"
-              className="flex h-11 items-center rounded-lg bg-cyan px-3 text-xs font-semibold text-cyan-ink"
+              className="flex h-11 items-center rounded-lg bg-terracotta px-3 text-xs font-semibold text-terracotta-ink"
             >
               Rejoindre
             </Link>

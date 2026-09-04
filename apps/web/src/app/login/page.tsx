@@ -51,7 +51,7 @@ export default function LoginPage() {
       <div>
         <h1 className="font-head text-2xl font-bold text-ink">Connexion</h1>
         <p className="mt-1 text-sm text-ink-muted">
-          Content de te revoir sur MindClash 228.
+          Content de te revoir sur CestomClash228.
         </p>
       </div>
 
@@ -113,7 +113,7 @@ export default function LoginPage() {
 
       <p className="text-center text-sm text-ink-muted">
         Pas encore de compte ?{" "}
-        <Link href="/signup" className="text-cyan">
+        <Link href="/signup" className="text-terracotta">
           Rejoindre
         </Link>
       </p>

@@ -20,13 +20,13 @@ export function MuteToggle() {
       aria-label={muted ? "Activer le son" : "Couper le son"}
       aria-pressed={!muted}
       className={`relative flex h-11 w-11 items-center justify-center rounded-full border border-line bg-bg-elevated text-ink-muted transition-colors hover:text-ink ${
-        recentlyUnlocked ? "text-cyan" : ""
+        recentlyUnlocked ? "text-terracotta" : ""
       }`}
     >
       {recentlyUnlocked && (
         <span
           aria-hidden
-          className="absolute inset-0 animate-ping rounded-full bg-cyan/30"
+          className="absolute inset-0 animate-ping rounded-full bg-terracotta/30"
         />
       )}
       {muted ? (

@@ -50,8 +50,12 @@ base locale (dev, jetable) — pas de nettoyage automatique, pas un problème en
 
 | Workflow | Dernière vérification | Statut |
 |---|---|---|
-| `npm run lint` (apps/web) | 2026-08-23 (après la passe UX NN/g complète) | ✅ |
-| `npx tsc --noEmit` (apps/web) | 2026-08-23 (après la passe UX NN/g complète) | ✅ |
+| `npm run lint` (apps/web) | 2026-08-31 (après refonte visuelle afro-futuriste + renommage CestomClash228) | ✅ |
+| `npx tsc --noEmit` (apps/web) | 2026-08-31 (idem) | ✅ |
+| Palette afro-futuriste (`--terracotta` remplace `--cyan`) | 2026-08-31 — valeurs reprises de la maquette retenue, vérifiées dans le CSS compilé réel via curl (`--bg:#1a0704`, `--terracotta:#ed7940`), 0 résidu "cyan" | ✅ |
+| Renommage CestomClash228 (Header, signup, login, `<title>`) | 2026-08-31 — vérifié dans le HTML SSR réel (2× "CestomClash228", 0× "MindClash") | ✅ |
+| Bouton "+" créer — label visible | 2026-08-31 — remplacé icône-seule par pilule icône+texte "Créer" (bug identifié le 2026-08-24, jamais corrigé jusqu'ici) | ✅ |
+| Accueil séparé avant la carte (`WelcomeIntro`) | 2026-08-31 — nouveau, vérifié en SSR réel (Pins/Bounties/CTA présents dans le HTML), visiteur non connecté uniquement | ⚠️ build/curl vert, jamais confirmé à l'œil |
 | Accueil SSR — Hero + noms de villes présents dans le HTML rendu serveur | 2026-08-23 | ✅ |
 | Carte Maroc — rendu SVG, sélection de ville → panneau | 2026-08-23 — **coordonnées de 3 villes ajustées** (anti-chevauchement, voir LOG.md), rayons discrétisés en 3 paliers, `role="button"`+clavier ajoutés. SSR vérifié : nouvelles coordonnées et 12× `role="button"` présents dans le HTML rendu | ⚠️ build/curl vert, jamais confirmé à l'œil (rendu visuel réel, sélection tactile) |
 | `CreateSheet` — création Pin/Bounty depuis l'UI | 2026-08-23 — labels visibles + validation au blur + confirmation d'abandon ajoutés | ⛔ jamais testé UI réelle, seulement via API directe |

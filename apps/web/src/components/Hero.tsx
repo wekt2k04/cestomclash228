@@ -19,8 +19,8 @@ export function Hero() {
           </>
         ) : (
           <>
-            Explore<span className="text-cyan">.</span> Partage
-            <span className="text-cyan">.</span> Level-up
+            Explore<span className="text-terracotta">.</span> Partage
+            <span className="text-terracotta">.</span> Level-up
             <span className="text-gold">.</span>
           </>
         )}
@@ -33,7 +33,7 @@ export function Hero() {
       {!loading && !user && (
         <Link
           href="/signup"
-          className="mt-3 inline-block rounded-lg bg-cyan px-4 py-2 text-sm font-semibold text-cyan-ink"
+          className="mt-3 inline-block rounded-lg bg-terracotta px-4 py-2 text-sm font-semibold text-terracotta-ink"
         >
           Rejoindre la communauté
         </Link>

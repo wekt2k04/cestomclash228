@@ -80,7 +80,7 @@ export function MoroccoMap({
         <path
           d={MOROCCO_OUTLINE_PATH}
           fill="url(#mc-outline-grad)"
-          stroke="var(--cyan)"
+          stroke="var(--terracotta)"
           strokeOpacity={0.4}
           strokeWidth={2}
         />
@@ -118,11 +118,11 @@ export function MoroccoMap({
                 />
               )}
               {isHovered && (
-                <circle r={r + 6} fill="var(--cyan)" fillOpacity={0.18} />
+                <circle r={r + 6} fill="var(--terracotta)" fillOpacity={0.18} />
               )}
               <circle
                 r={r}
-                fill="var(--cyan)"
+                fill="var(--terracotta)"
                 fillOpacity={0.9}
                 stroke="var(--bg)"
                 strokeWidth={2}
@@ -133,7 +133,7 @@ export function MoroccoMap({
                 fontFamily="var(--font-head)"
                 fontWeight={700}
                 fontSize={Math.max(11, r * 0.62)}
-                fill="var(--cyan-ink)"
+                fill="var(--terracotta-ink)"
               >
                 {count}
               </text>
