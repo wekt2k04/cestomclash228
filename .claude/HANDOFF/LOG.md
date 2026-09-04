@@ -603,3 +603,71 @@ par l'utilisateur.
 - **Vérifié réellement** : `npm run test` 32/32, `npm run lint` propre, `tsc --noEmit` propre,
   API relancée et re-testée en direct (`/health`, `/cities`) après chaque changement de schéma.
   **L'Incrément 0 est fait et audité — l'Incrément 1 (déploiement + design) peut démarrer.**
+
+## 2026-09-04 — Refonte visuelle + Sponsoring vérifié + Notation (Incréments 2, 3, 3bis)
+
+**Point urgent constaté ce jour** : l'échéance du concours (2026-09-03 23:59, voir
+`docs/CONCOURS.md`) est dépassée — signalé à l'utilisateur, qui a demandé de continuer
+vers "ce soir" comme nouvelle cible.
+
+**Refonte visuelle (Incrément 2, fait le 2026-08-31 en tout début de cette session)** :
+palette afro-futuriste appliquée au vrai code (pas seulement aux maquettes) — tokens
+`globals.css` relus depuis la maquette retenue (Artifact lu explicitement pour extraire
+les vraies valeurs oklch, pas devinées) : rouge/or/vert confirmés identiques, `--cyan`
+renommé `--terracotta` (fond bleu-gris froid teinte 260 → anthracite chaud teinte 35-55).
+Renommage `MindClash 228` → `CestomClash228` dans les 4 endroits utilisateur visibles
+(Header, signup, login, `<title>`) — identifiants internes (clés localStorage, nom du
+composant `MindClashMark`) laissés inchangés, aucun gain utilisateur à les toucher. Bouton
+"+" flottant (icône seule depuis le 2026-08-24, jamais corrigé) remplacé par une pilule
+icône+texte. Nouvel écran `WelcomeIntro.tsx` : vrai premier écran séparé de la carte pour
+un visiteur non connecté (Pins/Bounties expliqués, CTA) — demandé le 2026-08-24, jamais
+codé jusqu'ici (`Hero.tsx` restait un bandeau collé au-dessus de la carte). Vérifié
+réellement : lint/tsc propres, serveur dev relancé, SSR vérifié par curl (2×
+"CestomClash228", 0× "MindClash"), CSS compilé inspecté (`--bg:#1a0704`,
+`--terracotta:#ed7940`, 0 résidu "cyan"). **Jamais vu à l'écran** — confirmé ce jour
+qu'aucun outil navigateur n'est disponible (extension Claude in Chrome non connectée).
+
+**Sponsoring vérifié + Notation (Incréments 3/3bis)** : nouveau module
+`apps/api/src/sponsorship/` complet (entité `SponsorshipRequest`, service, contrôleur,
+DTOs, migration) + `PATCH /bounties/:id/rate` (auteur seul, après résolution, une fois).
+Vérificateur = `RolesService.isVerifier`/`requireVerifierScope`, réutilise le scope
+national existant plutôt qu'un nouveau rang RBAC (décision actée au pivot du 2026-08-31).
+
+**Audité réellement par `security-review` + `architecture-review` (tâches de fond, pas
+simulé) — 2 problèmes réels trouvés et corrigés avant de considérer l'incrément fini** :
+1. **CRITIQUE** : `approve()`/`reject()` ne comparaient jamais `requesterId` à
+   `verifierId` — un rôle national pouvait approuver SA PROPRE demande de sponsoring,
+   annulant tout l'intérêt du mécanisme (aucune passerelle de paiement ne rattrape ça
+   derrière). Corrigé par un `UPDATE ... WHERE status='pending' AND "requesterId" != $verifierId`
+   atomique unique (même pattern que `BountiesService.claim()`) — bloque à la fois
+   l'auto-approbation ET une race entre deux vérificateurs concurrents dans la même requête.
+2. **MOYEN** : `proofImageUrl` validé par un simple `@IsUrl()` acceptait des hôtes
+   privés/loopback/link-local littéraux (`127.0.0.1`, `169.254.169.254` — metadata cloud,
+   `10.x`/`192.168.x`) — risque de désanonymisation d'un vérificateur nommé (balise de
+   traçage via chargement d'image) et SSRF latent si un futur traitement serveur lit
+   cette URL. Corrigé par un validateur `class-validator` custom (https obligatoire,
+   hôtes privés rejetés par motif littéral).
+3. `architecture-review` a en plus trouvé une dérive de contrat API réelle
+   (`apps/web/src/lib/types.ts` `BountyView` pas synchronisé avec le backend malgré son
+   propre commentaire de tête affirmant le contraire — `ratingValue`/`ratingComment`
+   absents) et une contradiction documentaire entre `NEXT_SESSION.md` (encore "pas
+   encore fait") et `PLAN_EXTENSION.md`/`WORKFLOW_STATUS.md` (déjà "✅ fait") — j'avais
+   mis à jour ces deux derniers avant que l'audit ne revienne, erreur de séquencement.
+   Les deux corrigés dans le même commit, plus `docs/ARCHITECTURE.md`/`VISION.md`/
+   `RESUME_FONCTIONNEL.md`/`CONCOURS.md` qui affirmaient encore Sponsoring "roadmap".
+
+**Vérifié réellement, deux fois** (avant et après le correctif de sécurité, sur des
+requêtes HTTP réelles contre une base Postgres+PostGIS isolée fraîche, pas seulement des
+mocks) : cycle complet création → refus non-vérificateur → approbation → re-approbation
+refusée → liste publique sans fuite de montant/preuve → lecture refusée à un tiers ;
+auto-approbation explicitement testée et confirmée bloquée après le fix ; 6 URLs
+malveillantes rejetées, 1 URL valide acceptée ; montant hors bornes rejeté proprement
+(400, pas 500). `npm run test` 59/59, lint+tsc propres sur les deux apps. Cycle de
+migration run/revert/run vérifié sur conteneur isolé. UI réelle ajoutée pour la Notation
+(`BountyDetail.tsx`) — **pas encore d'UI pour le Sponsoring** (backend complet et audité,
+mais inatteignable depuis l'app pour l'instant).
+
+**Piège opérationnel reconstaté** : plusieurs process `nest start --watch` orphelins
+accumulés pendant les tests multi-bases de cette session (même cause déjà documentée
+plus haut dans ce fichier — un port réutilisé sans tuer toute la chaîne parent). Nettoyé
+via `Get-CimInstance Win32_Process` + kill ciblé avant de relancer proprement.
