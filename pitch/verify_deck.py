@@ -13,6 +13,14 @@ import zipfile
 from pathlib import Path
 from lxml import etree
 
+# Le terminal Windows utilise souvent le codepage cp1252 par defaut pour stdout, incapable
+# d'encoder des caracteres reels du deck (ex. '->' typographique, accents) - sans ceci le script
+# plante sur un print() alors que le pptx lui-meme est parfaitement valide. errors='replace' pour
+# ne jamais crasher sur l'affichage (les caracteres non representables deviennent '?'), le contenu
+# verifie (geometrie, XML) n'est pas affecte.
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+
 DEFAULT_PPTX = Path(__file__).parent / 'CestomClash228-Pitch.pptx'
 PPTX = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_PPTX
 
