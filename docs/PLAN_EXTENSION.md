@@ -31,7 +31,7 @@ chacun complets/démontrables, jamais un squelette à moitié fait (méthode dé
 | 1a | Amorce déploiement (Vercel/Render/Supabase gratuits) | ⬜ pas commencé — repoussé après le 3/09 (voir Pivot ci-dessous), pas nécessaire pour les livrables concours |
 | 1b | Exploration design (`product-designer`, parallèle) | ✅ 3/3 maquettes publiées 2026-08-30, **direction choisie 2026-08-31 : afro-futuriste vibrant** (https://claude.ai/code/artifact/9d460df4-301b-4484-a162-109eb17d99e6) — questions ouvertes sur le trace carte encore en cours de tranchage, voir Pivot |
 | 2 | Refonte visuelle (code) | ✅ fait 2026-08-31 — palette afro-futuriste appliquée (`--cyan`→`--terracotta`, valeurs reprises de la maquette retenue), renommage CestomClash228, bouton "+" corrigé, écran d'accueil séparé (`WelcomeIntro`). Vérifié réellement (lint/tsc + SSR curl + CSS compilé inspecté) |
-| 3 | Sponsoring vérifié (preuve de virement + rôle vérificateur) | ✅ fait 2026-09-04 — module complet (`apps/api/src/sponsorship/`), vérificateur = scope national réutilisé (pas de nouveau rang RBAC). Testé bout-en-bout via HTTP réel (22 vérifications), audité par `security-review`+`architecture-review` |
+| 3 | Sponsoring vérifié (preuve de virement + rôle vérificateur) | ✅ fait 2026-09-04 — backend complet (`apps/api/src/sponsorship/`) + frontend réel (`/sponsoring` : soumission, suivi, file de vérification, liste publique). Vérificateur = scope national réutilisé (pas de nouveau rang RBAC). Testé bout-en-bout via HTTP réel, audité par `security-review`+`architecture-review` (1 faille critique corrigée : auto-approbation) |
 | 3bis | Notation d'un service rendu | ✅ fait 2026-09-04 — `PATCH /bounties/:id/rate`, auteur seul, après résolution, une seule fois. Testé bout-en-bout via HTTP réel, audité par `security-review`+`architecture-review` |
 | 4 | Modération anti-brigading | ⬜ **repoussé après le 3/09** — hors critères de notation de la phase éliminatoire |
 | 5 | Ghost Mode | ⬜ **repoussé après le 3/09** — idem |
@@ -343,8 +343,9 @@ proprement. 58/58 tests unitaires. Audité par `security-review` (1 faille criti
 trouvées et corrigées) et `architecture-review` (contradiction documentaire + drift de contrat
 `BountyView` trouvés et corrigés).
 
-**Reste à faire** : interface de soumission (formulaire), file d'attente du vérificateur, liste
-publique des sponsors — aucune UI construite à ce jour, uniquement l'API.
+**Frontend fait juste après** (`apps/web/src/app/sponsoring/page.tsx`) : formulaire de
+soumission, suivi "Mes demandes", file de vérification (visible si `role.scope === "national"`),
+liste publique des sponsors. Vérifié par lint/tsc + SSR curl réel.
 
 ---
 

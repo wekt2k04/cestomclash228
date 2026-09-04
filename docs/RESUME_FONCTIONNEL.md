@@ -71,7 +71,7 @@ elle boucle plutôt qu'une coupure nette. Un bouton permet de la couper. Piste "
   notification WhatsApp. Le pitch deck (`pitch/CestomClash228-Pitch.pptx`) les présente comme
   une feuille de route, pas comme déjà construits.
 - **Sponsoring vérifié et Notation existent réellement depuis le 2026-09-04** (backend testé et
-  audité pour les deux ; frontend construit pour la Notation, pas encore pour le Sponsoring) —
-  voir `docs/PLAN_EXTENSION.md` § Incrément 3/3bis.
+  audité pour les deux, frontend réel pour les deux aussi — page `/sponsoring` et widget de note
+  sur `BountyDetail.tsx`) — voir `docs/PLAN_EXTENSION.md` § Incrément 3/3bis.
 - **La démo du pitch deck est un espace réservé** — pas encore de vraie capture d'écran de
   l'application à jour (carte redessinée depuis).

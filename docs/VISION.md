@@ -55,7 +55,7 @@ pitch (mais détaillé dans le futur `.pptx`) :
 | Reality-Vlogs (upload vidéo, Cloudflare R2) | Roadmap / pitch uniquement |
 | Ghost Mode (anonymat réversible, Redis) | Roadmap / pitch uniquement |
 | Modération anti-brigading (>6 signalements/6 villes) | Roadmap / pitch uniquement |
-| Sponsoring vérifié (preuve de virement + rôle vérificateur) | **Réel côté backend** (2026-09-04, testé bout-en-bout, audité) — frontend pas encore construit |
+| Sponsoring vérifié (preuve de virement + rôle vérificateur) | **Réel** (2026-09-04, backend + frontend `/sponsoring`, testé bout-en-bout, audité) |
 | Notation (auteur note qui l'a aidé sur une Bounty résolue) | **Réel** (2026-09-04), backend + frontend |
 | Ambiance sonore (son de fond façon jeu, contextuel) | **Réel** — activée avec 2 pistes CC0 (voir `docs/ARCHITECTURE.md`) |
 

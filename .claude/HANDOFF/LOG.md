@@ -671,3 +671,13 @@ mais inatteignable depuis l'app pour l'instant).
 accumulés pendant les tests multi-bases de cette session (même cause déjà documentée
 plus haut dans ce fichier — un port réutilisé sans tuer toute la chaîne parent). Nettoyé
 via `Get-CimInstance Win32_Process` + kill ciblé avant de relancer proprement.
+
+## 2026-09-04 (suite) — Interface Sponsoring vérifié (rattrape le manque signalé plus haut)
+
+Nouvelle page `apps/web/src/app/sponsoring/page.tsx` : formulaire de soumission, suivi "Mes
+demandes", file de vérification (réservée à `role.scope === "national"`), liste publique des
+sponsors. Comble l'écart signalé dans l'entrée précédente ("pas encore d'UI pour le
+Sponsoring"). Lien de navigation ajouté au `Header` (desktop uniquement). Vérifié réellement :
+lint/tsc propres, SSR vérifié par curl (200, contenu attendu présent). Pattern
+`eslint-disable-next-line react-hooks/set-state-in-effect` réutilisé tel qu'établi dans
+`auth-context.tsx` pour le même cas (effet qui déclenche un fetch async au montage).
