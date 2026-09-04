@@ -1,5 +1,9 @@
 # Pitch deck — CestomClash228
 
+**`SCRIPT_ORAL.md`** (nouveau, 2026-08-31) : le script oral à dire slide par slide (texte
+suggéré, minutage, anticipation des questions du jury, conseils de posture) — à lire avant de
+monter sur scène. Séparé de ce README, qui documente le fichier `.pptx` lui-même.
+
 `CestomClash228-Pitch.pptx` est généré par `generate-deck.mjs`. **Remplace `MindClash228-
 Pitch.pptx` (supprimé du repo le 2026-08-31)**, suite au renommage `MindClash 228` →
 `CestomClash228` acté le même jour. Contenu tiré de `docs/BUSINESS_PLAN.md` (le business plan
@@ -24,7 +28,7 @@ cohérent avec la charte (dark mode, néons cyan/or/vert), pas des illustrations
 
 ## Régénérer et vérifier
 
-```
+```bash
 cd pitch
 npm install   # une seule fois
 node generate-deck.mjs
@@ -77,9 +81,9 @@ confirmer par l'utilisateur avant dépôt final.
   verrait une substitution silencieuse). Bahnschrift garde un registre technique proche de
   Chakra Petch.
 - Fichier vérifié par `verify_deck.py` (zip valide, XML bien formé sur les 5 slides, aucun
-  dépassement de cadre, aucun chevauchement de texte >25%, 0 problème sur la dernière exécution)
-  + un contrôle numérique séparé (aucune valeur `NaN`/infinie dans les coordonnées brutes du XML,
-  un défaut qu'une comparaison Python silencieuse aurait pu laisser passer) — **toujours pas
+  dépassement de cadre, aucun chevauchement de texte >25%, 0 problème sur la dernière exécution),
+  ainsi qu'un contrôle numérique séparé (aucune valeur `NaN`/infinie dans les coordonnées brutes
+  du XML, un défaut qu'une comparaison Python silencieuse aurait pu laisser passer) — **toujours pas
   d'inspection visuelle réelle possible** (aucun outil de rendu PowerPoint/LibreOffice
   disponible ici, et les nouveaux accents géométriques n'ont jamais été vus à l'écran par
   personne, y compris moi). Une relecture visuelle par l'utilisateur reste nécessaire avant dépôt.
