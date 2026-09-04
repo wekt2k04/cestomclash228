@@ -72,3 +72,29 @@ export interface BountyView {
   ratingComment: string | null;
   createdAt: string;
 }
+
+export type SponsorshipStatus = "pending" | "approved" | "rejected";
+
+// Forme complete (GET /sponsorship-requests/mine, /pending, /:id) - reserve au
+// demandeur ou a un verificateur, voir apps/api/src/sponsorship/sponsorship.service.ts.
+export interface SponsorshipRequestView {
+  id: string;
+  requesterId: string;
+  requester: { displayName: string };
+  description: string;
+  amountDeclared: number;
+  proofImageUrl: string;
+  status: SponsorshipStatus;
+  reviewedById: string | null;
+  reviewedAt: string | null;
+  rejectionReason: string | null;
+  createdAt: string;
+}
+
+// Forme allegee et volontairement differente (GET /sponsorship-requests/approved,
+// public) - jamais amountDeclared/proofImageUrl, voir findApprovedPublic().
+export interface ApprovedSponsor {
+  id: string;
+  description: string;
+  requesterDisplayName: string;
+}

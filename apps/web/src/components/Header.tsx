@@ -27,6 +27,12 @@ export function Header() {
         >
           Musique : PlayOnLoop
         </a>
+        <Link
+          href="/sponsoring"
+          className="hidden text-xs text-ink-muted hover:text-ink sm:inline"
+        >
+          Sponsoring
+        </Link>
         <MuteToggle />
         {loading ? null : user ? (
           <div className="flex items-center gap-2">
