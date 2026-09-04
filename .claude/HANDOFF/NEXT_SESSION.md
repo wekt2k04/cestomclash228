@@ -1,13 +1,14 @@
 # NEXT_SESSION
 
-Dernière mise à jour : 2026-08-31.
+Dernière mise à jour : 2026-09-04.
 
 ## Pivot concours (2026-08-31) — lire avant tout le reste
 
-Échéance réelle communiquée : **PPT dû le 2026-09-03 23:59**, détail complet dans
-`docs/CONCOURS.md`. Ça a redéfini les priorités — voir `docs/PLAN_EXTENSION.md` § "Pivot
-2026-08-31" pour le détail complet (renommage `CestomClash228`, modèle économique en 3 phases,
-Sponsoring v2, Notation). État à cette date :
+Échéance communiquée : **PPT dû le 2026-09-03 23:59** (détail complet dans `docs/CONCOURS.md`).
+**Cette échéance est dépassée** (session du 2026-09-04) — signalé à l'utilisateur, qui a demandé de
+continuer quand même vers "ce soir" comme nouvelle cible. Ça a redéfini les priorités — voir
+`docs/PLAN_EXTENSION.md` § "Pivot 2026-08-31" pour le détail complet (renommage `CestomClash228`,
+modèle économique en 3 phases, Sponsoring v2, Notation). État à cette date :
 
 - **Villes réelles CESTOM** : corrigées partout (6 villes, effectifs réels, source cestom.org) —
   `apps/web/src/lib/morocco-geo.ts`, `apps/api/src/cities/cities.service.ts`,
@@ -15,14 +16,20 @@ Sponsoring v2, Notation). État à cette date :
 - **Business Plan détaillé** (`docs/BUSINESS_PLAN.md`, 17 sections) : SAM réel chiffré (650),
   SOM calculé (150-200 Année 1). Reste `[À COMPLÉTER]` : section 15 (ask au concours — l'utilisateur
   a demandé ce que ça signifie, expliqué en conversation, sa réponse n'est pas encore arrivée).
-- **PPT** (`pitch/CestomClash228-Pitch.pptx`, 4 slides) : reformaté avec mini-carte réelle des 6
-  villes + icônes suite au retour "trop monotone, fade, pas d'images". **Jamais inspecté
-  visuellement** (aucun outil PowerPoint ici) — priorité pour l'utilisateur : ouvrir le fichier et
-  vérifier qu'aucun texte/forme ne déborde, en particulier la mini-carte de la Slide 3 (positions
-  calculées, jamais vues à l'écran).
-- **Pas encore fait** : Sponsoring v2 (code réel, preuve de virement + vérificateur), Notation
-  (code réel), script vidéo vendeur, vidéo elle-même, décision finale sur le contour de la carte
-  produit (réel vs abstrait vs hybride — toujours ouverte).
+- **PPT** (`pitch/CestomClash228-Pitch.pptx`, 5 slides) : Problème/Solution séparées + Business
+  case + vraie Conclusion, habillage visuel (verre dépoli, glow, mini-carte réelle). **Jamais
+  inspecté visuellement** (aucun outil PowerPoint ici, ni navigateur — extension Claude in Chrome
+  non connectée, vérifié le 2026-09-04) — priorité pour l'utilisateur : ouvrir le fichier.
+- **Sponsoring vérifié + Notation : fait le 2026-09-04**, code réel testé bout-en-bout (HTTP réel,
+  pas seulement mocks) et audité par `security-review`+`architecture-review` — 2 vrais problèmes
+  trouvés et corrigés avant commit (auto-approbation d'une demande par son propre vérificateur ;
+  `proofImageUrl` acceptait des hôtes privés/loopback). Voir `LOG.md` pour le détail complet.
+- **Refonte visuelle (Incrément 2) : fait le 2026-08-31**, palette afro-futuriste appliquée au vrai
+  code (pas juste les maquettes), renommage CestomClash228, bouton "+" corrigé, écran d'accueil
+  séparé. Vérifié par SSR/CSS compilé — jamais vu à l'écran (pas d'outil navigateur disponible).
+- **Reste à faire** : script vidéo vendeur + vidéo elle-même, décision finale sur le contour de la
+  carte produit (réel vs abstrait vs hybride — toujours ouverte), relecture visuelle humaine du PPT
+  et de l'appli (aucun outil de rendu disponible ici pour aucun des deux).
 
 ## Chantier en cours — voir `docs/PLAN_EXTENSION.md`
 
@@ -150,16 +157,14 @@ VirtualBox/WSL/Hyper-V) et mettre à jour les deux fichiers `.env*` en conséque
 - Ambiance sonore actée comme faisant partie du noyau MVP (pas roadmap), activée et fonctionnelle
   (desktop confirmé, mobile en attente de reconfirmation — voir plus haut).
 
-## Prochaine étape (une fois la confirmation utilisateur obtenue)
+## Prochaine étape (section pré-pivot, très en grande partie dépassée — voir § Pivot en tête)
+
+Point 1 ci-dessous reste valable. Les points 2-3 décrivaient l'ancien deck 11 slides et l'ancien
+périmètre resserré — remplacés par `pitch/CestomClash228-Pitch.pptx` (5 slides) et le pivot
+concours (Sponsoring vérifié + Notation déjà construits, voir § Pivot en tête de ce fichier).
 
 1. Si des bugs visuels/UX apparaissent au test réel : corriger, avec la même discipline
    (workflow-audit → vérifié → commit → `LOG.md` + `WORKFLOW_STATUS.md`).
-2. Régénérer `pitch/MindClash228-Pitch.pptx` avec (1) une vraie capture d'écran à la place du
-   placeholder Démo, (2) l'"ask" de la slide de closing précisé avec l'utilisateur, (3) un
-   aperçu visuel réel du fichier (aucun outil PowerPoint/LibreOffice disponible ici — jamais
-   inspecté à l'œil non plus, voir `pitch/README.md`).
-3. Fonctionnalités hors noyau (Ghost Mode, Reality-Vlogs, modération anti-brigading complète,
-   sponsoring, pont WhatsApp) — seulement si l'utilisateur élargit le périmètre.
 
 Pour lancer l'environnement de dev : `docker compose -f infra/docker-compose.yml up -d`, puis
 `cd apps/api && npm run start:dev` (port 3001), puis `cd apps/web && npx next dev -H 0.0.0.0`

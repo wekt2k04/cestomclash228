@@ -125,8 +125,13 @@ la couleur) n'existent qu'à un endroit à maintenir.
 
 Ghost Mode (anonymat réversible + purgatoire Redis), modération anti-brigading complète (seuil
 >6 signalements/6 villes), RBAC à 9 rôles nationaux asymétriques, Reality-Vlogs (upload vidéo
-R2), sponsoring (Pins dorés). Chacun aura ses propres décisions de conception à acter avant
-implémentation (ex : qui peut voir la correspondance auteur réel ↔ post anonyme avant claim).
+R2). Chacun aura ses propres décisions de conception à acter avant implémentation (ex : qui peut
+voir la correspondance auteur réel ↔ post anonyme avant claim).
+
+**Sponsoring (Sponsoring vérifié) : construit le 2026-09-04**, pas différé — voir
+`docs/PLAN_EXTENSION.md` § Incrément 3 pour le détail (module `apps/api/src/sponsorship/`,
+preuve de virement + rôle vérificateur réutilisant le scope national, sans passerelle de
+paiement). Backend réel et audité ; frontend pas encore construit à cette date.
 
 ## Critères de qualité par incrément ("super-métriques")
 

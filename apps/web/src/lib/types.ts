@@ -68,5 +68,7 @@ export interface BountyView {
   claimedByDisplayName: string | null;
   expiresAt: string;
   resolvedAt: string | null;
+  ratingValue: number | null;
+  ratingComment: string | null;
   createdAt: string;
 }

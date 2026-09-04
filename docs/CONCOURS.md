@@ -35,9 +35,9 @@ faire sur le moment — **fait foi sur toute estimation de délai antérieure da
 Le format "business plan avec chiffres réels, marché ciblé et sa taille, pas de bénévolat" est un
 changement de philosophie par rapport à `docs/VISION.md` actuel, dont l'avantage concurrentiel
 ("avantage déloyal") est actuellement formulé autour de la légitimité institutionnelle CESTOM —
-proche d'un angle associatif, pas incompatible mais à re-formuler pour ce jury. Aucune donnée de
-taille de marché (nombre réel d'étudiants togolais au Maroc, croissance annuelle, etc.) n'existe
-encore dans les docs du projet — à obtenir/estimer avec l'utilisateur avant la refonte du pitch.
+proche d'un angle associatif, pas incompatible mais à re-formuler pour ce jury. **Résolu
+2026-08-31** : SAM réel chiffré à 650 (source cestom.org), voir `docs/BUSINESS_PLAN.md`.
 
-Voir aussi la refonte du pitch (`pitch/MindClash228-Pitch.pptx`, `pitch/README.md`) — probablement
-à reprendre en priorité compte tenu de l'échéance du 2026-09-03.
+Voir aussi le pitch (`pitch/CestomClash228-Pitch.pptx`, `pitch/SCRIPT_ORAL.md`,
+`pitch/README.md`). **Échéance du 2026-09-03 23:59 dépassée** (constaté le 2026-09-04) —
+l'utilisateur a demandé de continuer vers "ce soir" comme nouvelle cible.

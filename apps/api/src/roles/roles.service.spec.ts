@@ -267,4 +267,50 @@ describe('RolesService', () => {
       ).resolves.toBeUndefined();
     });
   });
+
+  describe('isVerifier', () => {
+    it('retourne true pour un role national', async () => {
+      repo.findOne.mockResolvedValueOnce(
+        makeRole({ scope: RoleScope.NATIONAL }),
+      );
+
+      await expect(service.isVerifier('user-1')).resolves.toBe(true);
+    });
+
+    it('retourne false pour un role local (contrairement a canActOnCity, aucune ville ne le rend verificateur)', async () => {
+      repo.findOne.mockResolvedValueOnce(
+        makeRole({ scope: RoleScope.LOCAL, cityId: 'city-a' }),
+      );
+
+      await expect(service.isVerifier('user-1')).resolves.toBe(false);
+    });
+
+    it('retourne false pour un utilisateur sans role du tout', async () => {
+      repo.findOne.mockResolvedValueOnce(null);
+
+      await expect(service.isVerifier('user-1')).resolves.toBe(false);
+    });
+  });
+
+  describe('requireVerifierScope', () => {
+    it('leve ForbiddenException pour un role local', async () => {
+      repo.findOne.mockResolvedValueOnce(
+        makeRole({ scope: RoleScope.LOCAL, cityId: 'city-a' }),
+      );
+
+      await expect(
+        service.requireVerifierScope('user-1'),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('resout sans erreur pour un role national', async () => {
+      repo.findOne.mockResolvedValueOnce(
+        makeRole({ scope: RoleScope.NATIONAL }),
+      );
+
+      await expect(
+        service.requireVerifierScope('user-1'),
+      ).resolves.toBeUndefined();
+    });
+  });
 });

@@ -58,6 +58,17 @@ export class Bounty {
   @Column({ type: 'timestamptz', nullable: true })
   resolvedAt: Date | null;
 
+  // Notation (docs/PLAN_EXTENSION.md § Pivot 2026-08-31, Increment 3bis) :
+  // l'auteur note la personne qui a reclame/resolu, jamais l'inverse (c'est
+  // l'auteur qui juge si l'aide recue etait de qualite) - voir
+  // BountiesService.rate(). ratingValue reste null tant que non note, pas 0
+  // (0 serait une vraie note basse, pas "pas encore note").
+  @Column({ type: 'smallint', nullable: true })
+  ratingValue: number | null;
+
+  @Column({ type: 'text', nullable: true })
+  ratingComment: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 }

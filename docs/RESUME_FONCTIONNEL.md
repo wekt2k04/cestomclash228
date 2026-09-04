@@ -67,8 +67,11 @@ elle boucle plutôt qu'une coupure nette. Un bouton permet de la couper. Piste "
 - **Rien n'est déployé publiquement.** Tout tourne en local (PC + réseau Wi-Fi local). Le
   passage en ligne (Vercel/Railway/Supabase, voir `docs/STACK.md`) reste à faire.
 - **Ce qui n'existe pas encore**, volontairement laissé pour plus tard : Ghost Mode (anonymat
-  réversible), Reality-Vlogs (vidéos), modération anti-brigading automatique, sponsoring
-  (Pins dorés), pont de notification WhatsApp. Le pitch deck (`pitch/MindClash228-Pitch.pptx`)
-  les présente comme une feuille de route, pas comme déjà construits.
+  réversible), Reality-Vlogs (vidéos), modération anti-brigading automatique, pont de
+  notification WhatsApp. Le pitch deck (`pitch/CestomClash228-Pitch.pptx`) les présente comme
+  une feuille de route, pas comme déjà construits.
+- **Sponsoring vérifié et Notation existent réellement depuis le 2026-09-04** (backend testé et
+  audité pour les deux ; frontend construit pour la Notation, pas encore pour le Sponsoring) —
+  voir `docs/PLAN_EXTENSION.md` § Incrément 3/3bis.
 - **La démo du pitch deck est un espace réservé** — pas encore de vraie capture d'écran de
   l'application à jour (carte redessinée depuis).

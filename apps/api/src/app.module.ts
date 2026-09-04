@@ -13,6 +13,7 @@ import { RolesModule } from './roles/roles.module';
 import { AuthModule } from './auth/auth.module';
 import { PinsModule } from './pins/pins.module';
 import { BountiesModule } from './bounties/bounties.module';
+import { SponsorshipModule } from './sponsorship/sponsorship.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { BountiesModule } from './bounties/bounties.module';
     AuthModule,
     PinsModule,
     BountiesModule,
+    SponsorshipModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

@@ -13,6 +13,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/decorators/current-user.decorator';
 import { BountiesService } from './bounties.service';
 import { CreateBountyDto } from './dto/create-bounty.dto';
+import { RateBountyDto } from './dto/rate-bounty.dto';
 import { toBBox } from '../common/bbox';
 import { ListBountiesQueryDto } from './dto/list-bounties-query.dto';
 
@@ -46,5 +47,15 @@ export class BountiesController {
   @Patch(':id/resolve')
   resolve(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.bounties.resolve(user.userId, id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id/rate')
+  rate(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() dto: RateBountyDto,
+  ) {
+    return this.bounties.rate(user.userId, id, dto.value, dto.comment);
   }
 }

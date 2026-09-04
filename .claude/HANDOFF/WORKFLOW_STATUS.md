@@ -27,10 +27,12 @@ Prérequis pour les commandes ci-dessous : API sur `localhost:3001`, Web sur `lo
 | Claim Bounty — tiers accepté (200) | 2026-08-23 | ✅ |
 | Claim Bounty — double claim refusé (409, pas de race) | 2026-08-23 | ✅ |
 | Resolve Bounty par l'auteur (200) | 2026-08-23 | ✅ |
-| Suite de tests unitaires (`roles`/`pins`/`bounties`.service.spec.ts) | 2026-08-23 | ✅ (26/26) |
+| Suite de tests unitaires (`roles`/`pins`/`bounties`/`sponsorship`.service.spec.ts) | 2026-09-04 | ✅ (58/58) |
 | RBAC — pouvoir limité national (aucune action destructrice unilatérale) | 2026-08-25 — centralisé (`RolesService.isLocalModeratorForCity`), re-testé (6 nouveaux tests dédiés incl. exclusion national), audité par `architecture-review` | ✅ |
-| Migrations TypeORM (remplace `synchronize`) | 2026-08-25 — baseline + `AddSpatialIndexes`, cycle run/revert/run vérifié sur 2 bases vierges isolées, dev backfillée sans perte | ✅ |
+| Migrations TypeORM (remplace `synchronize`) | 2026-09-04 — 4 migrations (baseline, spatial, sponsorship, bounty rating), cycle run/revert/run vérifié sur base vierge isolée + appliqué à la base de dev | ✅ |
 | Index spatiaux GiST (pins/bounties/cities) | 2026-08-25 — créés, usage réel confirmé par `EXPLAIN` sur la base de dev | ✅ |
+| Sponsoring vérifié (`/sponsorship-requests/*`) | 2026-09-04 — nouveau, testé bout-en-bout via HTTP réel (22 vérifications : création, refus non-vérificateur, approbation, re-approbation refusée, liste publique sans fuite de données sensibles, lecture refusée à un tiers) sur une base fraîche | ✅ |
+| Notation Bounty (`PATCH /bounties/:id/rate`) | 2026-09-04 — nouveau, testé bout-en-bout via HTTP réel (auteur seul, après résolution seulement, une seule fois, bornes 1-5 validées) | ✅ |
 | Google OAuth (`/auth/google`) | — | ⛔ (pas de credentials Google réels configurés — connu, non bloquant) |
 
 **Commande de référence** (cycle complet auth+pins+bounties, compte jetable) :

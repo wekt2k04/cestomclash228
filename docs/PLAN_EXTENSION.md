@@ -30,9 +30,9 @@ chacun complets/démontrables, jamais un squelette à moitié fait (méthode dé
 | 0 | Dette technique (RBAC centralisé + migrations réelles) | ✅ fait 2026-08-25, audité par `architecture-review` (2 problèmes trouvés et corrigés avant commit) |
 | 1a | Amorce déploiement (Vercel/Render/Supabase gratuits) | ⬜ pas commencé — repoussé après le 3/09 (voir Pivot ci-dessous), pas nécessaire pour les livrables concours |
 | 1b | Exploration design (`product-designer`, parallèle) | ✅ 3/3 maquettes publiées 2026-08-30, **direction choisie 2026-08-31 : afro-futuriste vibrant** (https://claude.ai/code/artifact/9d460df4-301b-4484-a162-109eb17d99e6) — questions ouvertes sur le trace carte encore en cours de tranchage, voir Pivot |
-| 2 | Refonte visuelle (code) | ⬜ pas commencé — **reciblé** sur les écrans qui apparaîtront dans la vidéo concours, pas toute l'app |
-| 3 | Sponsoring (Pins dorés) | ⬜ pas commencé — **redéfini en "Sponsoring v2"** (preuve de virement + rôle vérificateur), priorité haute avant le 3/09, voir Pivot |
-| 3bis | Notation d'un service rendu (nouveau, ajouté 2026-08-31) | ⬜ pas commencé — priorité haute avant le 3/09, voir Pivot |
+| 2 | Refonte visuelle (code) | ✅ fait 2026-08-31 — palette afro-futuriste appliquée (`--cyan`→`--terracotta`, valeurs reprises de la maquette retenue), renommage CestomClash228, bouton "+" corrigé, écran d'accueil séparé (`WelcomeIntro`). Vérifié réellement (lint/tsc + SSR curl + CSS compilé inspecté) |
+| 3 | Sponsoring vérifié (preuve de virement + rôle vérificateur) | ✅ fait 2026-09-04 — module complet (`apps/api/src/sponsorship/`), vérificateur = scope national réutilisé (pas de nouveau rang RBAC). Testé bout-en-bout via HTTP réel (22 vérifications), audité par `security-review`+`architecture-review` |
+| 3bis | Notation d'un service rendu | ✅ fait 2026-09-04 — `PATCH /bounties/:id/rate`, auteur seul, après résolution, une seule fois. Testé bout-en-bout via HTTP réel, audité par `security-review`+`architecture-review` |
 | 4 | Modération anti-brigading | ⬜ **repoussé après le 3/09** — hors critères de notation de la phase éliminatoire |
 | 5 | Ghost Mode | ⬜ **repoussé après le 3/09** — idem |
 | 6 | Reality-Vlogs | ⬜ **repoussé après le 3/09** — idem |
@@ -298,23 +298,53 @@ agent). Agent : `workflow-audit`.
 
 ---
 
-## Incrément 3 — Sponsoring (Pins dorés)
+## Incrément 3 — Sponsoring vérifié ✅ FAIT 2026-09-04
 
-**Schéma** (`pin.entity.ts`) : `isSponsored: boolean` (default false), `sponsoredAt: timestamptz|
-null`, `sponsoredById: uuid|null` + relation `sponsoredBy`.
+**Le mécanisme ci-dessous (`isSponsored` sur `Pin`, `sponsor()`/`unsponsor()`) a été abandonné
+avant d'être codé** — remplacé le 2026-08-31 par le "Sponsoring vérifié" du pivot concours (preuve
+de virement + rôle vérificateur, voir § Pivot ci-dessus), qui EST ce qui a été réellement construit
+et audité. Section gardée biffée ci-dessous pour l'historique, ne pas la suivre.
 
-**Backend** : `roles.service.ts` → nouvelle `isNational()`/`requireNationalScope()` (méthode
-dédiée, distincte de `requireCityScope` car un rôle local ne doit PAS pouvoir sponsoriser) ;
-`pins.service.ts` → `sponsor()`/`unsponsor()` (atomique `UPDATE...RETURNING`, piège tuple
-`[rows,rowCount]` de cette version de TypeORM) ; `pins.controller.ts` → `PATCH /pins/:id/sponsor`,
-`PATCH /pins/:id/unsponsor` ; tests positif (national) + négatif (local et utilisateur ordinaire
-rejetés) ; migration `AddPinSponsorship`.
+~~**Schéma** (`pin.entity.ts`) : `isSponsored: boolean` (default false), `sponsoredAt:
+timestamptz|null`, `sponsoredById: uuid|null` + relation `sponsoredBy`.~~
 
-**Frontend** : `types.ts` (`PinView.isSponsored`), `PinDetail.tsx` (badge doré + bouton visible
-seulement si `role?.scope === "national"`), `CityPanel.tsx` (tri sponsorisés en premier).
+~~**Backend** : `roles.service.ts` → nouvelle `isNational()`/`requireNationalScope()`...
+`pins.service.ts` → `sponsor()`/`unsponsor()`... migration `AddPinSponsorship`.~~
 
-**Vérification** : cycle curl réel (signup national via `BOOTSTRAP_ADMIN_EMAIL`, sponsor, vérif,
-unsponsor). Agents : `security-review` + `critical-logic-tests`.
+~~**Frontend** : `types.ts` (`PinView.isSponsored`), `PinDetail.tsx` (badge doré)...~~
+
+### Ce qui a été réellement construit (Sponsoring vérifié)
+
+**Schéma** : nouveau module `apps/api/src/sponsorship/`, entité `SponsorshipRequest`
+(`requesterId`, `description`, `amountDeclared: numeric(10,2)` avec transformer explicite
+number↔string, `proofImageUrl`, `status: pending|approved|rejected`, `reviewedById`,
+`reviewedAt`, `rejectionReason`). Migration `AddSponsorshipRequests` (index sur `status`).
+
+**Backend** : `roles.service.ts` → `isVerifier()`/`requireVerifierScope()` réutilisent le scope
+`national` existant (pas de nouveau rang RBAC, décision actée au § Pivot). `sponsorship.service.ts`
+→ `create()`, `findMine()`, `findPending()` (verifier only), `findApprovedPublic()` (public,
+expose uniquement `id`/`description`/`requesterDisplayName` — jamais le montant ni l'URL de
+preuve), `findOne()` (auteur ou vérificateur seulement), `approve()`/`reject()` en **UPDATE
+conditionnel atomique unique** (même pattern que `BountiesService.claim()`, `WHERE status='pending'
+AND "requesterId" != $verifierId` — empêche à la fois une double-décision concurrente ET
+l'auto-approbation, faille critique trouvée par `security-review` avant commit, corrigée dans la
+même requête). `proofImageUrl` validé par un validateur `class-validator` custom
+(`https` obligatoire + hôtes privés/loopback/link-local littéraux rejetés — trouvé par
+`security-review` : sans ça, risque de désanonymisation d'un vérificateur nommé + SSRF latent).
+
+**Frontend** : pas encore construit (voir "Reste à faire" ci-dessous) — le backend est réel,
+testé, audité, mais inatteignable depuis l'UI de l'app pour l'instant.
+
+**Vérification** : 32 assertions HTTP réelles (pas seulement mocks) sur base Postgres+PostGIS
+isolée fraîche — création, refus non-vérificateur, approbation, re-approbation refusée,
+auto-approbation refusée (régression après le fix), fuite de données bloquée sur la liste
+publique, lecture refusée à un tiers, 6 URLs malveillantes rejetées, montant hors bornes rejeté
+proprement. 58/58 tests unitaires. Audité par `security-review` (1 faille critique + 1 moyenne
+trouvées et corrigées) et `architecture-review` (contradiction documentaire + drift de contrat
+`BountyView` trouvés et corrigés).
+
+**Reste à faire** : interface de soumission (formulaire), file d'attente du vérificateur, liste
+publique des sponsors — aucune UI construite à ce jour, uniquement l'API.
 
 ---
 

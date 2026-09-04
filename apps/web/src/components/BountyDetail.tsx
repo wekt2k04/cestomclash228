@@ -29,12 +29,19 @@ export function BountyDetail({
   const { user, token } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Notation (docs/PLAN_EXTENSION.md § Pivot 2026-08-31, Increment 3bis) :
+  // brouillon local avant envoi, jamais transmis tant que l'auteur n'a pas
+  // choisi une valeur (pas de note 0 par defaut qui serait une vraie note).
+  const [ratingDraft, setRatingDraft] = useState<number | null>(null);
+  const [ratingComment, setRatingComment] = useState("");
 
   const isAuthor = user?.id === bounty.authorId;
   const isClaimant = user?.id === bounty.claimedById;
   const canClaim = Boolean(user) && !isAuthor && bounty.status === "open";
   const canResolve =
     (isAuthor || isClaimant) && bounty.status === "claimed";
+  const canRate =
+    isAuthor && bounty.status === "resolved" && bounty.ratingValue === null;
 
   async function act(action: "claim" | "resolve") {
     setError(null);
@@ -44,6 +51,27 @@ export function BountyDetail({
         `/bounties/${bounty.id}/${action}`,
         { method: "PATCH", token },
       );
+      onChanged(updated);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Une erreur est survenue.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function submitRating() {
+    if (ratingDraft === null) return;
+    setError(null);
+    setBusy(true);
+    try {
+      const updated = await apiFetch<BountyView>(`/bounties/${bounty.id}/rate`, {
+        method: "PATCH",
+        token,
+        body: JSON.stringify({
+          value: ratingDraft,
+          comment: ratingComment.trim() || undefined,
+        }),
+      });
       onChanged(updated);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Une erreur est survenue.");
@@ -111,6 +139,67 @@ export function BountyDetail({
               "Marquer résolue"
             )}
           </button>
+        )}
+
+        {bounty.ratingValue !== null && (
+          <div className="rounded-lg border border-line bg-bg-elevated p-3">
+            <p className="font-head text-sm font-bold text-gold">
+              Note : {bounty.ratingValue}/5
+            </p>
+            {bounty.ratingComment && (
+              <p className="mt-1 text-xs text-ink-muted">
+                « {bounty.ratingComment} »
+              </p>
+            )}
+          </div>
+        )}
+
+        {canRate && (
+          <div className="flex flex-col gap-2 rounded-lg border border-line bg-bg-elevated p-3">
+            <p className="text-sm text-ink-muted">
+              Note la personne qui vous a aidé
+            </p>
+            <div className="flex gap-2" role="radiogroup" aria-label="Note de 1 à 5">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  role="radio"
+                  aria-checked={ratingDraft === n}
+                  onClick={() => setRatingDraft(n)}
+                  className={`flex h-11 flex-1 items-center justify-center rounded-lg border text-sm font-semibold ${
+                    ratingDraft === n
+                      ? "border-terracotta bg-terracotta text-terracotta-ink"
+                      : "border-line bg-bg text-ink-muted"
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+            <textarea
+              value={ratingComment}
+              onChange={(e) => setRatingComment(e.target.value)}
+              maxLength={500}
+              rows={2}
+              placeholder="Un commentaire (optionnel)"
+              className="input resize-none"
+            />
+            <button
+              type="button"
+              disabled={busy || ratingDraft === null}
+              onClick={submitRating}
+              className="btn-primary"
+            >
+              {busy ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Spinner /> Envoi…
+                </span>
+              ) : (
+                "Envoyer la note"
+              )}
+            </button>
+          </div>
         )}
       </div>
     </DetailSheet>

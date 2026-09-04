@@ -113,6 +113,25 @@ export class RolesService {
     }
   }
 
+  // Le Sponsoring verifie (docs/PLAN_EXTENSION.md § Pivot 2026-08-31) n'est PAS
+  // une action destructrice contre le contenu d'un pair (voir doctrine en tete
+  // de fichier) - c'est une verification financiere administrative, analogue a
+  // assign() ci-dessus (deja national-only sans mecanisme collectif requis).
+  // Un role national peut donc approuver/rejeter seul une demande.
+  async isVerifier(userId: string): Promise<boolean> {
+    const role = await this.findByUserId(userId);
+    return role?.scope === RoleScope.NATIONAL;
+  }
+
+  async requireVerifierScope(userId: string): Promise<void> {
+    const allowed = await this.isVerifier(userId);
+    if (!allowed) {
+      throw new ForbiddenException(
+        'Seul un rôle national peut vérifier une demande de sponsoring.',
+      );
+    }
+  }
+
   async getOrThrow(userId: string): Promise<Role> {
     const role = await this.findByUserId(userId);
     if (!role) throw new NotFoundException('Aucun rôle pour cet utilisateur.');

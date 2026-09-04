@@ -28,6 +28,8 @@ export interface BountyView {
   claimedByDisplayName: string | null;
   expiresAt: Date;
   resolvedAt: Date | null;
+  ratingValue: number | null;
+  ratingComment: string | null;
   createdAt: Date;
 }
 
@@ -173,6 +175,39 @@ export class BountiesService {
     return this.findOne(bountyId);
   }
 
+  // Notation (docs/PLAN_EXTENSION.md § Pivot 2026-08-31) : SEUL l'auteur note
+  // - jamais la personne qui a reclame (elle ne juge pas sa propre aide).
+  // Distinct de resolve() (que les deux parties peuvent declencher) : noter
+  // est un jugement unilateral de l'auteur, pas une cloture bilaterale.
+  // Une seule note par Bounty, jamais ecrasee silencieusement une fois posee.
+  async rate(
+    userId: string,
+    bountyId: string,
+    value: number,
+    comment?: string,
+  ): Promise<BountyView> {
+    const bounty = await this.bounties.findOne({ where: { id: bountyId } });
+    if (!bounty) throw new NotFoundException('Bounty introuvable.');
+
+    if (bounty.authorId !== userId) {
+      throw new ForbiddenException(
+        "Seul l'auteur de la Bounty peut noter la personne qui a aidé.",
+      );
+    }
+    if (bounty.status !== BountyStatus.RESOLVED) {
+      throw new ConflictException('Seule une Bounty résolue peut être notée.');
+    }
+    if (bounty.ratingValue !== null) {
+      throw new ConflictException('Cette Bounty a déjà été notée.');
+    }
+
+    await this.bounties.update(
+      { id: bountyId },
+      { ratingValue: value, ratingComment: comment ?? null },
+    );
+    return this.findOne(bountyId);
+  }
+
   // Materialise en base les bounties OPEN dont l'echeance est passee - pas
   // de scheduler/cron (incompatible avec le scale-to-zero, voir
   // docs/ARCHITECTURE.md) : la verification se fait a la lecture.
@@ -202,6 +237,8 @@ export class BountiesService {
       claimedbydisplayname: string | null;
       expiresat: Date;
       resolvedat: Date | null;
+      ratingvalue: number | null;
+      ratingcomment: string | null;
       createdat: Date;
     }> = await this.bounties.query(
       `SELECT
@@ -211,6 +248,7 @@ export class BountiesService {
          b."authorId" AS authorid, u."displayName" AS authordisplayname,
          b."claimedById" AS claimedbyid, cu."displayName" AS claimedbydisplayname,
          b."expiresAt" AS expiresat, b."resolvedAt" AS resolvedat,
+         b."ratingValue" AS ratingvalue, b."ratingComment" AS ratingcomment,
          b."createdAt" AS createdat
        FROM bounties b
        JOIN cities c ON c.id = b."cityId"
@@ -235,6 +273,8 @@ export class BountiesService {
       claimedByDisplayName: r.claimedbydisplayname,
       expiresAt: r.expiresat,
       resolvedAt: r.resolvedat,
+      ratingValue: r.ratingvalue,
+      ratingComment: r.ratingcomment,
       createdAt: r.createdat,
     }));
   }

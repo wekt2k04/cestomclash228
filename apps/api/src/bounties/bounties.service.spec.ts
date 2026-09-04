@@ -35,6 +35,7 @@ describe('BountiesService', () => {
       claimedById: null,
       status: BountyStatus.OPEN,
       expiresAt: new Date(Date.now() + 3600_000),
+      ratingValue: null,
       ...overrides,
     }) as Bounty;
 
@@ -203,6 +204,88 @@ describe('BountiesService', () => {
       await expect(
         service.resolve('author-1', 'bounty-1'),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+  });
+
+  describe('rate', () => {
+    it("rejette avec ForbiddenException si l'acteur n'est pas l'auteur (même la personne qui a aidé ne peut pas se noter elle-même)", async () => {
+      bountiesRepo.findOne.mockResolvedValueOnce(
+        makeBounty({
+          authorId: 'author-1',
+          claimedById: 'claimer-1',
+          status: BountyStatus.RESOLVED,
+        }),
+      );
+
+      await expect(
+        service.rate('claimer-1', 'bounty-1', 5),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(bountiesRepo.update).not.toHaveBeenCalled();
+    });
+
+    it("rejette avec ConflictException si la Bounty n'est pas encore résolue", async () => {
+      bountiesRepo.findOne.mockResolvedValueOnce(
+        makeBounty({ authorId: 'author-1', status: BountyStatus.CLAIMED }),
+      );
+
+      await expect(
+        service.rate('author-1', 'bounty-1', 5),
+      ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('rejette avec ConflictException si déjà notée (pas de ré-écrasement silencieux)', async () => {
+      bountiesRepo.findOne.mockResolvedValueOnce(
+        makeBounty({
+          authorId: 'author-1',
+          status: BountyStatus.RESOLVED,
+          ratingValue: 4,
+        }),
+      );
+
+      await expect(
+        service.rate('author-1', 'bounty-1', 5),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(bountiesRepo.update).not.toHaveBeenCalled();
+    });
+
+    it("rejette avec NotFoundException si la Bounty n'existe pas", async () => {
+      bountiesRepo.findOne.mockResolvedValueOnce(null);
+
+      await expect(
+        service.rate('author-1', 'bounty-x', 5),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it("l'auteur note la Bounty résolue avec succès", async () => {
+      bountiesRepo.findOne.mockResolvedValueOnce(
+        makeBounty({ authorId: 'author-1', status: BountyStatus.RESOLVED }),
+      );
+      jest
+        .spyOn(service, 'findOne')
+        .mockResolvedValueOnce({} as unknown as BountyView);
+
+      await service.rate('author-1', 'bounty-1', 5, 'Très réactif');
+
+      expect(bountiesRepo.update).toHaveBeenCalledWith(
+        { id: 'bounty-1' },
+        { ratingValue: 5, ratingComment: 'Très réactif' },
+      );
+    });
+
+    it('accepte une note sans commentaire (reste null, pas une chaîne vide)', async () => {
+      bountiesRepo.findOne.mockResolvedValueOnce(
+        makeBounty({ authorId: 'author-1', status: BountyStatus.RESOLVED }),
+      );
+      jest
+        .spyOn(service, 'findOne')
+        .mockResolvedValueOnce({} as unknown as BountyView);
+
+      await service.rate('author-1', 'bounty-1', 3);
+
+      expect(bountiesRepo.update).toHaveBeenCalledWith(
+        { id: 'bounty-1' },
+        { ratingValue: 3, ratingComment: null },
+      );
     });
   });
 });
