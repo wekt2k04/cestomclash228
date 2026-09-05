@@ -20,7 +20,7 @@ export function Hero() {
         ) : (
           <>
             Explore<span className="text-terracotta">.</span> Partage
-            <span className="text-terracotta">.</span> Level-up
+            <span className="text-green">.</span> Level-up
             <span className="text-gold">.</span>
           </>
         )}

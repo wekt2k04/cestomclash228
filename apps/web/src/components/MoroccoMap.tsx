@@ -46,15 +46,23 @@ export function MoroccoMap({
   // au rayon. sqrt() ramene le ratio a ~2.7x, plus lisible - la taille du
   // cercle reste un encodage grossier (3 paliers) donc l'echelle exacte
   // compte moins que la fonction ne pas ecraser les extremes.
-  const radiusFor = (count: number) => {
-    if (maxCount === minCount) return RADIUS_TIERS[1];
+  const tierFor = (count: number): 0 | 1 | 2 => {
+    if (maxCount === minCount) return 1;
     const t =
       (Math.sqrt(count) - Math.sqrt(minCount)) /
       (Math.sqrt(maxCount) - Math.sqrt(minCount));
-    if (t < 1 / 3) return RADIUS_TIERS[0];
-    if (t < 2 / 3) return RADIUS_TIERS[1];
-    return RADIUS_TIERS[2];
+    if (t < 1 / 3) return 0;
+    if (t < 2 / 3) return 1;
+    return 2;
   };
+  const radiusFor = (count: number) => RADIUS_TIERS[tierFor(count)];
+  // Couleur variee par palier (retour utilisateur 2026-09-05 : la carte
+  // entierement monochrome orange contribuait a la fatigue visuelle) - les 3
+  // teintes deja dans la palette de marque (vert/or/terracotta), jamais le
+  // rouge (associe a alerte ailleurs dans l'app) ni reserve au ring "ville en
+  // tete" (voir isTop plus bas, reste dore quel que soit le palier).
+  const COLOR_TIERS = ["var(--green)", "var(--gold)", "var(--terracotta)"] as const;
+  const colorFor = (count: number) => COLOR_TIERS[tierFor(count)];
   // Un seul element mis en avant, jamais plus (NN/g : au-dela de 1-2 points
   // d'emphase, la hierarchie visuelle s'effondre - tout devient "important"
   // donc plus rien ne l'est). Pas de nouvelle couleur : reutilise --gold,
@@ -88,6 +96,7 @@ export function MoroccoMap({
         {CITIES.map((city) => {
           const count = presence[city.name];
           const r = radiusFor(count);
+          const color = colorFor(count);
           const isHovered = hovered === city.name;
           const isTop = city.name === topCityName;
           return (
@@ -118,11 +127,11 @@ export function MoroccoMap({
                 />
               )}
               {isHovered && (
-                <circle r={r + 6} fill="var(--terracotta)" fillOpacity={0.18} />
+                <circle r={r + 6} fill={color} fillOpacity={0.18} />
               )}
               <circle
                 r={r}
-                fill="var(--terracotta)"
+                fill={color}
                 fillOpacity={0.9}
                 stroke="var(--bg)"
                 strokeWidth={2}

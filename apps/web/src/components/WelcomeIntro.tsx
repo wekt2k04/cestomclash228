@@ -11,7 +11,9 @@ import { MindClashMark } from "./MindClashMark";
 export function WelcomeIntro({ onExplore }: { onExplore: () => void }) {
   return (
     <section className="flex flex-1 flex-col items-center justify-center gap-6 px-6 py-10 text-center">
-      <MindClashMark size={56} />
+      <div className="mc-logo-spin">
+        <MindClashMark size={56} />
+      </div>
 
       <div>
         <h1 className="font-head text-3xl font-bold tracking-wide text-ink">
@@ -36,7 +38,7 @@ export function WelcomeIntro({ onExplore }: { onExplore: () => void }) {
           </p>
         </div>
         <div className="rounded-xl border border-line bg-bg-elevated p-4 text-left">
-          <p className="font-head text-sm font-bold text-terracotta">Bounties</p>
+          <p className="font-head text-sm font-bold text-green">Bounties</p>
           <p className="mt-1 text-xs text-ink-muted">
             Une demande d&apos;aide concrète, résolue par quelqu&apos;un qui
             est déjà passé par là.

@@ -44,22 +44,35 @@
   --font-head: var(--font-head);
 }
 
-html,
-body {
-  height: 100%;
-}
+/* BUG REEL CORRIGE (retour utilisateur 2026-09-05, "il faut hover pour voir ce qui est
+   ecrit, sinon on ne voit rien") : ces regles etaient ecrites hors de tout @layer, donc
+   dans le bucket "non calque" de CSS Cascade Layers - qui l'emporte TOUJOURS sur
+   @layer utilities de Tailwind, quelle que soit la specificite. Consequence concrete :
+   sur tout <Link> stylise en bouton (ex. "Rejoindre la communaute", bg-terracotta +
+   text-terracotta-ink), la regle "a { color }" ci-dessous ecrasait silencieusement
+   text-terracotta-ink par --terracotta - texte orange sur fond orange, invisible - et
+   seul :hover (qui active a:hover, plus specifique) revelait le texte en --ink. Fixe en
+   deplacant ces regles dans @layer base, qui passe AVANT @layer utilities dans l'ordre
+   Tailwind v4 (theme, base, components, utilities) et se fait donc correctement
+   surclasser par n'importe quelle classe utilitaire de couleur explicite. */
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
 
-body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font-body);
-}
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+  }
 
-a {
-  color: var(--terracotta);
-}
-a:hover {
-  color: var(--ink);
+  a {
+    color: var(--terracotta);
+  }
+  a:hover {
+    color: var(--ink);
+  }
 }
 
 @layer components {
@@ -98,5 +111,32 @@ a:hover {
     padding: 0.6rem 1rem;
     font-size: 0.875rem;
     font-weight: 500;
+  }
+
+  /* Rotation 360 continue du logo (demande utilisateur 2026-09-05) - lente et
+     linéaire pour rester une ambiance discrète, pas une distraction. Reservee
+     a l'instance "hero" (WelcomeIntro), pas celle du Header : un logo qui
+     tourne en permanence dans la barre de nav, visible sur CHAQUE page,
+     deviendrait vite fatiguant - la version hero n'est vue qu'une fois par
+     visite (ecran d'accueil, visiteur non connecte). prefers-reduced-motion
+     desactive l'animation, comme il se doit pour toute animation continue.
+     Classe plutot qu'ID cible : MindClashMark utilise des id SVG internes
+     (mc-pin-grad/mc-pin-mask) dupliques si le composant est monte plusieurs
+     fois sur une meme page (Header + WelcomeIntro) - inoffensif ici (memes
+     valeurs de degrade des deux cotes) mais une regle CSS scopee par ID
+     casserait silencieusement sur la 2e instance. */
+  .mc-logo-spin {
+    animation: mc-spin 9s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mc-logo-spin {
+      animation: none;
+    }
+  }
+}
+
+@keyframes mc-spin {
+  to {
+    transform: rotate(360deg);
   }
 }

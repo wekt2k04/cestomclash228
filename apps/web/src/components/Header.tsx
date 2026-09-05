@@ -18,14 +18,20 @@ export function Header() {
       </Link>
 
       <div className="flex items-center gap-3">
+        {/* Attribution requise par la licence CC-BY 3.0 de la musique - ne pas
+            retirer ce lien. Reformule suite au retour utilisateur du 2026-09-05
+            ("mène vers autre chose, ça ne me plaît pas") : le libelle precedent
+            ("Musique : PlayOnLoop") ressemblait a un controle de lecture alors
+            que c'est un simple credit legal vers la source - "(crédit)" et
+            l'icone de note clarifient l'intention avant le clic. */}
         <a
           href="https://playonloop.com"
           target="_blank"
           rel="noopener noreferrer"
-          title="Musique : « Battle March » par PlayOnLoop, licence CC-BY 3.0"
+          title="Ce lien ouvre le site PlayOnLoop (crédit légal requis par la licence CC-BY 3.0) - il ne joue pas la musique ici. Utilise l'icône haut-parleur pour couper/activer le son."
           className="hidden text-[10px] text-ink-faint hover:text-ink-muted sm:inline"
         >
-          Musique : PlayOnLoop
+          ♪ Musique (crédit)
         </a>
         <Link
           href="/sponsoring"

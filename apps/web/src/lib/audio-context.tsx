@@ -9,7 +9,13 @@ import {
 } from "react";
 
 const MUTE_STORAGE_KEY = "mindclash_audio_muted";
-const DEFAULT_VOLUME = 0.18; // "faible" - demande explicite de l'utilisateur
+// Releve de 0.18 a 0.32 le 2026-09-05 : retour utilisateur "le son ne se joue
+// pas" sur telephone - le volume precedent (deja tres faible par demande
+// explicite anterieure) le rendait probablement impercetible plutot que reellement
+// absent (aucune erreur JS/console associee, voir LoopEngine.play - le
+// deverrouillage lui-meme fonctionne). Reste une ambiance de fond, pas un
+// premier plan.
+const DEFAULT_VOLUME = 0.32;
 const LOOP_FADE_SECONDS = 1.5; // duree du fondu de part et d'autre du point de boucle
 const DUCK_FACTOR = 0.3; // volume pendant qu'une sheet/formulaire est ouvert(e)
 const RECENTLY_UNLOCKED_MS = 2500; // duree du signal visuel post-deverrouillage
