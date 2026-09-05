@@ -793,3 +793,50 @@ Next, les 2 fichiers error boundary sont enregistres dans l'arbre de routage. **
 rendu visuel effectif sur appareil reel (extension navigateur non connectee lors de cette passe,
 tentee mais abandonnee apres echec repete plutot que d'insister) - explicitement signale a
 l'utilisateur, pas laisse silencieux.
+
+## 2026-09-05 (suite 2) — Pipeline video complet (voix off reelle + animation programmatique)
+
+Deadline concours signalee par l'utilisateur : 23h59 le jour meme. Demande : remplacer le PPT de
+5 images statiques par 5 videos animees (une par page du script) + voix off, chacune avec un
+"scenario d'evenements" (bulles de chat qui apparaissent -> silhouette confuse pour la page 1, et
+equivalent anime pour les 4 suivantes), plus le logo CreaAfrica (fourni par l'utilisateur,
+pitch/CreaAfrica_logo.png) "positionne au bon endroit" en tant que logo de l'organisateur du
+concours.
+
+Reconnaissance d'outils avant tout engagement (deadline serree, pas de gamble sur un pipeline non
+verifie) : ffmpeg absent du systeme, mais `imageio-ffmpeg` (binaire statique bundle) disponible
+via pip. `edge-tts` (voix neuronales Microsoft, gratuit, sans cle API) et `moviepy` 2.1.2
+installes avec succes (`python -m pip install --user`, la commande `pip` directe echouait en
+permission refusee). `python-pptx`/`Pillow` deja presents dans conda base. Pas de Playwright/
+Selenium disponibles - plutot que d'en installer un (risque de telechargement lourd/lent sous
+pression de deadline), pipeline construit entierement en Python pur (Pillow dessine chaque frame
+en fonction du temps, moviepy assemble + synchronise sur la duree REELLE de chaque piste audio
+generee).
+
+Nouveau `pitch/video-render/` :
+- `prep_logo.py` : recadre pitch/CreaAfrica_logo.png (540x1170, logo minuscule sur immense fond
+  blanc) en un asset propre 468x118, fond blanc rendu transparent par seuil de luminosite.
+- `build.py` : genere 5 voix off (edge-tts, voix fr-FR-HenriNeural) a partir des textes exacts de
+  VIDEO_SCRIPT.md (le bloc FEATURES scinde en 2 pour correspondre a 1 audio par page = 1 video par
+  page), anime chaque page en Pillow (bulles qui apparaissent en escalier avec pop/fade puis
+  silhouette+"?" pour le Hook ; villes qui s'allument une a une pour Social-Map, meme logique de
+  couleur par palier que MoroccoMap.tsx/generate-video-deck.mjs ; countdown+etoiles pour Bounty ;
+  toggle qui glisse pour Ghost Mode ; compteur 650 qui defile + tagline lettre par lettre pour le
+  CTA), synchronise chaque clip sur la duree reelle de son audio, exporte page1-5.mp4 + final.mp4
+  (concatenation). Logo CreaAfrica compose en petit badge constant bas-droite sur chaque page,
+  en grand et centre sur la page finale.
+
+Verifie reellement (pas suppose) : duree finale exacte 60.0s (format du concours), 1080x1920,
+30fps, piste audio presente (`moviepy.VideoFileClip` inspecte directement). Frames extraites a des
+points de controle sur chaque page et inspectees visuellement (pas seulement des metriques
+techniques) - 2 defauts reels trouves et corriges : emojis (🔥/🙏/😅) non rendus par la police
+systeme utilisee (Segoe UI, pas de glyphes couleur), remplaces par du texte simple. 1 fausse alerte
+ecartee : une page qui semblait vide sur un premier echantillonnage etait en realite un mauvais
+choix de timestamp de ma part (tombe au tout debut d'une page suivante), pas un bug reel - confirme
+en isolant chaque page/mp4 individuellement et en recalculant les vraies durees cumulees avant de
+re-echantillonner.
+
+Limite honnete : verification visuelle faite uniquement via extraction d'images fixes a des
+instants precis (pas un visionnage video complet, aucun outil de lecture video disponible ici) -
+le mouvement/la fluidite des animations et la qualite/le rythme reel de la voix off restent a
+confirmer par l'utilisateur a l'ouverture du fichier.

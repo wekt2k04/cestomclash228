@@ -19,3 +19,4 @@ Thumbs.db
 
 # Claude Code — état interne de session, pas du contenu projet
 .claude/scheduled_tasks.lock
+pitch/video-render/out/
