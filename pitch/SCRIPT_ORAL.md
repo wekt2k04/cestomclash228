@@ -168,6 +168,20 @@ D'après `docs/CONCOURS.md`, les questions portent sur : problématique, solutio
   monétaire actif dès cette version, pas une promesse — le distinguer clairement d'un don.
 - **"Ça marche que pour les Togolais ?"** → Phase 3 du modèle économique : l'architecture se
   transpose à toute diaspora étudiante structurée autour d'une association reconnue.
+- **"Et si le nombre d'utilisateurs explose, ça tient ?"** (ou toute question sur la charge
+  technique) → réponse à assumer, pas à esquiver : *"Oui, on a fait un choix délibéré —
+  hébergement 100 % gratuit (Vercel, Render, Supabase) pour rester à coût zéro tant qu'il n'y a
+  pas encore de revenu. La contrepartie assumée : le serveur backend se met en veille après 15
+  minutes sans trafic et met 30 à 60 secondes à se réveiller, et la base de données se met en
+  pause après une semaine d'inactivité sur le palier gratuit. C'est une vraie limite qu'on
+  connaît, pas un angle mort — et elle disparaît dès qu'on bascule vers un palier payant, ce que
+  le premier revenu de Sponsoring permet de financer directement."* Sourcé : `docs/STACK.md`,
+  `docs/ARCHITECTURE.md` § scale-to-zero.
+
+**Recommandation de posture** : si l'occasion se présente en Q&A (même sans question directe sur
+ce point), glisser toi-même cette limite assumée plutôt que d'attendre qu'on te la reproche — un
+jury remarque davantage la maturité d'un candidat qui connaît les faiblesses de son propre
+système que l'absence de faiblesse elle-même.
 
 Si une question sort de ce que tu sais avec certitude : dire "je vérifie et je reviens vers vous"
 plutôt qu'inventer un chiffre — un chiffre faux découvert par le jury coûte plus cher qu'une

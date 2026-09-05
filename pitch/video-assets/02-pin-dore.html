@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Pin Doré — Sponsoring</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a0704; --bg-elevated: #24130f; --bg-card: #2c1c17;
+    --line: #63453a8c; --ink: #f6f1eb; --ink-muted: #b8a79c; --ink-faint: #7f716a;
+    --terracotta: #ed7940; --terracotta-ink: #120805;
+    --red: #e9504d; --gold: #eab532; --green: #3aba6a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 390px; height: 844px; position: relative; overflow: hidden;
+    background: var(--bg); color: var(--ink); font-family: 'IBM Plex Sans', sans-serif;
+  }
+  /* Scrim + fond de carte flouté, meme esprit que DetailSheet.tsx reel */
+  .backdrop {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(237,121,64,0.08), transparent 50%),
+      var(--bg);
+    filter: blur(1px);
+  }
+  .scrim { position: absolute; inset: 0; background: rgba(0,0,0,0.55); }
+  .sheet {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    background: var(--bg-elevated); border-top: 1px solid var(--line);
+    border-radius: 20px 20px 0 0; padding: 14px 20px 28px;
+    box-shadow: 0 -12px 40px rgba(0,0,0,0.5);
+  }
+  .handle { width: 36px; height: 4px; border-radius: 999px; background: var(--line); margin: 0 auto 16px; }
+  .badge-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .pin-type {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--bg-card); border-radius: 999px; padding: 5px 12px;
+    font-family: 'Chakra Petch', sans-serif; font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-muted);
+  }
+  .sponsor-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: linear-gradient(135deg, #eab532, #f2cd6e);
+    color: var(--terracotta-ink); border-radius: 999px; padding: 5px 12px;
+    font-family: 'Chakra Petch', sans-serif; font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    box-shadow: 0 0 0 5px rgba(234,181,50,0.16), 0 4px 16px rgba(234,181,50,0.35);
+  }
+  h1 { font-family: 'Chakra Petch', sans-serif; font-size: 19px; font-weight: 700; margin-bottom: 8px; }
+  p.desc { font-size: 13.5px; color: var(--ink-muted); line-height: 1.5; margin-bottom: 16px; }
+  .meta { font-size: 11px; color: var(--ink-faint); margin-bottom: 20px; }
+  .divider { height: 1px; background: var(--line); margin: 18px 0; }
+  .sponsor-line {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg-card); border: 1px solid #eab53255; border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .sponsor-icon {
+    width: 30px; height: 30px; border-radius: 999px; flex-shrink: 0;
+    background: var(--gold); display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: var(--terracotta-ink); font-family: 'Chakra Petch', sans-serif;
+  }
+  .sponsor-line .t1 { font-size: 12px; font-weight: 600; color: var(--ink); }
+  .sponsor-line .t2 { font-size: 10.5px; color: var(--ink-faint); }
+  .vision-tag {
+    position: absolute; top: 18px; left: 18px; font-size: 10px; color: var(--ink-faint);
+    font-family: 'IBM Plex Sans', sans-serif; letter-spacing: 0.03em;
+  }
+</style>
+</head>
+<body>
+  <div class="backdrop"></div>
+  <div class="scrim"></div>
+  <div class="vision-tag">Vision — Sponsoring vérifié, visible sur la carte</div>
+
+  <div class="sheet">
+    <div class="handle"></div>
+    <div class="badge-row">
+      <span class="pin-type">🛂 Piège administratif</span>
+      <span class="sponsor-badge">★ Sponsorisé</span>
+    </div>
+    <h1>Astuce Préfecture — Rabat</h1>
+    <p class="desc">
+      Le guichet titres de séjour ferme à 14h30 le vendredi, pas 15h comme affiché.
+      Arrive avant 14h ou prends un ticket la veille pour ne pas perdre ta matinée.
+    </p>
+    <div class="meta">Rabat · déposé par Amina K.</div>
+
+    <div class="divider"></div>
+
+    <div class="sponsor-line">
+      <div class="sponsor-icon">★</div>
+      <div>
+        <div class="t1">Mis en avant par Agence Immo Rabat</div>
+        <div class="t2">Sponsoring vérifié — virement confirmé par CESTOM</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

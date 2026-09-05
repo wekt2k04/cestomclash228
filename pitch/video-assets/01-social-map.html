@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Social-Map — CestomClash228</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* Valeurs reprises EXACTEMENT du CSS compile de l'appli reelle
+     (apps/web/src/app/globals.css) le 2026-09-05 - pas devinees. */
+  :root {
+    --bg: #1a0704; --bg-elevated: #24130f; --bg-card: #2c1c17;
+    --line: #63453a8c; --ink: #f6f1eb; --ink-muted: #b8a79c; --ink-faint: #7f716a;
+    --terracotta: #ed7940; --terracotta-ink: #120805;
+    --red: #e9504d; --gold: #eab532; --green: #3aba6a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 390px; height: 844px; overflow: hidden; position: relative;
+    background: var(--bg); color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+  .head { padding: 20px 20px 8px; }
+  .brand { font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.04em; }
+  .brand .gold { color: var(--gold); }
+  .tagline { font-size: 11px; color: var(--terracotta); font-weight: 600; margin-top: 2px; }
+  .map-wrap { position: relative; padding: 8px 12px; }
+  svg { width: 100%; height: auto; display: block; }
+  .city-label {
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; fill: var(--ink-muted);
+  }
+  .city-count {
+    font-family: 'Chakra Petch', sans-serif; font-weight: 700; fill: var(--terracotta-ink);
+  }
+  .help-bubble {
+    position: absolute; width: 30px; height: 30px; border-radius: 999px;
+    background: var(--gold); color: var(--terracotta-ink);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 15px;
+    box-shadow: 0 0 0 4px rgba(234,181,50,0.18), 0 4px 14px rgba(0,0,0,0.4);
+  }
+  .help-note {
+    position: absolute; background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 10px; padding: 8px 10px; font-size: 11px; color: var(--ink);
+    max-width: 150px; line-height: 1.35; box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+  }
+  .footer { position: absolute; bottom: 22px; left: 0; right: 0; text-align: center; }
+  .cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--terracotta); color: var(--terracotta-ink);
+    font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 14px;
+    padding: 12px 22px; border-radius: 999px; box-shadow: 0 6px 20px rgba(237,121,64,0.35);
+  }
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="brand">CESTOMCLASH<span class="gold">228</span></div>
+    <div class="tagline">Explore. Partage. Level-up.</div>
+  </div>
+
+  <div class="map-wrap">
+    <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#2c1c17"/>
+          <stop offset="100%" stop-color="#1a0704"/>
+        </linearGradient>
+        <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="6" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <!-- Contour reel du Maroc - meme trace SVG que apps/web/src/lib/morocco-geo.ts -->
+      <path d="M 585.85,56.69 L 614.73,77.03 L 660.3,73.72 L 709.93,84.29 L 730.74,84.81 L 748.8,115.5 L 751.66,144.64 L 768.21,195.22 L 780.83,205.41 L 772.05,224.03 L 709.34,232.1 L 687.66,249.82 L 659.94,254 L 657.89,289.48 L 601.86,308.44 L 583.54,332.43 L 544.32,345.31 L 496.47,352.62 L 419.09,387.98 L 419.5,444.75 L 412.2,444.75 L 412.2,444.75 L 413.3,470.42 L 383.68,471.96 L 368.24,482.87 L 346.48,482.87 L 329.14,476.64 L 288.83,481.79 L 273.23,519.13 L 258.25,522.64 L 235.72,583.05 L 169.11,634.76 L 153.3,700.92 L 133.67,722.45 L 127.91,739.71 L 20,743.54 L 19.17,743.46 L 21.43,721.26 L 39.83,708.2 L 55.51,683.23 L 52.42,667.02 L 68.89,633.21 L 95.56,602.74 L 111.7,595.02 L 124.38,567.07 L 125.52,541.55 L 142.81,511.93 L 174.73,494.46 L 205.1,445.53 L 205.98,444.86 L 230.07,426.46 L 274.63,421.17 L 312.39,388.41 L 336.41,375.65 L 376.41,335.64 L 364.44,276.02 L 382.64,234.8 L 389.07,209.57 L 419.89,177.2 L 467.96,155.31 L 503.5,135.5 L 535.51,85.89 L 550.58,56.46 L 585.85,56.69 Z"
+            fill="url(#grad)" stroke="#ed7940" stroke-opacity="0.4" stroke-width="2" transform="translate(0,-30) scale(1, 0.62)"/>
+
+      <!-- 6 vraies villes CESTOM (source cestom.org) - memes coordonnees que morocco-geo.ts -->
+      <g transform="translate(0,-30) scale(1, 0.62)">
+        <g transform="translate(506.9,139.79)">
+          <circle r="19" fill="#ed7940" filter="url(#glow)"/>
+          <text class="city-count" y="6" text-anchor="middle" font-size="15">220</text>
+          <text class="city-label" y="35" text-anchor="middle">Rabat</text>
+        </g>
+        <g transform="translate(471.04,161.25)">
+          <circle r="17" fill="#ed7940" filter="url(#glow)"/>
+          <text class="city-count" y="5" text-anchor="middle" font-size="14">180</text>
+          <text class="city-label" y="34" text-anchor="middle">Casablanca</text>
+        </g>
+        <g transform="translate(452.3,254.38)">
+          <circle r="13" fill="#eab532" filter="url(#glow)"/>
+          <text class="city-count" y="4" text-anchor="middle" font-size="11" fill="#120805">95</text>
+          <text class="city-label" y="30" text-anchor="middle" font-size="13">Marrakech</text>
+        </g>
+        <g transform="translate(595.12,139.21)">
+          <circle r="13" fill="#eab532" filter="url(#glow)"/>
+          <text class="city-count" y="4" text-anchor="middle" font-size="11" fill="#120805">85</text>
+          <text class="city-label" y="30" text-anchor="middle" font-size="13">Fès</text>
+        </g>
+        <g transform="translate(555.18,56.48)">
+          <circle r="10" fill="#b8a79c" filter="url(#glow)"/>
+          <text class="city-count" y="4" text-anchor="middle" font-size="10" fill="#120805">40</text>
+          <text class="city-label" y="26" text-anchor="middle" font-size="12">Tanger</text>
+        </g>
+        <g transform="translate(743.13,107.89)">
+          <circle r="10" fill="#b8a79c" filter="url(#glow)"/>
+          <text class="city-count" y="4" text-anchor="middle" font-size="10" fill="#120805">30</text>
+          <text class="city-label" y="26" text-anchor="middle" font-size="12">Oujda</text>
+        </g>
+      </g>
+    </svg>
+
+    <div class="help-bubble" style="top: 18px; right: 24px;">?</div>
+    <div class="help-note" style="top: 52px; right: 10px;">Chaque point = une ville où la CESTOM est présente</div>
+
+    <div class="help-bubble" style="top: 145px; left: 24px;">?</div>
+    <div class="help-note" style="top: 178px; left: 8px;">Tape une ville pour voir ses Pins et Bounties</div>
+  </div>
+
+  <div class="footer">
+    <div class="cta">+ Créer un Pin ou une Bounty</div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Module Bounty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a0704; --bg-elevated: #24130f; --bg-card: #2c1c17;
+    --line: #63453a8c; --ink: #f6f1eb; --ink-muted: #b8a79c; --ink-faint: #7f716a;
+    --terracotta: #ed7940; --terracotta-ink: #120805;
+    --red: #e9504d; --gold: #eab532; --green: #3aba6a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 390px; height: 844px; position: relative; overflow: hidden;
+    background: var(--bg); color: var(--ink); font-family: 'IBM Plex Sans', sans-serif;
+    display: flex; flex-direction: column; justify-content: center; padding: 24px;
+  }
+  .eyebrow { font-size: 11px; color: var(--ink-faint); text-align: center; margin-bottom: 14px; }
+  .card {
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-elevated));
+    border: 1px solid var(--line); border-radius: 18px; padding: 20px;
+    box-shadow: 0 0 0 1px rgba(237,121,64,0.12), 0 16px 40px rgba(0,0,0,0.45);
+  }
+  .top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--bg); border-radius: 999px; padding: 5px 12px;
+    font-family: 'Chakra Petch', sans-serif; font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em; color: var(--terracotta);
+  }
+  .countdown {
+    font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 17px; color: var(--red);
+    text-shadow: 0 0 16px rgba(233,80,77,0.5);
+  }
+  h1 { font-family: 'Chakra Petch', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 8px; line-height: 1.3; }
+  p.desc { font-size: 13px; color: var(--ink-muted); line-height: 1.5; margin-bottom: 16px; }
+  .meta { font-size: 11px; color: var(--ink-faint); margin-bottom: 18px; }
+  .divider { height: 1px; background: var(--line); margin: 16px 0; }
+  .rating-label { font-size: 11.5px; color: var(--ink-muted); margin-bottom: 8px; }
+  .stars { display: flex; gap: 6px; margin-bottom: 4px; }
+  .star {
+    width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center;
+    justify-content: center; font-size: 15px; font-weight: 700; font-family: 'Chakra Petch', sans-serif;
+    background: var(--bg); color: var(--ink-muted); border: 1px solid var(--line);
+  }
+  .star.on { background: var(--terracotta); color: var(--terracotta-ink); border-color: var(--terracotta); }
+  .rating-caption { font-size: 10.5px; color: var(--ink-faint); }
+  .cta {
+    margin-top: 18px; width: 100%; text-align: center;
+    background: var(--terracotta); color: var(--terracotta-ink);
+    font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 14px;
+    padding: 13px; border-radius: 12px;
+  }
+</style>
+</head>
+<body>
+  <div class="eyebrow">CESTOMCLASH228 — Bounty</div>
+  <div class="card">
+    <div class="top-row">
+      <span class="pill">🔥 Urgent</span>
+      <span class="countdown">02:14:59</span>
+    </div>
+    <h1>Besoin d'aide algo en urgence à la BU</h1>
+    <p class="desc">
+      Bloqué sur un exo de structures de données avant le rendu de demain matin.
+      Une heure de ton temps peut débloquer toute ma nuit.
+    </p>
+    <div class="meta">Rabat · publié par Kodjo T. il y a 12 min</div>
+
+    <div class="divider"></div>
+
+    <div class="rating-label">Réputation de qui a déjà aidé sur cette Bounty</div>
+    <div class="stars">
+      <div class="star on">1</div><div class="star on">2</div><div class="star on">3</div>
+      <div class="star on">4</div><div class="star">5</div>
+    </div>
+    <div class="rating-caption">4/5 — noté par l'auteur après résolution</div>
+
+    <div class="cta">Résoudre cette Bounty</div>
+  </div>
+</body>
+</html>
