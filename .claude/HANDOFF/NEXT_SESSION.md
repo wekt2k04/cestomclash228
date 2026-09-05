@@ -1,6 +1,34 @@
 # NEXT_SESSION
 
-Dernière mise à jour : 2026-09-04.
+Dernière mise à jour : 2026-09-05.
+
+## Session du 2026-09-05 — première inspection visuelle réelle (Claude in Chrome)
+
+L'utilisateur a connecté Claude in Chrome pour la première fois cette session — première vraie
+inspection à l'écran de l'appli après tout un chantier vérifié seulement au niveau code/SSR.
+**A immédiatement trouvé une faille critique invisible à toute vérification automatisée** :
+`globals.css` avait ses règles `a { color }`/`a:hover { color }` écrites hors de tout `@layer`,
+donc dans le bucket "non calqué" de CSS Cascade Layers qui l'emporte TOUJOURS sur
+`@layer utilities` de Tailwind — conséquence réelle : le texte de tout `<Link>` stylisé en bouton
+(ex. "Rejoindre la communauté") était écrasé en `--terracotta` (même couleur que le fond),
+littéralement invisible sans `:hover`. Corrigé (déplacé dans `@layer base`), reconfirmé à l'écran.
+
+Autres corrections du même échange : carte du Maroc entièrement monochrome orange → 3 couleurs de
+marque par palier de taille de ville ; lien "Musique" reformulé (ressemblait à un contrôle de
+lecture, c'est un crédit légal CC-BY 3.0 obligatoire) ; volume par défaut relevé 0.18→0.32
+(hypothèse : le son était probablement imperceptible, pas absent) ; logo en rotation continue sur
+l'écran d'accueil (demande utilisateur). Détail complet dans `LOG.md`.
+
+**Non résolu, signalé honnêtement** : le bouton "Explorer la carte" n'a pas répondu de façon
+fiable à 5 tentatives de clic automatisé via Claude in Chrome, même après arrêt de toute édition
+de fichier en cours. Impossible de déterminer si c'est un artefact de l'automatisation ou un vrai
+bug produit — **à confirmer par l'utilisateur avec un clic réel**, priorité pour la prochaine
+session si le retour utilisateur confirme un problème.
+
+**Leçon méthodologique à retenir** : cette session confirme, une fois de plus, que
+lint/tsc/tests/SSR verts ne garantissent RIEN sur le rendu visuel réel — la faille de contraste
+ci-dessus était invisible à tous les outils utilisés jusqu'ici dans ce projet. Dès qu'un outil de
+rendu réel est disponible, l'utiliser AVANT d'annoncer un incrément visuel "vérifié".
 
 ## Pivot concours (2026-08-31) — lire avant tout le reste
 

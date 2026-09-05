@@ -681,3 +681,71 @@ Sponsoring"). Lien de navigation ajouté au `Header` (desktop uniquement). Véri
 lint/tsc propres, SSR vérifié par curl (200, contenu attendu présent). Pattern
 `eslint-disable-next-line react-hooks/set-state-in-effect` réutilisé tel qu'établi dans
 `auth-context.tsx` pour le même cas (effet qui déclenche un fetch async au montage).
+
+## 2026-09-05 — Premiere inspection visuelle reelle (Claude in Chrome) + faille critique trouvee
+
+L'utilisateur a connecte l'extension Claude in Chrome (jamais disponible avant cette session) et
+demande explicitement de l'utiliser pour inspecter le rendu reel - premiere fois que l'appli est
+vue a l'ecran depuis le debut de ce chantier, apres tout un travail verifie seulement au niveau
+code/SSR/tests.
+
+**Faille CRITIQUE trouvee et corrigee** (retour utilisateur : "il faut hover sur les boutons
+orange avant de voir ce qui est ecrit, sinon on ne voit rien") : `apps/web/src/app/globals.css`
+avait ses regles `a { color: var(--terracotta) }` / `a:hover { color: var(--ink) }` ecrites HORS
+de tout `@layer` - dans le modele CSS Cascade Layers, le bucket "non calque" l'emporte TOUJOURS
+sur `@layer utilities` de Tailwind, quelle que soit la specificite calculee. Consequence reelle :
+tout `<Link>` next/link stylise comme un bouton (`bg-terracotta` + `text-terracotta-ink`, ex.
+"Rejoindre la communaute" sur `Header.tsx` et `Hero.tsx`) voyait son texte ecrase en
+`--terracotta` (identique au fond) - texte orange sur fond orange, litteralement invisible - et
+seul `:hover` (qui active `a:hover`, toujours dans le meme bucket non calque mais plus specifique)
+revelait le texte en `--ink`. Corrige en deplacant ces regles dans `@layer base` (avant
+`@layer utilities` dans l'ordre Tailwind v4 : theme, base, components, utilities). **Verifie a
+l'ecran, pas seulement en theorie** : capture avant/apres montrant le texte "Rejoindre" bien
+visible sans survol. Aucun `<button>` n'etait affecte (seuls les `<Link>` passent par la balise
+`<a>`) - grep exhaustif confirme uniquement 2 instances touchees, toutes deux corrigees par ce
+fix global (pas de patch au cas par cas necessaire).
+
+**Autres corrections du meme echange, toutes verifiees a l'ecran via Claude in Chrome** :
+- `MoroccoMap.tsx` : la carte etait entierement monochrome orange (`fill="var(--terracotta)"`
+  pour TOUTES les villes quel que soit leur palier de taille) - contribuait a la fatigue visuelle
+  signalee ("ca fait tres mal aux yeux"). Introduit `colorFor()` : vert/or/terracotta par palier
+  de taille (`tierFor()`), le ring "ville en tete" reste dore independamment. `Hero.tsx` (un point
+  de la tagline passe au vert) et `WelcomeIntro.tsx` (carte "Bounties" passee au vert) rebalances
+  dans le meme esprit - reduire la dominance orange generale plutot que de choisir une nouvelle
+  palette de zero.
+- `Header.tsx` : lien "Musique : PlayOnLoop" reformule en "♪ Musique (credit)" avec tooltip
+  explicite - retour utilisateur "le lien de la musique mene vers autre chose, ca ne me plait
+  pas". Le lien reste (attribution CC-BY 3.0 obligatoire, ne JAMAIS le retirer - verifie que le
+  fichier `epic.mp3` est bien local, `apps/web/public/audio/`, pas un stream externe), juste
+  reformule pour ne plus ressembler a un controle de lecture.
+- `audio-context.tsx` : volume par defaut releve de 0.18 a 0.32. Aucune erreur console associee
+  au deverrouillage (verifie via Claude in Chrome), donc le son etait probablement techniquement
+  actif mais imperceptible plutot que reellement absent - hypothese la plus probable pour le
+  retour "le son ne se joue pas (A15, tout navigateur)", non confirmable a 100% sans test sur
+  l'appareil reel de l'utilisateur.
+- `WelcomeIntro.tsx`/`globals.css` : logo (`MindClashMark`) en rotation continue (9s/tour, lineaire,
+  respecte `prefers-reduced-motion`) sur l'ecran d'accueil - demande utilisateur explicite. Cible
+  par classe CSS (`.mc-logo-spin`) plutot que par ID : `MindClashMark` a des `id` SVG internes
+  (`mc-pin-grad`/`mc-pin-mask`) dupliques quand le composant est monte 2x sur une meme page
+  (Header + WelcomeIntro simultanement) - sans consequence aujourd'hui (memes valeurs des deux
+  cotes) mais une regle scopee par ID aurait pu casser silencieusement sur la 2e instance.
+
+**Non resolu, signale honnetement, pas cache** : le bouton "Explorer la carte" n'a pas repondu de
+facon fiable a 5 tentatives de clic automatise via Claude in Chrome (coordonnees precises ET
+reference d'element via `find`), y compris apres arret complet de toute edition de fichier en
+cours (ecartant une explication par Fast Refresh/HMR en cours, hypothese initiale plausible mais
+infirmee par ce dernier essai). La carte elle-meme fonctionne une fois atteinte (donnees reelles
+des 6 villes CESTOM affichees correctement, verifie visuellement). Conforme aux instructions du
+projet sur les rabbit holes d'automatisation navigateur (arreter apres echecs repetes plutot que
+de deviner indefiniment) - a confirmer par l'utilisateur avec un clic reel avant de decider si
+c'est un artefact de l'automatisation ou un vrai bug.
+
+**Point methodologique confirme une fois de plus** : lint/tsc/tests/SSR au vert ne garantissent
+RIEN sur le rendu visuel reel - la faille de contraste ci-dessus etait invisible a tous les outils
+utilises dans ce projet jusqu'a aujourd'hui. Voir aussi l'entree du 2026-08-24 (meme lecon, deja
+tiree une fois, reconfirmee ici sur un axe different - contraste plutot que composition/mise en
+page).
+
+**Verifie reellement** : `npm run lint`/`npx tsc --noEmit` propres sur `apps/web` apres chaque
+lot de changements, capture d'ecran avant/apres pour la faille critique, carte re-inspectee apres
+le changement de couleurs (rendu confirme correct visuellement avant le blocage sur le clic).
