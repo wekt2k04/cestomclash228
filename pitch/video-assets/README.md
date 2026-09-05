@@ -1,11 +1,20 @@
-# Assets vidéo — 4 maquettes pour Canva Pro
+# Assets vidéo — 5 maquettes pour Canva Pro
 
-4 fichiers HTML autonomes (aucune dépendance sauf Google Fonts en ligne), un par écran demandé,
-390×844px (format mobile) — ouvrables directement dans un navigateur pour capture d'écran ou
-enregistrement, ou leur code réutilisable tel quel. Couleurs reprises **exactement** du CSS
+5 fichiers HTML autonomes (aucune dépendance sauf Google Fonts en ligne), un par écran/moment
+demandé, 390×844px (format mobile) — ouvrables directement dans un navigateur pour capture d'écran
+ou enregistrement, ou leur code réutilisable tel quel. Couleurs reprises **exactement** du CSS
 compilé de l'appli réelle le 2026-09-05 (`--bg:#1a0704`, `--terracotta:#ed7940`, etc. — voir
-`apps/web/src/app/globals.css`), pas inventées.
+`apps/web/src/app/globals.css`), pas inventées. Retour utilisateur du 2026-09-05 qui a motivé la
+révision de ce set : chaque partie de la vidéo doit être "compréhensible et révélatrice" de son
+propre moment du script — les 4 premiers assets illustraient tous le PRODUIT (donc rien pour le
+moment [0s-10s], qui parle du problème AVANT le produit) ; `00-hook-probleme.html` comble ce trou.
 
+- `00-hook-probleme.html` — le moment [0s-10s] du script (voir `VIDEO_SCRIPT.md`) : une
+  silhouette débordée, entourée de bulles de chat chaotiques et inutiles ("URGENT quelqu'un a un
+  logement pour demain 🙏", "c'est déjà répondu plus haut je crois"), illustre concrètement le
+  problème ("noyé dans des groupes WhatsApp qui n'aident plus personne") avant que le produit
+  n'apparaisse. Bulles volontairement génériques (pas le vert de marque WhatsApp) — le propos est
+  "un chat qui n'aide plus personne", pas une référence à une appli précise.
 - `01-social-map.html` — Social-Map centrale, contour réel du Maroc (même tracé SVG que
   `apps/web/src/lib/morocco-geo.ts`) + les 6 vraies villes CESTOM avec leurs effectifs réels,
   2 bulles d'aide "?" pour le concept self-explained.
@@ -29,8 +38,12 @@ Ouvrir chaque fichier dans un navigateur (double-clic, ou `file://` direct) puis
 
 ## Limite honnête
 
-**Ces 4 fichiers n'ont jamais été ouverts ni vus par personne** — aucun outil de rendu
-navigateur disponible dans cet environnement au moment de leur création. Seule vérification
-faite : le HTML est structurellement valide (balises bien fermées, vérifié par script). Un
-défaut de mise en page réel (débordement, chevauchement) est possible et n'a pas pu être détecté
-avant que tu ne les ouvres toi-même.
+**Mise à jour 2026-09-05** : `02-pin-dore.html` et `04-ghost-mode.html` avaient un vrai défaut à
+l'ouverture (retour utilisateur : "c'est moche", capture à l'appui) — une grande zone quasi vide
+sans intention visuelle (fond plat derrière la sheet du Pin Doré, marges immenses autour du toggle
+Ghost Mode). Corrigés (fond de carte suggéré en arrière-plan du Pin Doré, halo/silhouette de
+fantôme en arrière-plan du toggle) — **toujours pas re-vérifiés à l'écran** après correction, pas
+d'outil de rendu navigateur connecté au moment du fix. `01-social-map.html` et `03-bounty.html`
+n'ont pas eu ce défaut signalé. `00-hook-probleme.html` est entièrement nouveau, jamais ouvert.
+**Rouvre les 5 fichiers toi-même avant de les importer dans Canva** — c'est la seule vérification
+fiable disponible tant qu'aucun outil de rendu réel n'est actif ici.

@@ -13,12 +13,32 @@
     --red: #e9504d; --gold: #eab532; --green: #3aba6a;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* Retour utilisateur 2026-09-05 ("c'est moche", capture montrant une tres
+     grande zone vide en haut et en bas d'un petit bloc centre) : le contenu
+     ne remplit naturellement qu'un tiers de la hauteur du canevas 844px, et
+     un canevas "ecran de telephone" a toujours une part de vide autour d'un
+     callout court - le vrai probleme n'est pas l'espace en soi mais son
+     absence d'intention visuelle. Fix : garde le centrage (juste), ajoute un
+     halo/silhouette de fantome en arriere-plan pour que ce vide se lise
+     comme un choix de composition plutot qu'un rendu casse/inacheve. */
   body {
     width: 390px; height: 844px; position: relative; overflow: hidden;
     background: var(--bg); color: var(--ink); font-family: 'IBM Plex Sans', sans-serif;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     padding: 24px; text-align: center;
   }
+  .bg-motif {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(circle at 50% 18%, rgba(246,241,235,0.05), transparent 40%),
+      radial-gradient(circle at 20% 75%, rgba(237,121,64,0.06), transparent 45%),
+      radial-gradient(circle at 82% 78%, rgba(234,181,50,0.05), transparent 45%);
+  }
+  .ghost-watermark {
+    position: absolute; top: 60px; left: 50%; transform: translateX(-50%);
+    font-size: 220px; opacity: 0.05; z-index: 0; line-height: 1;
+  }
+  .vision-tag, h1, p.sub, .switch-row, .footnote { position: relative; z-index: 1; }
   .vision-tag { position: absolute; top: 24px; left: 0; right: 0; font-size: 10px; color: var(--ink-faint); }
   h1 { font-family: 'Chakra Petch', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 8px; }
   p.sub { font-size: 13px; color: var(--ink-muted); max-width: 260px; margin: 0 auto 40px; line-height: 1.5; }
@@ -57,6 +77,8 @@
 </style>
 </head>
 <body>
+  <div class="bg-motif"></div>
+  <div class="ghost-watermark">👻</div>
   <div class="vision-tag">Vision — Ghost Mode, anonymat réversible</div>
 
   <h1>Ton espace, ton rythme</h1>
