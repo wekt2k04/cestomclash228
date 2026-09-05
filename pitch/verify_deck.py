@@ -31,6 +31,11 @@ NS = {
 }
 
 EMU_PER_IN = 914400
+# Lues depuis ppt/presentation.xml (p:sldSz) plus bas dans main() - PAS hardcodees : ce script
+# sert maintenant a verifier 2 decks de formats differents (CestomClash228-Pitch.pptx en 16:9
+# paysage, CestomClash228-VideoAssets.pptx en portrait mobile) - un hardcode a 13.333x7.5 flaguait
+# a tort tout element du deck portrait passant y=7.5 comme "hors cadre", alors que sa vraie
+# hauteur de slide est 9.375. Valeurs de repli seulement si jamais sldSz est absent/illisible.
 SLIDE_W_IN = 13.333
 SLIDE_H_IN = 7.5
 
@@ -53,6 +58,21 @@ def main():
     zf = zipfile.ZipFile(PPTX)
     bad = zf.testzip()
     print(f"Zip integrity (testzip) : {'OK' if bad is None else 'CORROMPU : ' + bad}")
+
+    # Dimensions reelles du slide lues dans presentation.xml (p:sldSz cx/cy) plutot que les
+    # constantes de repli SLIDE_W_IN/SLIDE_H_IN (16:9 paysage) - un deck portrait (ex.
+    # CestomClash228-VideoAssets.pptx, 4.333x9.375) a une hauteur REELLE superieure a 7.5in,
+    # comparer contre le repli paysage flaguerait a tort tout element en bas de slide.
+    slide_w_in, slide_h_in = SLIDE_W_IN, SLIDE_H_IN
+    try:
+        pres_root = etree.fromstring(zf.read('ppt/presentation.xml'))
+        sld_sz = pres_root.find('p:sldSz', NS)
+        if sld_sz is not None:
+            slide_w_in = emu_to_in(sld_sz.get('cx'))
+            slide_h_in = emu_to_in(sld_sz.get('cy'))
+    except (KeyError, etree.XMLSyntaxError):
+        pass
+    print(f"Format slide : {slide_w_in:.3f}in x {slide_h_in:.3f}in\n")
 
     slide_names = sorted(
         [n for n in zf.namelist() if n.startswith('ppt/slides/slide') and n.endswith('.xml')],
@@ -101,7 +121,7 @@ def main():
             is_decorative = s['text'] == '' and s['w'] > 3.0 and s['h'] > 3.0
             if not is_decorative and (
                 s['x'] < -0.02 or s['y'] < -0.02
-                or right > SLIDE_W_IN + 0.02 or bottom > SLIDE_H_IN + 0.02
+                or right > slide_w_in + 0.02 or bottom > slide_h_in + 0.02
             ):
                 print(f"  [DÉPASSEMENT CADRE] {s['tag']} '{s['text']}' -> "
                       f"x={s['x']:.2f} y={s['y']:.2f} w={s['w']:.2f} h={s['h']:.2f} "
