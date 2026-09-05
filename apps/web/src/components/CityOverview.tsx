@@ -27,14 +27,27 @@ export function CityOverview() {
   }
 
   return (
-    <div className="relative flex flex-1 flex-col">
+    // min-h-0 : sans ça, un enfant flex-1 (ce div) refuse par defaut de retrecir sous la
+    // taille intrinseque de son contenu (Hero + MoroccoMap) - sur un petit viewport, le
+    // contenu deborderait silencieusement au lieu de defiler (audit + validation agent Plan
+    // du 2026-09-05 : cause racine du bouton "Creer" qui pouvait sortir de l'ecran visible,
+    // pas seulement son position: absolute).
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-y-auto">
       <Hero />
       <MoroccoMap onSelectCity={setSelectedCity} />
 
+      {/* fixed, pas absolute : ancre au viewport reel plutot qu'a la hauteur (potentiellement
+          etendue) de ce conteneur - un bouton d'action flottant doit rester atteignable peu
+          importe le defilement. Insets de zone securisee (encoche/barre de gestes iPhone) -
+          necessite viewportFit:"cover" dans layout.tsx pour se resoudre a une vraie valeur. */}
       <button
         type="button"
         onClick={() => (user ? setCreating(true) : router.push("/login"))}
-        className="absolute bottom-6 right-4 z-10 flex h-14 items-center gap-2 rounded-full bg-terracotta px-5 text-sm font-semibold text-terracotta-ink shadow-2xl"
+        className="fixed z-10 flex h-14 items-center gap-2 rounded-full bg-terracotta px-5 text-sm font-semibold text-terracotta-ink shadow-2xl"
+        style={{
+          bottom: "calc(1.5rem + env(safe-area-inset-bottom, 0px))",
+          right: "calc(1rem + env(safe-area-inset-right, 0px))",
+        }}
       >
         <svg viewBox="0 0 20 20" width="20" height="20" fill="none">
           <path

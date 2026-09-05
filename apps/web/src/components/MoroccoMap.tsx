@@ -30,6 +30,25 @@ import { CITIES, MOROCCO_OUTLINE_PATH, MOROCCO_VIEWBOX } from "@/lib/morocco-geo
 // (19px, pas 28px comme avant).
 const RADIUS_TIERS = [11, 15, 19] as const;
 
+// Cible tactile invisible, UNIFORME sur les 6 villes quel que soit leur palier
+// visuel (audit mobile-render-audit du 2026-09-05 : sur mobile, le SVG est mis
+// a l'echelle par la largeur d'ecran - jamais pres du plafond desktop de
+// 720px - donnant un rayon REEL de 9-19px pour le palier le plus petit, tres
+// en dessous du minimum WCAG 2.5.5/convention du projet (44px, voir
+// MuteToggle.tsx). Un cercle invisible plus grand agrandit la zone cliquable
+// SANS changer la taille visuelle du marqueur (pattern WCAG standard : taille
+// visuelle et taille de cible tactile peuvent differer). Plafond a 19 (pas
+// plus) : Rabat-Casablanca ne sont qu'a ~41.8 unites viewBox l'une de l'autre
+// (les 2 villes les plus proches du jeu de donnees reel) - un rayon de cible
+// superieur a ~20 ferait se chevaucher leurs zones tactiles, rendant un tap
+// ambigu entre les deux. Meme a 19, l'objectif WCAG de 44px reel n'est PAS
+// atteint sur les plus petits mobiles (~16px reel a l'echelle la plus
+// defavorable) - limite geometrique de CE jeu de villes a CETTE echelle,
+// documentee plutot que cachee ; le resoudre completement demanderait de
+// re-espacer les coordonnees des villes (changement visuel plus large, pas
+// fait ici sans validation).
+const HIT_RADIUS = 19;
+
 export function MoroccoMap({
   onSelectCity,
 }: {
@@ -117,6 +136,11 @@ export function MoroccoMap({
               aria-label={`${city.name} — ${count} présent·e·s`}
               style={{ cursor: "pointer" }}
             >
+              {/* Cible tactile invisible, voir HIT_RADIUS plus haut. pointer-events="all"
+                  explicite plutot que de compter sur la resolution ambiante de
+                  fill="transparent" (visiblePainted par la spec, mais un historique de
+                  particularites iOS Safari sur ce projet justifie de ne pas deviner). */}
+              <circle r={HIT_RADIUS} fill="transparent" pointerEvents="all" />
               {isTop && (
                 <circle
                   r={r + 5}
@@ -141,7 +165,7 @@ export function MoroccoMap({
                 dominantBaseline="central"
                 fontFamily="var(--font-head)"
                 fontWeight={700}
-                fontSize={Math.max(11, r * 0.62)}
+                fontSize={Math.max(12, r * 0.62)}
                 fill="var(--terracotta-ink)"
               >
                 {count}
@@ -150,7 +174,7 @@ export function MoroccoMap({
                 y={r + 16}
                 textAnchor="middle"
                 fontFamily="var(--font-body)"
-                fontSize={13}
+                fontSize={14}
                 fill="var(--ink-muted)"
               >
                 {city.name}

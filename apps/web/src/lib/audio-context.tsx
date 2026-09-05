@@ -212,8 +212,18 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
   // Precharge/decode la piste en tache de fond des le montage - ne necessite
   // pas de geste utilisateur (juste un fetch), pour que la lecture demarre
-  // instantanement une fois le geste reçu.
+  // instantanement une fois le geste reçu. Saute ce telechargement (2.6 Mo,
+  // audit mobile-runtime-audit du 2026-09-05) si l'utilisateur a deja coupe
+  // le son lors d'une visite precedente - inutile de le lui faire payer en
+  // data/CPU pour une fonctionnalite qu'il a explicitement refusee.
   useEffect(() => {
+    let alreadyMuted = false;
+    try {
+      alreadyMuted = localStorage.getItem(MUTE_STORAGE_KEY) === "true";
+    } catch {
+      // Stockage indisponible - precharge par defaut (comportement inchange).
+    }
+    if (alreadyMuted) return;
     const src = TRACKS[mood];
     if (src) void engine.preload(src);
   }, [mood, engine]);
@@ -221,7 +231,15 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Lecture localStorage dans un effet, pas un useState paresseux - evite
     // un mismatch d'hydratation SSR (localStorage n'existe pas cote serveur).
-    const stored = localStorage.getItem(MUTE_STORAGE_KEY);
+    let stored: string | null = null;
+    try {
+      stored = localStorage.getItem(MUTE_STORAGE_KEY);
+    } catch {
+      // Stockage indisponible - demarre non-muet par defaut plutot que de planter (ce
+      // useEffect est dans AudioProvider, monte a la racine de app/layout.tsx - une
+      // exception non catchee ici casserait le rendu de toute l'appli, voir audit
+      // mobile-runtime-audit du 2026-09-05).
+    }
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (stored !== null) setMuted(stored === "true");
   }, []);
@@ -260,7 +278,16 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       if (settled || attempting) return;
       attempting = true;
 
-      const alreadyChose = localStorage.getItem(MUTE_STORAGE_KEY);
+      // Ce handler est un vrai listener DOM natif (window.addEventListener plus bas), pas un
+      // gestionnaire synthetique React - une exception ici n'est JAMAIS rattrapee par un
+      // error boundary React, quel qu'il soit (audit + validation agent Plan du 2026-09-05).
+      // Seul un try/catch direct protege ce site.
+      let alreadyChose: string | null = null;
+      try {
+        alreadyChose = localStorage.getItem(MUTE_STORAGE_KEY);
+      } catch {
+        // Stockage indisponible - traite comme "jamais choisi", comportement par defaut.
+      }
       const shouldPlay = alreadyChose === null || alreadyChose === "false";
       const src = TRACKS[moodRef.current];
 
@@ -325,6 +352,37 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     }
   }, [mood, muted, hasInteracted, engine]);
 
+  // Reprise apres mise en arriere-plan (verrouillage d'ecran, changement d'onglet) - les
+  // navigateurs mobiles suspendent agressivement l'AudioContext en arriere-plan, et rien
+  // avant ce fix ne le relançait au retour au premier plan (audit mobile-runtime-audit du
+  // 2026-09-05). Tente quand meme un rappel a engine.play() : ctx.resume() se produit AVANT
+  // le court-circuit "meme URL deja en cours" dans LoopEngine.play(), donc l'appel tente
+  // reellement de debloquer l'AudioContext plutot que d'etre un no-op. Pas de garantie de
+  // succes sur iOS strict pour autant : visibilitychange n'est PAS un contexte de geste
+  // utilisateur reconnu par les politiques d'autoplay - LoopEngine.play() leve deja une
+  // erreur explicite si ctx.state n'est pas "running" apres coup (voir plus haut dans ce
+  // fichier), auquel cas on retombe sur le meme signal visuel que le premier deverrouillage
+  // (recentlyUnlocked, deja cable sur MuteToggle.tsx) plutot que de pretendre une reprise
+  // silencieuse garantie. Ne verifie PAS engine.isActive (ne reflete que "stop() n'a pas ete
+  // appele", pas l'etat reel de l'AudioContext sous-jacent - un faux sentiment de securite).
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState !== "visible") return;
+      if (!hasInteracted || muted) return;
+      const src = TRACKS[moodRef.current];
+      if (!src) return;
+      engine.play(src).catch(() => {
+        // Meme signal, meme duree que le premier deverrouillage (voir attemptUnlock plus
+        // haut) - pas de reprise silencieuse garantie sur iOS strict, on attire l'oeil vers
+        // MuteToggle.tsx pour un retap manuel (geste reel, fiable) plutot que rien du tout.
+        setRecentlyUnlocked(true);
+        setTimeout(() => setRecentlyUnlocked(false), RECENTLY_UNLOCKED_MS);
+      });
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
+  }, [hasInteracted, muted, engine]);
+
   useEffect(() => {
     engine.setVolume(DEFAULT_VOLUME);
   }, [engine]);
@@ -332,7 +390,15 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const toggleMuted = () => {
     setMuted((m) => {
       const next = !m;
-      localStorage.setItem(MUTE_STORAGE_KEY, String(next));
+      // Dans l'updater fonctionnel d'un handler d'evenement React - React ne rattrape par
+      // design aucune exception issue d'un gestionnaire d'evenement (audit + validation
+      // agent Plan du 2026-09-05), meme raison que le site attemptUnlock plus haut.
+      try {
+        localStorage.setItem(MUTE_STORAGE_KEY, String(next));
+      } catch {
+        // Stockage indisponible - le mute fonctionne quand meme pour cette session, juste
+        // pas persiste au prochain chargement.
+      }
       if (!next) {
         // Demute via clic direct : appel synchrone aussi, meme raison que
         // le deverrouillage initial. Un clic reel est deja un geste fiable

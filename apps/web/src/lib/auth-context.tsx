@@ -46,18 +46,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading: true,
   });
 
+  // localStorage enveloppe dans son propre try/catch, imbrique DANS le try/catch metier
+  // (pas autour) - piege reel signale par l'agent Plan du 2026-09-05 : si le try/catch etait
+  // un seul bloc et que localStorage.removeItem() (catch) levait a son tour (stockage
+  // totalement bloque), le setState qui suit ne s'executerait dans AUCUNE branche - l'appli
+  // resterait bloquee en loading:true indefiniment (bug silencieux, pas un crash franc). En
+  // isolant le storage, la mise a jour d'etat React s'execute TOUJOURS, que le storage
+  // reussisse ou non.
   const hydrate = useCallback(async (token: string) => {
     try {
       const me = await apiFetch<{ user: PublicUser; role: Role | null }>(
         "/auth/me",
         { token },
       );
-      localStorage.setItem(TOKEN_STORAGE_KEY, token);
+      try {
+        localStorage.setItem(TOKEN_STORAGE_KEY, token);
+      } catch {
+        // Stockage indisponible (navigation privee, quota) - session valide en memoire pour
+        // cette visite, juste pas persistee au prochain chargement.
+      }
       setState({ token, user: me.user, role: me.role, loading: false });
     } catch {
       // Token invalide/expire - repartir propre plutot que garder un etat
       // incoherent (token present mais utilisateur inconnu).
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      try {
+        localStorage.removeItem(TOKEN_STORAGE_KEY);
+      } catch {
+        // idem - ne doit jamais empecher la mise a jour d'etat qui suit.
+      }
       setState({ token: null, user: null, role: null, loading: false });
     }
   }, []);
@@ -67,7 +83,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // paresseux) : localStorage n'existe pas cote serveur, un lazy
     // initializer causerait un mismatch d'hydratation si la valeur persistee
     // differe du rendu serveur par defaut.
-    const stored = localStorage.getItem(TOKEN_STORAGE_KEY);
+    let stored: string | null = null;
+    try {
+      stored = localStorage.getItem(TOKEN_STORAGE_KEY);
+    } catch {
+      // Stockage indisponible - redemarre sans session persistee plutot que de planter.
+    }
     if (stored) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       void hydrate(stored);
@@ -77,7 +98,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [hydrate]);
 
   const applyAuthResult = (result: AuthResult) => {
-    localStorage.setItem(TOKEN_STORAGE_KEY, result.accessToken);
+    try {
+      localStorage.setItem(TOKEN_STORAGE_KEY, result.accessToken);
+    } catch {
+      // idem hydrate() ci-dessus - ne doit jamais empecher la mise a jour d'etat qui suit.
+    }
     setState({
       token: result.accessToken,
       user: result.user,
@@ -110,7 +135,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    try {
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+    } catch {
+      // idem hydrate() ci-dessus.
+    }
     setState({ token: null, user: null, role: null, loading: false });
   };
 

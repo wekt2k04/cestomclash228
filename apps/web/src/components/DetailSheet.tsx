@@ -3,6 +3,15 @@
 import { useEffect } from "react";
 import { useAudio } from "@/lib/audio-context";
 
+// Compteur module-level (pas un useRef expose via Context - effet de bord DOM pur, local a
+// ce fichier) : toutes les sheets du projet (CityPanel/PinDetail/BountyDetail/CreateSheet)
+// passent par ce seul composant, donc un verrou pose ici couvre tout. Meme pattern que
+// duckCountRef dans lib/audio-context.tsx - robuste si plusieurs sheets se chevauchaient un
+// jour (pas le cas aujourd'hui, verifie : CityPanel et CreateSheet sont deja mutuellement
+// exclusifs dans CityOverview.tsx), plutot qu'un simple booleen qui reactiverait le scroll
+// prematurement si une 2e sheet se fermait avant la 1ere.
+let scrollLockCount = 0;
+
 // Recherche NN/g appliquee ici (voir .claude/HANDOFF/LOG.md pour le detail
 // des sources par element) :
 // - Scrim (fond assombri, cliquable pour fermer) : une sheet sans overlay
@@ -54,6 +63,21 @@ export function DetailSheet({
     return () => unduck();
   }, [duck, unduck]);
 
+  // Verrou de scroll du <body> pendant que cette sheet est ouverte - sans ça, le contenu de
+  // fond peut defiler "a travers" l'overlay fixed sur Safari iOS (comportement rubber-band
+  // documente, audit mobile-render-audit du 2026-09-05). overflow-hidden simple plutot que
+  // la technique position:fixed+sauvegarde de scrollY (plus lourde, son propre bug classique
+  // si scrollY est mal restaure) - le scrim plein ecran masque deja l'essentiel d'une
+  // eventuelle fuite residuelle.
+  useEffect(() => {
+    scrollLockCount += 1;
+    document.body.style.overflow = "hidden";
+    return () => {
+      scrollLockCount = Math.max(0, scrollLockCount - 1);
+      if (scrollLockCount === 0) document.body.style.overflow = "";
+    };
+  }, []);
+
   const requestClose = () => {
     if (confirmClose && !confirmClose()) return;
     window.history.back();
@@ -66,7 +90,10 @@ export function DetailSheet({
         onClick={requestClose}
         aria-hidden="true"
       />
-      <div className="relative w-full max-w-md rounded-t-2xl border border-line bg-bg-card p-4 shadow-2xl sm:m-4 sm:rounded-2xl">
+      <div
+        className="relative w-full max-w-md rounded-t-2xl border border-line bg-bg-card p-4 shadow-2xl sm:m-4 sm:rounded-2xl"
+        style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom, 0px))" }}
+      >
         <div className="flex justify-end">
           <button
             type="button"

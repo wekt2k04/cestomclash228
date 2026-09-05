@@ -9,7 +9,10 @@ export function Header() {
   const { user, loading, logout } = useAuth();
 
   return (
-    <header className="flex items-center justify-between gap-3 border-b border-line bg-bg px-4 py-3">
+    <header
+      className="flex items-center justify-between gap-3 border-b border-line bg-bg px-4 pb-3"
+      style={{ paddingTop: "calc(0.75rem + env(safe-area-inset-top, 0px))" }}
+    >
       <Link href="/" className="flex items-center gap-2">
         <MindClashMark size={26} />
         <span className="font-head text-[15px] font-bold tracking-wide text-ink">

@@ -81,7 +81,12 @@
     border: 1px solid var(--line);
     background: var(--bg-elevated);
     padding: 0.55rem 0.75rem;
-    font-size: 0.9rem;
+    /* 16px, pas 14.4px (0.9rem) - sous ce seuil, Safari iOS zoome automatiquement toute la
+       page au focus d'un champ (audit mobile-render-audit du 2026-09-05). Verifie qu'aucun
+       consommateur (CreateSheet/login/signup/BountyDetail) n'empile une classe Tailwind de
+       taille de texte par-dessus - sinon ce changement serait silencieusement ecrase, meme
+       piege que le bug a{color} hors @layer corrige plus tot cette session. */
+    font-size: 1rem;
     color: var(--ink);
   }
   .input:focus {

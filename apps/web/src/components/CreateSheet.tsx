@@ -228,7 +228,7 @@ function TabButton({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`flex-1 rounded-lg border px-2 py-2 text-xs font-medium ${
+      className={`flex min-h-11 flex-1 items-center justify-center rounded-lg border px-2 py-2 text-xs font-medium ${
         active
           ? "border-terracotta bg-terracotta text-terracotta-ink"
           : "border-line bg-bg-elevated text-ink-muted"
