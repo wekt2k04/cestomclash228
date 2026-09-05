@@ -20,3 +20,6 @@ Thumbs.db
 # Claude Code — état interne de session, pas du contenu projet
 .claude/scheduled_tasks.lock
 pitch/video-render/out/
+pitch/video-render/__pycache__/
+pitch/video-render/*TEMP_MPY*
+pitch/video-render/build_log*.txt

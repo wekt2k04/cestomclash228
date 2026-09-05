@@ -92,6 +92,7 @@ def paste_center_x(base, layer, y, opacity=1.0):
 
 
 CREA_LOGO = Image.open(ASSETS / "creaafrica_logo.png").convert("RGBA")
+PRODUCT_LOGO = Image.open(ASSETS / "cestomclash228_logo.png").convert("RGBA")
 
 
 def draw_creaafrica_credit(img, t, page_duration, big=False):
@@ -246,10 +247,12 @@ def page2_frame(t, duration):
     draw = ImageDraw.Draw(img)
 
     brand_op = fade(t, 0.0, 0.12)
-    f_brand = font(56, "bold")
-    draw.text((70, 90), "CESTOMCLASH", font=f_brand, fill=with_alpha(INK, int(255 * brand_op)))
-    bw, _ = text_size(draw, "CESTOMCLASH", f_brand)
-    draw.text((70 + bw, 90), "228", font=f_brand, fill=with_alpha(GOLD, int(255 * brand_op)))
+    brand_logo = PRODUCT_LOGO.resize((int(PRODUCT_LOGO.width * 0.32), int(PRODUCT_LOGO.height * 0.32)), Image.LANCZOS)
+    if brand_op < 1.0:
+        brand_logo = brand_logo.copy()
+        a = brand_logo.split()[3].point(lambda p: int(p * brand_op))
+        brand_logo.putalpha(a)
+    img.alpha_composite(brand_logo, (70, 80))
     f_tag = font(30, "semibold")
     draw.text((72, 170), "Explore. Partage. Level-up.", font=f_tag, fill=with_alpha(TERRACOTTA, int(255 * brand_op)))
 
@@ -507,20 +510,15 @@ def page5_frame(t, duration):
         layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
         ld = ImageDraw.Draw(layer)
         ld.ellipse([W / 2 - 500, 500, W / 2 + 500, 1500], fill=with_alpha(TERRACOTTA, int(30 * glow_op)))
-        layer = layer.filter_ok = layer  # no-op placeholder to keep structure simple
         img.alpha_composite(layer)
 
     logo_op = ease_out_cubic(fade(t, 0.08, 0.28))
     if logo_op > 0:
-        f_logo = font(int(70 * (0.7 + 0.3 * logo_op)), "bold")
-        draw.text((0, 0), "", font=f_logo)
-        t1, t2 = "CESTOMCLASH", "228"
-        w1, _ = text_size(draw, t1, f_logo)
-        w2, _ = text_size(draw, t2, f_logo)
-        total_w = w1 + w2
-        x0 = (W - total_w) / 2
-        draw.text((x0, 480), t1, font=f_logo, fill=with_alpha(INK, int(255 * logo_op)))
-        draw.text((x0 + w1, 480), t2, font=f_logo, fill=with_alpha(GOLD, int(255 * logo_op)))
+        scale = 0.7 + 0.3 * logo_op
+        lw = int(PRODUCT_LOGO.width * 0.62 * scale)
+        lh = int(PRODUCT_LOGO.height * 0.62 * scale)
+        logo_img = PRODUCT_LOGO.resize((lw, lh), Image.LANCZOS)
+        paste_center_x(img, logo_img, 460, opacity=logo_op)
 
     count_op = fade(t, 0.28, 0.4)
     if count_op > 0:
