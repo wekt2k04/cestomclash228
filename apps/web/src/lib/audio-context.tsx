@@ -22,16 +22,18 @@ const RECENTLY_UNLOCKED_MS = 2500; // duree du signal visuel post-deverrouillage
 
 export type AudioMood = "calm" | "urgent";
 
-// "Battle March - Epic Orchestral Music Loop" par PlayOnLoop (CC-BY 3.0,
-// credit requis - voir apps/web/public/audio/CREDITS.md). En MP3 (pas WAV) :
-// la 1ere version telechargee (WAV PCM 8 bits) ne jouait pas du tout sur
-// telephone - hypothese la plus probable, le decodeur audio de certains
-// navigateurs/OS mobiles ne supporte pas le PCM 8 bits (desktop est plus
-// permissif). Le MP3 est un format universellement decode, y compris mobile.
-// Meme piste sur les deux mood pour l'instant - un vrai second morceau pour
-// "urgent" pourra remplacer cette entree plus tard sans toucher au reste.
+// "A Picture of Beauty" par PlayOnLoop (CC-BY 3.0, credit requis - voir
+// apps/web/public/audio/CREDITS.md). Remplace "Battle March" le 2026-09-05 -
+// demande explicite de l'utilisateur pour un morceau "neutre, vecteur
+// d'emotions, sans caracteristique particuliere" (l'ancien etait volontairement
+// epique/intense, plus adapte a une ambiance "combat" qu'a une ambiance de
+// fond neutre). Meme format (MP3, deja confirme universellement decode y
+// compris mobile) et meme moteur de boucle a fondu enchaine (LoopEngine plus
+// bas) - le "sans impression de loop" demande vient du CODE (crossfade a
+// chaque cycle), pas du fichier audio lui-meme, donc valable quel que soit le
+// morceau charge ici.
 const TRACKS: Partial<Record<AudioMood, string>> = {
-  calm: "/audio/epic.mp3",
+  calm: "/audio/ambient.mp3",
   urgent: "/audio/epic.mp3",
 };
 

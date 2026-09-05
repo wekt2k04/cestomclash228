@@ -113,8 +113,10 @@
     font-weight: 500;
   }
 
-  /* Rotation 360 continue du logo (demande utilisateur 2026-09-05) - lente et
-     linéaire pour rester une ambiance discrète, pas une distraction. Reservee
+  /* Rotation 360 continue du logo (demande utilisateur 2026-09-05, puis
+     "garder la rotation, la rendre plus visible" + "des l'ouverture de
+     l'application" - le premier essai a 9s/tour etait juge trop lent pour
+     etre perçu comme une vraie animation au premier coup d'oeil). Reservee
      a l'instance "hero" (WelcomeIntro), pas celle du Header : un logo qui
      tourne en permanence dans la barre de nav, visible sur CHAQUE page,
      deviendrait vite fatiguant - la version hero n'est vue qu'une fois par
@@ -126,7 +128,7 @@
      valeurs de degrade des deux cotes) mais une regle CSS scopee par ID
      casserait silencieusement sur la 2e instance. */
   .mc-logo-spin {
-    animation: mc-spin 9s linear infinite;
+    animation: mc-spin 2s linear infinite;
   }
   @media (prefers-reduced-motion: reduce) {
     .mc-logo-spin {
