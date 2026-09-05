@@ -749,3 +749,47 @@ page).
 **Verifie reellement** : `npm run lint`/`npx tsc --noEmit` propres sur `apps/web` apres chaque
 lot de changements, capture d'ecran avant/apres pour la faille critique, carte re-inspectee apres
 le changement de couleurs (rendu confirme correct visuellement avant le blocage sur le clic).
+
+## 2026-09-05 (suite) — PPT video 5 slides + 9 bugs mobile corriges (plan valide par agent dedie)
+
+**PPT video** : abandon de l'approche mockups HTML (`pitch/video-assets/*.html`) sur demande
+explicite utilisateur apres inspection dans son propre navigateur ("ne me cree plus des HTML, je
+veux un PPT de 5 images bien structurees"). Nouveau `pitch/generate-video-deck.mjs` (independant
+du PPT business plan), layout portrait 4.333x9.375in, palette reelle de l'app (pas l'ancienne
+palette cyan de `generate-deck.mjs`). 5 slides = les 5 moments visuels du script video (Hook,
+Social-Map, Bounty, Ghost Mode, CTA/Outro - ce dernier jamais construit avant). Bug trouve et
+corrige au passage dans `pitch/verify_deck.py` : dimensions de slide en dur (ancien format
+paysage), lit maintenant `presentation.xml` reellement. Verifie propre (0 probleme) sur les 2
+PPT du projet.
+
+**9 bugs mobile** : suite au passage en mode plan explicitement demande par l'utilisateur ("un
+plan tres complet et structure avant de commencer, afin d'eviter de creer de nouveaux bugs"), un
+agent `Plan` dedie a valide l'approche avant toute execution (lecture reelle de ~20 fichiers +
+la doc Next 16.3.2 vendue dans ce repo). A trouve 3 decouvertes qui auraient rendu le plan
+initial partiellement inefficace :
+1. `env(safe-area-inset-*)` ne se resout a rien sans `viewport-fit=cover` dans le viewport meta
+   (absent) - ajoute a `layout.tsx`.
+2. Effet de bord de (1) : rend toute la page edge-to-edge, exposant le Header a passer sous
+   l'encoche - padding-top securise ajoute a `Header.tsx`, hors des 9 bugs initiaux.
+3. `app/error.tsx` seul ne couvre pas `layout.tsx` du meme segment (convention Next App Router) -
+   n'aurait donc pas protege `AuthProvider`/`AudioProvider`, montes dans `layout.tsx` lui-meme.
+   `app/global-error.tsx` ajoute en plus.
+
+Sequence A->H executee integralement : cibles tactiles carte (cercle invisible pointerEvents="all"
+uniforme, plafonne a 19 unites viewBox pour ne pas chevaucher Rabat/Casablanca), zoom auto iOS
+(.input 14.4px->16px), zone securisee (bouton "Creer" + DetailSheet + Header), bouton "Creer"
+absolute->fixed + min-h-0/overflow-y-auto (cause racine du debordement flexbox, pas juste le
+positionnement), verrou de scroll des sheets (compteur module-level), TabButton CreateSheet
+(min-h-11 + flex centering, pas min-h-11 seul), error boundaries + try/catch sur 8 sites
+localStorage (piege corrige dans auth-context.tsx hydrate() : le try/catch doit envelopper
+SEULEMENT le storage, imbrique DANS le try/catch metier, sinon un echec du catch bloquait l'app
+en loading:true indefiniment), gate du prechargement audio sur la preference muet, reprise audio
+sur visibilitychange (avec repli honnete sur le signal visuel existant, pas de garantie de succes
+pretendue sur iOS strict).
+
+Verifie reellement : `npx tsc --noEmit` + `npm run lint` propres. SSR reel confirme (curl sur le
+serveur dev) : `<meta viewport>` contient bien `viewport-fit=cover` fusionne avec les defauts
+Next, les 2 fichiers error boundary sont enregistres dans l'arbre de routage. **Pas verifie** :
+rendu visuel effectif sur appareil reel (extension navigateur non connectee lors de cette passe,
+tentee mais abandonnee apres echec repete plutot que d'insister) - explicitement signale a
+l'utilisateur, pas laisse silencieux.
