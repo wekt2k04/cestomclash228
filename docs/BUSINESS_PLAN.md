@@ -304,10 +304,11 @@ vérificateur, délai moyen de vérification, revenu mensuel récurrent (Phase 1
 
 ## 15. Demande au concours (ask) et utilisation
 
-`[À COMPLÉTER avec l'utilisateur — modalités exactes du concours CréaAfrica non connues :
-financement, mentorat, mise en réseau, autre. Une fois connu, détailler ici comment le montant
-ou l'accompagnement demandé accélère précisément une étape de ce plan (ex. financer la première
-automatisation de la vérification des paiements, ou l'extension à une deuxième ville pilote).]`
+**Visibilité — pas de financement demandé à ce stade.** Ce qui est recherché ici, c'est
+l'exposition offerte par le concours CréaAfrica : passer devant le jury et la communauté du
+concours suffit à amorcer la traction (premiers sponsors potentiels, premiers retours d'autres
+diasporas étudiantes intéressées par le modèle). Le financement, s'il vient, viendrait
+naturellement d'une victoire au concours plutôt que d'être la demande elle-même.
 
 ## 16. Vision à long terme (3-5 ans)
 

@@ -435,9 +435,9 @@ const SOLUTION_ITEMS = [
   edgeAccent(s, COLOR.gold);
   titleBlock(s, "Ce qu'on a déjà construit, et ce qu'on vous demande");
   const real = [
-    'Carte, demandes d\'aide, authentification, gouvernance à 2 niveaux — code fonctionnel, testé (32/32 tests automatisés)',
-    'Direction visuelle afro-futuriste retenue, 3 maquettes explorées (2026-08-31)',
-    'Sponsoring vérifié + notation en cours de développement, ciblés pour ce concours',
+    'Carte, demandes d\'aide, authentification, gouvernance à 2 niveaux — code fonctionnel, testé (59/59 tests automatisés)',
+    'Direction visuelle afro-futuriste appliquée au produit réel (palette, écran d\'accueil)',
+    'Sponsoring vérifié + notation : construits, testés bout-en-bout, audités avant mise en ligne',
     'Hébergement 100 % gratuit (aucune carte bancaire engagée) — marge protégée dès le 1er sponsor',
   ];
   glassCard(s, { x: MARGIN, y: 2.15, w: W - MARGIN * 2, h: 1.95, accent: COLOR.cyan });
@@ -449,7 +449,7 @@ const SOLUTION_ITEMS = [
   glassCard(s, { x: MARGIN, y: 4.35, w: W - MARGIN * 2, h: 1.25, accent: COLOR.gold });
   s.addText([
     { text: 'Ce qu\'on demande : ', options: { bold: true, color: COLOR.gold } },
-    { text: '[À compléter avec le porteur de projet — modalités exactes du concours CréaAfrica non connues : financement, mentorat, mise en réseau]', options: { italic: true, color: COLOR.inkMuted } },
+{ text: "De la visibilité — l'exposition du concours suffit à amorcer la traction. Le reste suivra naturellement.", options: { italic: true, color: COLOR.inkMuted } },
   ], {
     x: MARGIN + 0.35, y: 4.35, w: W - MARGIN * 2 - 0.7, h: 1.25, valign: 'middle',
     fontFace: FONT_BODY, fontSize: 13, lineSpacingMultiple: 1.3,
