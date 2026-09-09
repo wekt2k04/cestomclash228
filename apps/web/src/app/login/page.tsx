@@ -8,7 +8,6 @@ import { ApiError } from "@/lib/api";
 import { ErrorMessage } from "@/components/ErrorMessage";
 import { Spinner } from "@/components/Spinner";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginPage() {
@@ -107,9 +106,14 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <a href={`${API_URL}/auth/google`} className="btn-google">
-        Continuer avec Google
-      </a>
+      {/* "Continuer avec Google" retire le 2026-09-09 : GOOGLE_CLIENT_ID/SECRET
+          ne sont pas configures cote Render (401 invalid_client reel constate
+          par l'utilisateur) - obtenir de vraies cles necessite de creer un
+          projet OAuth dans Google Cloud Console (acces utilisateur requis, pas
+          faisable depuis ici). L'email+mot de passe reste la voie principale,
+          pleinement fonctionnelle. Route backend /auth/google toujours cablee
+          (voir apps/api/src/auth/) - reactiver ce lien des que de vraies cles
+          sont fournies. */}
 
       <p className="text-center text-sm text-ink-muted">
         Pas encore de compte ?{" "}

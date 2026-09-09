@@ -38,7 +38,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="fr"
       className={`${chakraPetch.variable} ${ibmPlexSans.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-bg text-ink">
+      {/* overflow-x-hidden : filet de securite defensif (audit mobile-render-audit
+          2026-09-09) - un debordement horizontal futur (ici deja corrige dans
+          Header.tsx, ou ailleurs) redevient un simple rognage local silencieux
+          au lieu de rendre TOUTE la page scrollable horizontalement, ce qui
+          decalait visiblement tout le contenu sous le header en dessous. */}
+      <body className="min-h-full flex flex-col overflow-x-hidden bg-bg text-ink">
         <AudioProvider>
           <AuthProvider>{children}</AuthProvider>
         </AudioProvider>

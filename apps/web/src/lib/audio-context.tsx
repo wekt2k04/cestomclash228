@@ -16,7 +16,11 @@ const MUTE_STORAGE_KEY = "mindclash_audio_muted";
 // deverrouillage lui-meme fonctionne). Reste une ambiance de fond, pas un
 // premier plan.
 const DEFAULT_VOLUME = 0.32;
-const LOOP_FADE_SECONDS = 1.5; // duree du fondu de part et d'autre du point de boucle
+// Releve de 1.5 a 2.2s le 2026-09-09 (retour utilisateur : le demarrage devait
+// "ne pas surprendre... etre cool") - s'applique a la fois au tout premier
+// demarrage (le seul vraiment perceptible comme un "demarrage", les suivants
+// sont masques par la musique deja en cours) et a chaque point de boucle.
+const LOOP_FADE_SECONDS = 2.2; // duree du fondu de part et d'autre du point de boucle
 const DUCK_FACTOR = 0.3; // volume pendant qu'une sheet/formulaire est ouvert(e)
 const RECENTLY_UNLOCKED_MS = 2500; // duree du signal visuel post-deverrouillage
 
@@ -367,7 +371,25 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   // appele", pas l'etat reel de l'AudioContext sous-jacent - un faux sentiment de securite).
   useEffect(() => {
     const onVisibilityChange = () => {
-      if (document.visibilityState !== "visible") return;
+      if (document.visibilityState !== "visible") {
+        // Arret explicite a la mise en arriere-plan (2026-09-09, retours
+        // utilisateur reels) - jusqu'ici seul le sens "reprise" (ci-dessous)
+        // etait gere. Sans cet arret, `this.timer` (setTimeout en horloge
+        // murale dans LoopEngine, decorrele de l'horloge AudioContext qui se
+        // met en pause pendant une suspension) continue de decompter en temps
+        // reel pendant l'arriere-plan et peut declencher un nouveau cycle
+        // AVANT que l'ancien (suspendu, jamais annule) n'ait fini de jouer au
+        // retour au premier plan - deux sources actives simultanement,
+        // d'ou "l'audio se joue 2 fois". Meme absence de handler expliquait
+        // aussi "le son continue a jouer meme quand on quitte le navigateur"
+        // (rien n'arretait jamais rien). engine.stop() est sur, meme appele
+        // plusieurs fois ou si rien ne jouait (no-op) : ne touche ni
+        // duckFactor/baseVolume (ducking preserve), ni le cache preload()
+        // (pas de re-telechargement au retour) - verifie par l'audit
+        // mobile-runtime-audit du 2026-09-09 avant d'ecrire ce correctif.
+        engine.stop();
+        return;
+      }
       if (!hasInteracted || muted) return;
       const src = TRACKS[moodRef.current];
       if (!src) return;

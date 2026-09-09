@@ -9,7 +9,6 @@ import type { City } from "@/lib/types";
 import { ErrorMessage } from "@/components/ErrorMessage";
 import { Spinner } from "@/components/Spinner";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -168,9 +167,9 @@ export default function SignupPage() {
         </button>
       </form>
 
-      <a href={`${API_URL}/auth/google`} className="btn-google">
-        Continuer avec Google
-      </a>
+      {/* "Continuer avec Google" retire le 2026-09-09 : GOOGLE_CLIENT_ID/SECRET
+          ne sont pas configures cote Render (401 invalid_client reel constate
+          par l'utilisateur) - voir la meme note dans app/login/page.tsx. */}
 
       <p className="text-center text-sm text-ink-muted">
         Déjà un compte ?{" "}

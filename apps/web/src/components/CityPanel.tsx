@@ -106,7 +106,7 @@ export function CityPanel({
             <button
               type="button"
               onClick={load}
-              className="flex h-9 items-center rounded-lg border border-line bg-bg-elevated px-3 text-xs font-medium text-ink-muted hover:text-ink"
+              className="flex h-11 items-center rounded-lg border border-line bg-bg-elevated px-3 text-xs font-medium text-ink-muted hover:text-ink"
             >
               Réessayer
             </button>
