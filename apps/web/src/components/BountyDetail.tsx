@@ -6,24 +6,19 @@ import { useAuth } from "@/lib/auth-context";
 import { apiFetch, ApiError } from "@/lib/api";
 import { formatCountdown } from "@/lib/geo";
 import type { BountyView } from "@/lib/types";
-import { DetailSheet } from "./DetailSheet";
+import { BOUNTY_STATUS_BADGE } from "@/lib/badge-styles";
 import { ErrorMessage } from "./ErrorMessage";
 import { Spinner } from "./Spinner";
 
-const STATUS_LABEL: Record<BountyView["status"], string> = {
-  open: "Ouverte",
-  claimed: "Réclamée",
-  resolved: "Résolue",
-  expired: "Expirée",
-};
-
+// PAS de <DetailSheet> propre ici - voir la note equivalente dans PinDetail.tsx (bug reel
+// corrige le 2026-09-09 : 2 DetailSheet montes/demontes dans le meme commit React
+// corrompaient la pile d'historique du navigateur). Rendu desormais DANS le DetailSheet unique
+// et persistant de CityPanel.tsx.
 export function BountyDetail({
   bounty,
-  onClose,
   onChanged,
 }: {
   bounty: BountyView;
-  onClose: () => void;
   onChanged: (updated: BountyView) => void;
 }) {
   const { user, token } = useAuth();
@@ -80,12 +75,19 @@ export function BountyDetail({
     }
   }
 
+  const statusBadge = BOUNTY_STATUS_BADGE[bounty.status];
+
   return (
-    <DetailSheet onClose={onClose}>
-      <div className="flex flex-col gap-3">
+    // Barre de couleur sur le bord gauche plutot qu'une bordure decorative uniforme -
+    // direction deja actee pour la refonte visuelle (voir le plan), appliquee ici en avance sur
+    // ce seul composant : signale le statut au premier coup d'oeil, avant meme de lire le texte
+    // de la pastille.
+    <div className={`flex flex-col gap-3 border-l-4 ${statusBadge.accentClassName} pl-3`}>
         <div className="flex items-center justify-between gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-bg-elevated px-2.5 py-1 font-head text-[10px] font-semibold uppercase tracking-wide text-ink-muted">
-            Bounty · {STATUS_LABEL[bounty.status]}
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-head text-[10px] font-semibold uppercase tracking-wide ${statusBadge.badgeClassName}`}
+          >
+            Bounty · {statusBadge.label}
           </span>
           <span className="font-head text-sm font-bold text-red">
             {formatCountdown(bounty.expiresAt)}
@@ -97,7 +99,7 @@ export function BountyDetail({
         <p className="text-xs text-ink-faint">
           {bounty.cityName} · par {bounty.authorDisplayName}
           {bounty.claimedByDisplayName
-            ? ` · réclamée par ${bounty.claimedByDisplayName}`
+            ? ` · prise en charge par ${bounty.claimedByDisplayName}`
             : ""}
         </p>
 
@@ -117,10 +119,10 @@ export function BountyDetail({
           >
             {busy ? (
               <span className="flex items-center justify-center gap-2">
-                <Spinner /> Réclamation…
+                <Spinner /> Prise en charge…
               </span>
             ) : (
-              "Réclamer cette Bounty"
+              "Prendre en charge cette Bounty"
             )}
           </button>
         )}
@@ -202,6 +204,5 @@ export function BountyDetail({
           </div>
         )}
       </div>
-    </DetailSheet>
   );
 }

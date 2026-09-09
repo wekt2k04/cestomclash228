@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAudio } from "@/lib/audio-context";
 
 // Compteur module-level (pas un useRef expose via Context - effet de bord DOM pur, local a
@@ -38,12 +38,31 @@ export function DetailSheet({
   confirmClose?: () => boolean;
   children: React.ReactNode;
 }) {
+  // Ref "toujours a jour" plutot que `onClose` directement en dependance d'effet - bug reel
+  // corrige le 2026-09-09 : `onClose` est tres souvent une fonction flechee EN LIGNE cote
+  // appelant (CityPanel.tsx notamment, recalculee a chaque render - y compris de simples
+  // rafraichissements de polling ou une mise a jour de la Bounty affichee apres "Prendre en
+  // charge"/noter), ce qui faisait re-executer cet effet BIEN PLUS souvent que la seule vraie
+  // ouverture/fermeture de la sheet - chaque re-execution rejouant history.back() (nettoyage)
+  // PUIS pushState() (nouvelle mise en place), corrompant la pile d'historique du navigateur de
+  // facon reproductible et constatee en direct (clic sur une Bounty/un Pin depuis la liste
+  // atterrissant sur une tout autre page du site, deja visitee bien plus tot dans la session).
+  // Le ref se met a jour via son PROPRE effet (jamais une assignation directe en cours de
+  // render - interdit par le linter React de ce projet, react-hooks/refs : une ref ne doit
+  // etre lue/ecrite que hors du corps de rendu, dans un effet ou un handler) ; l'effet
+  // pushState/popstate ci-dessous ne s'execute plus, lui, qu'au vrai montage/demontage de CE
+  // DetailSheet.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
   useEffect(() => {
     window.history.pushState({ mindclashSheet: true }, "");
     let closedViaPopState = false;
     const onPopState = () => {
       closedViaPopState = true;
-      onClose();
+      onCloseRef.current();
     };
     window.addEventListener("popstate", onPopState);
     return () => {
@@ -55,7 +74,10 @@ export function DetailSheet({
       // back() ne re-declenchera pas onClose une seconde fois.
       if (!closedViaPopState) window.history.back();
     };
-  }, [onClose]);
+    // Volontairement [] : doit s'executer une seule fois par montage reel, jamais a cause d'un
+    // changement de reference de `onClose` (le corps ne lit plus que `onCloseRef`, pas `onClose`
+    // directement - rien a lister ici).
+  }, []);
 
   const { duck, unduck } = useAudio();
   useEffect(() => {
