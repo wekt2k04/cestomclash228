@@ -862,5 +862,35 @@ confirmer par l'utilisateur a l'ouverture du fichier.
 - Chaîne de process dev (npm→nest --watch→dist/main) arrêtée proprement après vérification (3
   PID identifiés et tués ensemble, piège déjà documenté plus haut dans ce fichier évité).
 - Reste dans ce même chantier : module `bounty-unlocks` (paiement simulé pay-to-claim), `chat`,
-  `city-seats`, écran d'accueil à templates, refonte visuelle, déploiement, 2 documents pitch —
-  voir le plan pour le séquencement complet.
+  `city-seats`, écran d'accueil à templates, refonte visuelle, 2 documents pitch — voir le plan
+  pour le séquencement complet.
+
+## 2026-09-09 — Premier déploiement public réel (Neon + Render + Firebase Hosting)
+
+- **Backend** : Render (process NestJS, palier gratuit) + **Neon** pour Postgres/PostGIS (pas
+  Render — vérifié que le Postgres gratuit Render refuse `CREATE EXTENSION postgis` et expire
+  après 30 jours, signalé par l'agent `Plan` avant même d'essayer). 5 migrations appliquées sur
+  Neon en conditions réelles (run direct, pas simulé). `https://cestomclash228.onrender.com` —
+  `/health` et `/cities` vérifiés réellement (6 villes retournées).
+- **Frontend** : `next.config.ts` en `output:'export'` (compatible sans changement de code,
+  vérifié fichier par fichier). Déployé sur Firebase Hosting (projet `cestomclash228` créé via
+  CLI) — `https://cestomclash228.web.app`, vérifié réellement (200, `<title>` correct).
+- **Bug réel trouvé et corrigé par vérification directe, pas supposée** : le premier build a
+  intégré `http://192.168.11.142:3001` (IP LAN d'une ancienne session de dev réseau local) au
+  lieu de l'URL Render — `apps/web/.env.local` a priorité sur `.env.production` dans l'ordre de
+  chargement Next.js, donc le nouveau `.env.production` n'était jamais lu. Corrigé avec
+  `.env.production.local` (priorité maximale, n'écrase pas `.env.local` utilisé pour le dev LAN).
+  Rebuild + redéploiement + reverifié sur le site EN LIGNE (pas seulement le build local) que la
+  bonne URL y est bien présente.
+- CORS vérifié réellement (requête OPTIONS réelle avec `Origin: https://cestomclash228.web.app`
+  contre le backend déployé → `access-control-allow-origin` correct).
+- Piège d'outillage rencontré et documenté : `firebase deploy` a échoué 2 fois sur une erreur
+  masquée (bug de log de firebase-tools 14.x qui plante sur une erreur réseau au lieu de
+  l'afficher — `TypeError: Converting circular structure to JSON`). Passer à
+  `npx firebase-tools@latest` a révélé la vraie cause (`ConnectTimeoutError` vers l'API Google) —
+  résolu par changement de réseau côté utilisateur, pas un problème de code/config.
+- Comptes créés par l'utilisateur (Neon, GitHub, Render), projet Firebase + push GitHub +
+  migrations + déploiements effectués depuis cette session avec les identifiants fournis.
+- **Reste** : `WEB_ORIGIN` sur Render mis à jour avec les 2 domaines Firebase réels, redéployé et
+  reverifié. `.env.production.local` n'est PAS commité (gitignore `.env.*`, volontaire) — à
+  recréer si un futur rebuild frontend est nécessaire depuis une machine propre.
