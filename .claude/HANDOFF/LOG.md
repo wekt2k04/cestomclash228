@@ -942,7 +942,75 @@ vrais gabarits de téléphones 2026 ; déployé publiquement, ne dépend d'aucun
 **Faiblesses connues, non cachées** : le marketplace pay-to-claim / chat / sièges de gouvernance
 / refonte visuelle "carnet de terrain" planifiés dans `zesty-knitting-biscuit.md` ne sont **pas**
 construits — l'app en ligne est la version MVP polie, pas la refonte. Pas de flux "mot de passe
-oublié". Le ping de réveil Render (anti mise en veille, décision #2 du plan) n'a jamais été
-effectivement mis en place malgré la décision actée — **reste à faire**. Session stockée en
-localStorage (limite XSS théorique connue, acceptée pour ce stade). `PageHint` seulement sur
-l'écran carte, pas ailleurs.
+oublié". Session stockée en localStorage (limite XSS théorique connue, acceptée pour ce stade).
+`PageHint` seulement sur l'écran carte, pas ailleurs.
+
+## 2026-09-09 (suite) — Ping keep-alive Render + polling passif + statuts colorés + bug de navigation préexistant corrigé
+
+Repris juste après la note "forces et faiblesses" ci-dessus, en continuant l'audit demandé
+("enumère tous les problèmes... digge deep"). Quatre incréments distincts, chacun vérifié en
+direct (lint+tsc+build systématiques, plus Claude in Chrome pour tout ce qui touche au rendu ou
+à la navigation) et commité séparément (`5d185bf`, `45fee3b`, `6f3f609`) :
+
+- **Cache HTML cassé après déploiement** (`5d185bf`) : Firebase Hosting servait TOUT (HTML
+  compris) avec `Cache-Control: max-age=3600` par défaut, jamais configuré. Un visiteur qui
+  rechargeait une page après un redéploiement recevait du HTML périmé référençant des chunks
+  JS/CSS supprimés du serveur (`ChunkLoadError`), reproduit et confirmé en direct via les
+  messages de console. `firebase.json` corrigé : HTML en `no-cache` (révalidation systématique),
+  `_next/static/**` en `immutable` 1 an (noms déjà hashés par contenu, cache long sûr).
+  Découvert en testant le fix de déconnexion-au-reload du lot précédent.
+- **Ping de réveil Render** (`5d185bf`) : `.github/workflows/keep-alive.yml`, cron 10 min,
+  `curl /health`. Prévu dans le plan de déploiement d'origine, jamais mis en place jusqu'ici —
+  devient plus important maintenant que l'écran d'accueil bloque sur `/auth/me` (voir le
+  correctif "déconnexion sur reload" du lot précédent). Testé manuellement
+  (`gh workflow run` + `gh run view`) : réussi.
+- **Polling passif 20s** (`45fee3b`) : retour utilisateur explicite ("il y a la réactivité ? si
+  quelqu'un pose une complainte, on peut voir ça automatiquement ?"). Pas de WebSocket (choix
+  déjà tranché dans le plan — Render gratuit tue toute connexion persistante à la mise en
+  veille) : `CityPanel.tsx` et `sponsoring/page.tsx` re-fetchent en silence toutes les 20s
+  (`POLL_INTERVAL_MS`, `lib/api.ts`) tant que l'écran reste ouvert, sans repasser par le
+  skeleton ni remplacer un contenu déjà affiché par une erreur sur un raté transitoire.
+- **`apps/api/test/auth.e2e-spec.ts`** (`45fee3b`, nouveau) : le module auth n'avait jusqu'ici
+  aucun test alors que c'est précisément là que vivaient les 2 bugs d'auth réels de la soirée. 5
+  tests HTTP réels (signup→/auth/me, email dupliqué rejeté, login→/auth/me, mauvais mot de
+  passe/email inconnu rejetés avec le même message générique, /auth/me sans token/token
+  invalide). Les 5 passent contre la vraie base dev.
+- **Cartes/statuts colorés** (`6f3f609`) : retour utilisateur explicite ("il faut de belles
+  cards... des statuts... des jeux de couleur"). `lib/badge-styles.ts` (nouveau, mapping central
+  statut Bounty/type Pin → libellé + couleur, réutilisé par `BountyDetail`/`PinDetail`/liste de
+  `CityPanel`) ; barre de couleur sur le bord gauche des cartes plutôt qu'une bordure uniforme ;
+  libellé "Prise en charge" (pas "Réclamée", qui sonnait comme une plainte — suggéré
+  explicitement par l'utilisateur), propagé au bouton d'action et au texte associé.
+- **Bug de navigation préexistant, sérieux, trouvé en vérifiant ce dernier changement en
+  direct** (`6f3f609`) : cliquer sur un Pin/une Bounty depuis la liste de `CityPanel` pouvait
+  faire atterrir le visiteur sur une **tout autre page du site** (ou `chrome://newtab/`), déjà
+  visitée bien plus tôt dans la session — jamais un crash, juste une navigation silencieusement
+  incorrecte, invisible à tout lint/build/SSR, reproduite plusieurs fois de façon déterministe
+  avant d'être comprise. Ce bug préexistait cette session (présent depuis que
+  `PinDetail`/`BountyDetail` ont chacun leur propre `DetailSheet`) — **pas** introduit ce soir,
+  seulement révélé en testant réellement le clic liste→détail (jamais fait en profondeur
+  jusqu'ici). Cause racine en 3 couches dans le mécanisme partagé `DetailSheet.tsx`
+  (push/consommation d'une entrée d'historique navigateur à l'ouverture/fermeture, pour que le
+  geste "retour" natif ferme une sheet comme un overlay natif le ferait) :
+  1. `CityPanel.tsx` montait un `DetailSheet` DIFFÉRENT pour la liste et pour chaque détail
+     (Pin/Bounty) — passer de l'un à l'autre démontait l'un et montait l'autre dans le MÊME
+     commit React.
+  2. `DetailSheet.tsx` ré-exécutait son effet push/pop à CHAQUE changement de référence de la
+     prop `onClose` (souvent une fonction en ligne recalculée à chaque render côté appelant),
+     pas seulement au vrai montage/démontage.
+  3. Même les deux corrigés, faire varier `onClose` selon le niveau affiché (liste vs détail)
+     aurait exigé 2 entrées d'historique pour 2 fermetures utilisateur possibles, alors que
+     `DetailSheet` n'en gère qu'UNE par sheet ouverte — le 2e `history.back()` débordait alors
+     sur le vrai historique du navigateur antérieur à l'ouverture du panneau.
+  Corrigé : un seul `DetailSheet` par `CityPanel`, monté une fois pour toute sa durée de vie ;
+  `onClose` de `DetailSheet` lu via un ref "toujours à jour" (mis à jour par son propre effet —
+  jamais assigné en cours de rendu, interdit par `react-hooks/refs`) et redevenu stable (ne
+  varie plus jamais selon le niveau affiché) ; le retour détail→liste découplé de l'historique
+  du navigateur via un bouton "Retour" explicite. Séquences rejouées en direct après correctif,
+  plusieurs fois, tab neuf et tab réutilisé.
+- **Leçon méthodologique** (déjà tirée une fois le 2026-09-05, reconfirmée ici) : ce bug était
+  invisible à `lint`/`tsc`/`build`/SSR — seule une vérification comportementale réelle (cliquer
+  réellement dans un vrai navigateur, plusieurs fois, en observant l'URL et pas seulement le
+  rendu) l'a révélé. Le premier correctif tenté (un seul `DetailSheet`) semblait suffisant sur le
+  papier et a quand même laissé le bug intact — ne jamais arrêter la vérification au premier
+  correctif plausible quand le symptôme initial était déjà déroutant.

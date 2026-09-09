@@ -2,7 +2,40 @@
 
 Dernière mise à jour : 2026-09-09.
 
-## Calendrier concours confirmé (2026-09-09) — LIRE EN PREMIER, change la priorité immédiate
+## État réel à cette date — LIRE EN PREMIER
+
+**L'app est déployée et publique** : https://cestomclash228.web.app (Firebase Hosting) ↔
+https://cestomclash228.onrender.com (NestJS, Render) ↔ Neon (Postgres+PostGIS). Vérifier
+d'abord `git log --oneline -15` et `LOG.md` pour l'état exact — ce fichier dérive vite, l'état
+réel du code fait foi (CLAUDE.md §5).
+
+Session du soir 2026-09-09 : audit large suite à un retour utilisateur sévère ("expérience
+utilisateur 0/20"). Corrigé et déployé, dans l'ordre : bug "déconnexion instantanée" (2 causes
+distinctes), cache HTML cassé après déploiement (Firebase servait tout en cache 1h, y compris
+le HTML — visiteur qui recharge après un déploiement pouvait recevoir un
+`ChunkLoadError`), ping keep-alive Render (`.github/workflows/keep-alive.yml`), polling passif
+20s sur les listes (Pins/Bounties/Sponsoring), 5 tests e2e réels sur le module auth (jusque-là
+sans AUCUN test), cartes/statuts colorés Pins+Bounties, et un **bug de navigation préexistant
+sérieux** (clic sur un Pin/une Bounty depuis la liste pouvait atterrir sur une autre page du
+site) — détail complet dans `LOG.md`, section "Ping keep-alive Render + polling passif + statuts
+colorés + bug de navigation préexistant corrigé".
+
+**Encore en attente, dans l'ordre de priorité probable** :
+1. Test E2E avec 2 vrais comptes utilisateur — explicitement demandé par l'utilisateur, à faire
+   "à la toute fin, une fois que tous les patchs auront été faits" (sa propre formulation). Les
+   patchs fonctionnels du soir sont faits ; c'est probablement le moment.
+2. Nettoyer les artefacts de test dans la vraie base Neon : compte "Debug Test"
+   (`debug-e2e-1788940000@mindclash.local`) et la Bounty "Test E2E debug" qu'il a créée — visible
+   publiquement sur la carte en ce moment.
+3. Animation logo inclinée + effacement/réécriture façon machine à écrire — concept explicitement
+   différé par l'utilisateur à après les bugs fonctionnels, jamais construit.
+4. Le reste du plan `zesty-knitting-biscuit.md` (marketplace pay-to-claim, chat + filtre anti-
+   coordonnées, CitySeat, NeedsTemplates, refonte visuelle "carnet de terrain", 2 documents pitch)
+   reste entièrement non construit — le site en ligne est le MVP poli, pas la refonte complète.
+5. Vérifier avec l'utilisateur si le PPT jury a bien été confirmé soumis (voir section calendrier
+   ci-dessous, point jamais confirmé explicitement dans le chat WhatsApp exporté).
+
+## Calendrier concours confirmé (2026-09-09) — change la priorité immédiate
 
 Export WhatsApp du groupe participants CréaAfrica déposé dans le repo
 (`WhatsApp Chat with Participants Édition 1 CREAFRICA📚🔎/`, txt + 2 PDF + photos) et exploré en
