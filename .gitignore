@@ -14,6 +14,10 @@ coverage/
 .DS_Store
 Thumbs.db
 
+# Firebase CLI — cache local de hashes de deploiement, logs de debug
+apps/web/.firebase/
+apps/web/firebase-debug.log
+
 # Handoff — marqueur de travail en cours, jamais commité
 .claude/HANDOFF/.in_progress
 
