@@ -894,3 +894,55 @@ confirmer par l'utilisateur a l'ouverture du fichier.
 - **Reste** : `WEB_ORIGIN` sur Render mis à jour avec les 2 domaines Firebase réels, redéployé et
   reverifié. `.env.production.local` n'est PAS commité (gitignore `.env.*`, volontaire) — à
   recréer si un futur rebuild frontend est nécessaire depuis une machine propre.
+
+## 2026-09-09 (suite) — Audit UX complet post-déploiement + correctifs
+
+Retour utilisateur sévère après premier déploiement public ("expérience utilisateur 0/20") —
+audité et corrigé en plusieurs vagues, toutes vérifiées en direct (Claude in Chrome enfin
+connecté cette session, après 6 tentatives infructueuses) puis redéployées :
+
+- **Header responsive** : cause racine confirmée par agent dédié (`CESTOMCLASH228` + boutons =
+  mots insécables, aucun `overflow-x` nulle part → toute la page devenait scrollable
+  horizontalement). Resserré + mesuré en direct sur une grille réelle de largeurs (320/360/390-
+  430px) via injection JS (pas de vrai redimensionnement de fenêtre possible dans cet
+  environnement) : solide dès 360px (plancher Android réel), 320px (iPhone SE 1ère gen, quasi
+  éteint en 2026) accepté comme limite connue.
+- **Audio** : double lecture + lecture en arrière-plan non désirée corrigées (handler
+  `visibilitychange` devenu symétrique, `engine.stop()` explicite sur "hidden"). Piste coupée de
+  moitié + fondu de sortie (chargement plus rapide). Fondu d'entrée allongé (démarrage moins
+  brusque).
+- **Logo** : rotation infinie (lue comme un spinner bloqué) remplacée par un flourish unique à
+  l'arrivée.
+- **Google OAuth** : bouton retiré (401 invalid_client réel, clés non configurées — nécessite
+  action utilisateur dans Google Cloud Console, non bloquant).
+- **Bug réel le plus sérieux : "déconnexion instantanée"**. Cause trouvée dans le code (pas par
+  reproduction navigateur, polluée par un artefact de l'extension elle-même — signalé
+  honnêtement) : `login()`/`signup()` rappelaient un `hydrate()` STRICT juste après une
+  connexion déjà réussie ; le moindre raté de cet appel secondaire (réseau, cold start Render)
+  effaçait toute la session. Nouvelle fonction `refreshRoleBestEffort()` : ne peut plus jamais
+  défaire une connexion qui vient de réussir.
+- **UX formulaires auth** : `autoComplete`/`inputMode` corrects (Règle 45 du référentiel 100-
+  règles fourni par l'utilisateur), bouton montrer/cacher le mot de passe (absent jusqu'ici).
+- **Découvrabilité Pins/Bounties** : nouveau composant `PageHint.tsx` (astuce dismissible,
+  localStorage) sur l'écran carte, nommant explicitement Pins/Bounties/Créer — répond
+  directement au retour "je ne vois que la carte, pas d'explication".
+- Sécurité auth (cookies httpOnly, SOLID) : discuté avec l'utilisateur, **volontairement pas
+  fait** — cross-domaine (`.web.app` ↔ `.onrender.com`) rendrait les cookies httpOnly plus
+  fragiles (SameSite=None + ITP Safari + CSRF à construire) que le localStorage actuel, mauvais
+  rapport risque/bénéfice à 2-3 jours du concours. Noté comme premier chantier du "vrai
+  prototype" post-concours envisagé par l'utilisateur.
+
+### Forces et faiblesses réelles à ce stade (demandé explicitement par l'utilisateur)
+
+**Forces** : boucle cœur (carte → ville → Pins/Bounties → créer) fonctionnelle de bout en bout
+sur le vrai déploiement ; authentification robuste aux ratés réseau transitoires ; logique
+backend testée et auditée (RBAC, atomicité des Bounties, Sponsoring) ; responsive solide sur les
+vrais gabarits de téléphones 2026 ; déployé publiquement, ne dépend d'aucune machine locale.
+
+**Faiblesses connues, non cachées** : le marketplace pay-to-claim / chat / sièges de gouvernance
+/ refonte visuelle "carnet de terrain" planifiés dans `zesty-knitting-biscuit.md` ne sont **pas**
+construits — l'app en ligne est la version MVP polie, pas la refonte. Pas de flux "mot de passe
+oublié". Le ping de réveil Render (anti mise en veille, décision #2 du plan) n'a jamais été
+effectivement mis en place malgré la décision actée — **reste à faire**. Session stockée en
+localStorage (limite XSS théorique connue, acceptée pour ce stade). `PageHint` seulement sur
+l'écran carte, pas ailleurs.

@@ -77,6 +77,17 @@
 
 @layer components {
   .input {
+    /* Un <input> brut est en display inline-block par defaut (taille intrinseque ~20
+       caracteres) - jusqu'ici "gratuitement" plein-largeur uniquement parce que chaque usage
+       etait un enfant direct d'un conteneur flex-col (stretch par defaut sur l'axe transverse).
+       Bug reel trouve le 2026-09-09 en verification live : le bouton oeil montrer/mot de passe
+       (login/signup) enveloppe l'input dans un <div class="relative"> (necessaire pour
+       positionner le bouton en absolute) - ce div n'est PAS flex, l'input a donc perdu son
+       etirement et retrouvait sa largeur intrinseque, laissant le bouton oeil flotter dans le
+       vide a droite. Largeur explicite ici plutot qu'un correctif au cas par cas : tout usage
+       actuel de .input est deja pense plein-largeur (verifie), et ça evite de re-decouvrir ce
+       piege au prochain wrapper ajoute autour d'un input. */
+    width: 100%;
     border-radius: 0.6rem;
     border: 1px solid var(--line);
     background: var(--bg-elevated);

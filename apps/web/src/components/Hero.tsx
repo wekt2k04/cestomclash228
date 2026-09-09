@@ -38,6 +38,19 @@ export function Hero() {
           Rejoindre la communauté
         </Link>
       )}
+      {/* Bug de decouvrabilite reel trouve le 2026-09-09 en creusant le
+          retour "les pages sont ou ?" : le lien "Sponsoring" du Header est
+          `hidden sm:inline` (economie de largeur voulue et documentee dans
+          Header.tsx) - sur mobile, ecran principal vise par ce projet, la
+          page /sponsoring n'avait ALORS plus aucun point d'entree. Repris
+          ici, visible a toutes les tailles, sans toucher au budget de
+          largeur deja mesure du Header. */}
+      <Link
+        href="/sponsoring"
+        className="mt-3 inline-block text-xs text-ink-muted underline hover:text-ink"
+      >
+        Voir les sponsors vérifiés →
+      </Link>
     </section>
   );
 }

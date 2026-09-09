@@ -9,6 +9,7 @@ import { CityPanel } from "./CityPanel";
 import { CreateSheet } from "./CreateSheet";
 import { WelcomeIntro } from "./WelcomeIntro";
 import { PageHint } from "./PageHint";
+import { Spinner } from "./Spinner";
 
 // Remplace l'ancien SocialMap (MapLibre) par la vue "carte du Maroc stylisée
 // + présence par ville" (voir MoroccoMap.tsx). Orchestration : écran d'accueil
@@ -17,11 +18,33 @@ import { PageHint } from "./PageHint";
 // Hero sur le même scroll, jamais un vrai premier écran malgré la demande
 // explicite du 2026-08-24. Un membre déjà connecté saute directement à la carte.
 export function CityOverview() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [exploring, setExploring] = useState(false);
+
+  // Bug reel trouve le 2026-09-09 en creusant le retour "deconnexion
+  // instantanee" : ce composant decidait avant meme que `loading` existe ici
+  // (uniquement sur `user`, initialise a null le temps que auth-context relise
+  // le token persiste et rappelle /auth/me). Un membre DEJA connecte qui
+  // rechargeait la page ou y revenait voyait donc systematiquement flasher
+  // l'ecran d'accueil anonyme (gros logo anime + "Rejoindre la communaute")
+  // avant de basculer sur la carte une fois l'appel /auth/me resolu - lu a
+  // tort comme une deconnexion reelle. Ce cas est distinct du bug hydrate()
+  // deja corrige dans auth-context.tsx (qui ne jouait qu'juste apres un
+  // login()/signup() reussi) : celui-ci se declenche a CHAQUE chargement de
+  // page, y compris un simple F5, tant qu'une session valide est en cours de
+  // restauration depuis le stockage local.
+  if (loading) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 py-10">
+        <span className="inline-block scale-[2.2] text-terracotta">
+          <Spinner />
+        </span>
+      </div>
+    );
+  }
 
   if (!user && !exploring) {
     return <WelcomeIntro onExplore={() => setExploring(true)} />;

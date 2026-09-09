@@ -14,7 +14,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;
 
 export default function SignupPage() {
-  const { signup } = useAuth();
+  const { signup, user, loading } = useAuth();
   const router = useRouter();
   const [cities, setCities] = useState<City[]>([]);
   const [email, setEmail] = useState("");
@@ -35,6 +35,22 @@ export default function SignupPage() {
       .then(setCities)
       .catch(() => setCities([]));
   }, []);
+
+  // Meme rebond qu'en connexion (voir login/page.tsx) - un membre deja
+  // connecte ne doit pas revoir un formulaire de creation de compte.
+  useEffect(() => {
+    if (!loading && user) router.replace("/");
+  }, [loading, user, router]);
+
+  if (loading || user) {
+    return (
+      <main className="flex flex-1 flex-col items-center justify-center px-6 py-12">
+        <span className="inline-block scale-[2.2] text-terracotta">
+          <Spinner />
+        </span>
+      </main>
+    );
+  }
 
   const displayNameError =
     touched.displayName && displayName.trim().length === 0

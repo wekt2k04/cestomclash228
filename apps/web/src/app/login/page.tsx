@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
@@ -12,7 +12,7 @@ import { EyeIcon, EyeOffIcon } from "@/components/PasswordToggleIcons";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, user, loading } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,6 +24,25 @@ export default function LoginPage() {
   // agressif ; attendre la soumission, a l'inverse, est trop tardif et fait
   // perdre un aller-retour complet).
   const [touched, setTouched] = useState<{ email?: boolean; password?: boolean }>({});
+
+  // Retour utilisateur 2026-09-09 ("l'inscription et la connexion ne suivent
+  // pas les bonnes normes ISO et le flux apprecie") : un membre deja connecte
+  // qui atterrit ici (lien externe, retour arriere, onglet reste ouvert)
+  // doit rebondir vers l'accueil plutot que revoir un formulaire de
+  // connexion - flux standard attendu en 2026, absent jusqu'ici.
+  useEffect(() => {
+    if (!loading && user) router.replace("/");
+  }, [loading, user, router]);
+
+  if (loading || user) {
+    return (
+      <main className="flex flex-1 flex-col items-center justify-center px-6 py-12">
+        <span className="inline-block scale-[2.2] text-terracotta">
+          <Spinner />
+        </span>
+      </main>
+    );
+  }
 
   const emailError =
     touched.email && !EMAIL_RE.test(email) ? "Adresse email invalide." : null;
