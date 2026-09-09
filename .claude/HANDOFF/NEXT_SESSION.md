@@ -1,6 +1,34 @@
 # NEXT_SESSION
 
-Dernière mise à jour : 2026-09-05.
+Dernière mise à jour : 2026-09-09.
+
+## Calendrier concours confirmé (2026-09-09) — LIRE EN PREMIER, change la priorité immédiate
+
+Export WhatsApp du groupe participants CréaAfrica déposé dans le repo
+(`WhatsApp Chat with Participants Édition 1 CREAFRICA📚🔎/`, txt + 2 PDF + photos) et exploré en
+détail cette session. Détail complet dans la mémoire `creaafrica-contest-rules` (accessible aux
+sessions futures) ; résumé actionnable ici :
+
+- **Phase éliminatoire : samedi 12 et dimanche 13 septembre 2026, 19h30, en ligne** — dans 3-4
+  jours à la date de cette note. 5 min de présentation + 5-7 min de Q&A jury. **Un membre de
+  l'organisation fait défiler les diapos à la place du candidat** → le PPT jury
+  (`pitch/CestomClash228-Pitch.pptx`) doit être strictement linéaire, aucune interaction en direct
+  à prévoir. Caméra obligatoire, un seul porte-parole.
+- **Non vérifié dans le chat exporté : confirmation explicite de Wilfried que son propre PPT a
+  bien été soumis avant le 2026-09-03 23:59.** D'autres candidats ont confirmé conformité
+  nom/photo/projet le 2026-09-06 ("c'est bon de mon côté") ; aucun message équivalent de Wilfried
+  n'apparaît dans l'export jusqu'au 2026-09-09. **Prochaine session : vérifier ce point avec
+  l'utilisateur avant toute autre priorité** — si le PPT jury n'est pas confirmé envoyé, c'est le
+  bloquant absolu avant le 12 septembre, devant tout polish mobile ou vidéo.
+- **Vote réseaux sociaux (5% de la note) en cours sur Instagram, fin vendredi 11 septembre 12h00**
+  — cumul engagement affiche+vidéo. Le rendu vidéo (`pitch/video-render/out/final.mp4`, pipeline
+  edge-tts+moviepy construite début septembre) a normalement déjà été soumis avant le
+  2026-09-05 23:59 (échéance vidéo séparée) ; à confirmer que ça correspond bien à ce qui est
+  publié sur Instagram.
+- **Grille de notation officielle /100** (pertinence 20, posture 20, business 20, innovation 20,
+  faisabilité 15, vote réseaux 5) — dans la mémoire projet, sert de check-list avant la
+  présentation orale du 12/13.
+- Finale : dimanche 20 septembre 2026, 19h30, seulement les 5 meilleurs, présentation 3 min.
 
 ## Session du 2026-09-05 — première inspection visuelle réelle (Claude in Chrome)
 
