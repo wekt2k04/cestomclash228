@@ -9,6 +9,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { BountiesService, BountyView } from './bounties.service';
 import { Bounty } from './entities/bounty.entity';
 import { BountyStatus } from './bounty-status.enum';
+import { BountyKind } from './bounty-kind.enum';
 import { CitiesService } from '../cities/cities.service';
 
 // Cible claim() et resolve() : c'est la ou vit la logique metier a risque
@@ -36,6 +37,7 @@ describe('BountiesService', () => {
       status: BountyStatus.OPEN,
       expiresAt: new Date(Date.now() + 3600_000),
       ratingValue: null,
+      kind: BountyKind.REQUEST,
       ...overrides,
     }) as Bounty;
 
@@ -286,6 +288,46 @@ describe('BountiesService', () => {
         { id: 'bounty-1' },
         { ratingValue: 3, ratingComment: null },
       );
+    });
+
+    // Marketplace (refonte 2026-09-09) : pour une offre de service, le sens
+    // est inverse (l'auteur EST le prestataire) - bug identifie avant meme
+    // d'etre ecrit par l'agent Plan de la refonte, ces 2 tests le figent.
+    it('offer : le CLIENT (claimedBy) note le prestataire (auteur) avec succès', async () => {
+      bountiesRepo.findOne.mockResolvedValueOnce(
+        makeBounty({
+          kind: BountyKind.OFFER,
+          authorId: 'provider-1',
+          claimedById: 'client-1',
+          status: BountyStatus.RESOLVED,
+        }),
+      );
+      jest
+        .spyOn(service, 'findOne')
+        .mockResolvedValueOnce({} as unknown as BountyView);
+
+      await service.rate('client-1', 'bounty-1', 5, 'Super prestation');
+
+      expect(bountiesRepo.update).toHaveBeenCalledWith(
+        { id: 'bounty-1' },
+        { ratingValue: 5, ratingComment: 'Super prestation' },
+      );
+    });
+
+    it('offer : le PRESTATAIRE (auteur) ne peut PAS noter, seul le client le peut', async () => {
+      bountiesRepo.findOne.mockResolvedValueOnce(
+        makeBounty({
+          kind: BountyKind.OFFER,
+          authorId: 'provider-1',
+          claimedById: 'client-1',
+          status: BountyStatus.RESOLVED,
+        }),
+      );
+
+      await expect(
+        service.rate('provider-1', 'bounty-1', 5),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(bountiesRepo.update).not.toHaveBeenCalled();
     });
   });
 });

@@ -9,6 +9,8 @@ import {
 import { User } from '../../users/entities/user.entity';
 import { City } from '../../cities/entities/city.entity';
 import { BountyStatus } from '../bounty-status.enum';
+import { BountyKind } from '../bounty-kind.enum';
+import { ServiceCategory } from '../service-category.enum';
 
 @Entity('bounties')
 export class Bounty {
@@ -68,6 +70,35 @@ export class Bounty {
 
   @Column({ type: 'text', nullable: true })
   ratingComment: string | null;
+
+  // Marketplace (refonte 2026-09-09, docs/BUSINESS_PLAN.md) : prolonge Bounty
+  // plutot qu'une nouvelle table parallele - decision utilisateur explicite.
+  // kind=REQUEST reste le defaut, comportement historique inchange.
+  @Column({ type: 'enum', enum: BountyKind, default: BountyKind.REQUEST })
+  kind: BountyKind;
+
+  // Prix de deblocage optionnel - NULL = Bounty gratuite (l'entraide n'a
+  // "pas besoin d'etre payante", decision explicite). Le deblocage payant
+  // (reclamation conditionnee a un paiement simule approuve) est gere par le
+  // module bounty-unlocks, ajoute separement.
+  @Column({
+    type: 'numeric',
+    precision: 10,
+    scale: 2,
+    nullable: true,
+    transformer: {
+      to: (value: number | null) => value,
+      from: (value: string | null) =>
+        value === null ? null : parseFloat(value),
+    },
+  })
+  priceMad: number | null;
+
+  @Column({ type: 'boolean', default: false })
+  isRemote: boolean;
+
+  @Column({ type: 'enum', enum: ServiceCategory, nullable: true })
+  category: ServiceCategory | null;
 
   @CreateDateColumn()
   createdAt: Date;

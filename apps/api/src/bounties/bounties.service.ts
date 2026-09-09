@@ -9,6 +9,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Bounty } from './entities/bounty.entity';
 import { BountyStatus } from './bounty-status.enum';
+import { BountyKind } from './bounty-kind.enum';
+import { ServiceCategory } from './service-category.enum';
 import { CitiesService } from '../cities/cities.service';
 import { CreateBountyDto } from './dto/create-bounty.dto';
 import type { BBox } from '../common/bbox';
@@ -30,6 +32,10 @@ export interface BountyView {
   resolvedAt: Date | null;
   ratingValue: number | null;
   ratingComment: string | null;
+  kind: BountyKind;
+  priceMad: number | null;
+  isRemote: boolean;
+  category: ServiceCategory | null;
   createdAt: Date;
 }
 
@@ -55,10 +61,11 @@ export class BountiesService {
     const id = crypto.randomUUID();
     await this.bounties.query(
       `INSERT INTO bounties
-         (id, "authorId", title, description, location, "cityId", status, "expiresAt")
+         (id, "authorId", title, description, location, "cityId", status, "expiresAt",
+          "kind", "priceMad", "isRemote", "category")
        VALUES ($1, $2, $3, $4,
                ST_SetSRID(ST_MakePoint($5, $6), 4326)::geography, $7, 'open',
-               now() + ($8 || ' hours')::interval)`,
+               now() + ($8 || ' hours')::interval, $9, $10, $11, $12)`,
       [
         id,
         authorId,
@@ -68,6 +75,10 @@ export class BountiesService {
         dto.lat,
         city.id,
         dto.durationHours,
+        dto.kind ?? BountyKind.REQUEST,
+        dto.priceMad ?? null,
+        dto.isRemote ?? false,
+        dto.category ?? null,
       ],
     );
 
@@ -175,11 +186,18 @@ export class BountiesService {
     return this.findOne(bountyId);
   }
 
-  // Notation (docs/PLAN_EXTENSION.md § Pivot 2026-08-31) : SEUL l'auteur note
-  // - jamais la personne qui a reclame (elle ne juge pas sa propre aide).
-  // Distinct de resolve() (que les deux parties peuvent declencher) : noter
-  // est un jugement unilateral de l'auteur, pas une cloture bilaterale.
-  // Une seule note par Bounty, jamais ecrasee silencieusement une fois posee.
+  // Notation (docs/PLAN_EXTENSION.md § Pivot 2026-08-31, sens corrige lors de
+  // la refonte marketplace 2026-09-09) : qui note qui depend de kind. Pour une
+  // demande d'aide (REQUEST) c'est l'auteur qui note la personne qui l'a aide
+  // - comportement historique inchange. Pour une offre de service (OFFER)
+  // c'est l'INVERSE : l'auteur EST le prestataire, donc c'est le client
+  // (claimedBy) qui juge la prestation recue - reutiliser la regle REQUEST
+  // telle quelle ferait noter le client par le prestataire, l'oppose de ce
+  // qui construit une reputation utile (bug trouve avant meme d'etre ecrit,
+  // signale par l'agent Plan de la refonte). Distinct de resolve() (que les
+  // deux parties peuvent declencher) : noter est un jugement unilateral d'une
+  // seule partie, pas une cloture bilaterale. Une seule note par Bounty,
+  // jamais ecrasee silencieusement une fois posee.
   async rate(
     userId: string,
     bountyId: string,
@@ -189,9 +207,13 @@ export class BountiesService {
     const bounty = await this.bounties.findOne({ where: { id: bountyId } });
     if (!bounty) throw new NotFoundException('Bounty introuvable.');
 
-    if (bounty.authorId !== userId) {
+    const expectedRaterId =
+      bounty.kind === BountyKind.OFFER ? bounty.claimedById : bounty.authorId;
+    if (expectedRaterId !== userId) {
       throw new ForbiddenException(
-        "Seul l'auteur de la Bounty peut noter la personne qui a aidé.",
+        bounty.kind === BountyKind.OFFER
+          ? 'Seul le client (qui a réclamé cette offre) peut noter le prestataire.'
+          : "Seul l'auteur de la Bounty peut noter la personne qui a aidé.",
       );
     }
     if (bounty.status !== BountyStatus.RESOLVED) {
@@ -239,6 +261,10 @@ export class BountiesService {
       resolvedat: Date | null;
       ratingvalue: number | null;
       ratingcomment: string | null;
+      kind: BountyKind;
+      pricemad: string | null;
+      isremote: boolean;
+      category: ServiceCategory | null;
       createdat: Date;
     }> = await this.bounties.query(
       `SELECT
@@ -249,6 +275,8 @@ export class BountiesService {
          b."claimedById" AS claimedbyid, cu."displayName" AS claimedbydisplayname,
          b."expiresAt" AS expiresat, b."resolvedAt" AS resolvedat,
          b."ratingValue" AS ratingvalue, b."ratingComment" AS ratingcomment,
+         b."kind" AS kind, b."priceMad" AS pricemad, b."isRemote" AS isremote,
+         b."category" AS category,
          b."createdAt" AS createdat
        FROM bounties b
        JOIN cities c ON c.id = b."cityId"
@@ -275,6 +303,10 @@ export class BountiesService {
       resolvedAt: r.resolvedat,
       ratingValue: r.ratingvalue,
       ratingComment: r.ratingcomment,
+      kind: r.kind,
+      priceMad: r.pricemad === null ? null : Number(r.pricemad),
+      isRemote: r.isremote,
+      category: r.category,
       createdAt: r.createdat,
     }));
   }

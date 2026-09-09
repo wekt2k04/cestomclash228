@@ -840,3 +840,27 @@ Limite honnete : verification visuelle faite uniquement via extraction d'images 
 instants precis (pas un visionnage video complet, aucun outil de lecture video disponible ici) -
 le mouvement/la fluidite des animations et la qualite/le rythme reel de la voix off restent a
 confirmer par l'utilisateur a l'ouverture du fichier.
+
+## 2026-09-09 — Refonte marketplace : Bounty étendu (kind/prix/à distance/catégorie)
+
+- Contexte complet dans `.claude/plans/zesty-knitting-biscuit.md` (18 décisions utilisateur +
+  plan d'un agent `Plan` dédié, vérifications web réelles sur les pièges d'hébergement 2026).
+- 1er incrément du chantier marketplace : `Bounty` étendu avec `kind` (request/offer, défaut
+  request — comportement historique inchangé), `priceMad` (nullable, gratuite par défaut),
+  `isRemote`, `category` — prolonge l'entité existante plutôt qu'une nouvelle table (décision
+  utilisateur explicite). Migration `AddBountyMarketplaceFields1788600000000`.
+- **Bug corrigé avant même d'être introduit** (signalé par l'agent `Plan` de la refonte) : le
+  sens de la notation (`BountiesService.rate()`) dépend maintenant de `kind` — pour une offre de
+  service, l'auteur EST le prestataire, donc c'est le client (`claimedBy`) qui note, l'inverse du
+  comportement historique (auteur note qui l'a aidé) qui ne vaut que pour une demande d'aide.
+- Vérifié réellement, pas seulement en unitaire : migration run/revert/run sur la vraie base de
+  dev (docker) ; 61/61 tests (58 existants + 3 nouveaux ciblant explicitement l'inversion du sens
+  de notation) ; **15 vérifications HTTP réelles** contre le serveur `start:dev` qui tourne
+  (signup, création Bounty request par défaut, création Bounty offer payante/à distance/
+  catégorisée, cycle claim→resolve→rate dans les deux sens — client note prestataire = 200,
+  prestataire tente de se noter = 403 rejeté).
+- Chaîne de process dev (npm→nest --watch→dist/main) arrêtée proprement après vérification (3
+  PID identifiés et tués ensemble, piège déjà documenté plus haut dans ce fichier évité).
+- Reste dans ce même chantier : module `bounty-unlocks` (paiement simulé pay-to-claim), `chat`,
+  `city-seats`, écran d'accueil à templates, refonte visuelle, déploiement, 2 documents pitch —
+  voir le plan pour le séquencement complet.

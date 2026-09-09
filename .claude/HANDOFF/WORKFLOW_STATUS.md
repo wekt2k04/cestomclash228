@@ -27,7 +27,8 @@ Prérequis pour les commandes ci-dessous : API sur `localhost:3001`, Web sur `lo
 | Claim Bounty — tiers accepté (200) | 2026-08-23 | ✅ |
 | Claim Bounty — double claim refusé (409, pas de race) | 2026-08-23 | ✅ |
 | Resolve Bounty par l'auteur (200) | 2026-08-23 | ✅ |
-| Suite de tests unitaires (`roles`/`pins`/`bounties`/`sponsorship`.service.spec.ts) | 2026-09-04 | ✅ (58/58) |
+| Suite de tests unitaires (`roles`/`pins`/`bounties`/`sponsorship`.service.spec.ts) | 2026-09-09 | ✅ (61/61) |
+| Bounty étendu marketplace (`kind`/`priceMad`/`isRemote`/`category`) + sens de notation corrigé pour `kind=offer` | 2026-09-09 — nouveau, migration run/revert/run sur base de dev réelle + 15 vérifications HTTP réelles (create request/offer, cycle claim→resolve→rate dans les 2 sens) | ✅ |
 | RBAC — pouvoir limité national (aucune action destructrice unilatérale) | 2026-08-25 — centralisé (`RolesService.isLocalModeratorForCity`), re-testé (6 nouveaux tests dédiés incl. exclusion national), audité par `architecture-review` | ✅ |
 | Migrations TypeORM (remplace `synchronize`) | 2026-09-04 — 4 migrations (baseline, spatial, sponsorship, bounty rating), cycle run/revert/run vérifié sur base vierge isolée + appliqué à la base de dev | ✅ |
 | Index spatiaux GiST (pins/bounties/cities) | 2026-08-25 — créés, usage réel confirmé par `EXPLAIN` sur la base de dev | ✅ |
