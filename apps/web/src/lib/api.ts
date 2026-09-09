@@ -1,5 +1,15 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
+// Rafraichissement passif des listes (Pins/Bounties, Sponsoring) pendant
+// qu'un ecran reste ouvert - demande explicite utilisateur 2026-09-09 (pas
+// de WebSocket, deja tranche dans le plan de deploiement : Render gratuit
+// tue toute connexion persistante des sa mise en veille). 20s : assez court
+// pour qu'une nouvelle demande d'aide se voie sans recharger manuellement,
+// assez long pour rester negligeable face au vrai risque - le sommeil
+// Render (15 min sans requete) - que ce polling aide d'ailleurs a repousser
+// pendant qu'un ecran reste ouvert, en complement du ping keep-alive.
+export const POLL_INTERVAL_MS = 20_000;
+
 export class ApiError extends Error {
   constructor(
     public status: number,

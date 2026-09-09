@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, POLL_INTERVAL_MS } from "@/lib/api";
 import type { BountyView, PinView } from "@/lib/types";
 import { DetailSheet } from "./DetailSheet";
 import { ErrorMessage } from "./ErrorMessage";
@@ -34,36 +34,54 @@ export function CityPanel({
     null,
   );
 
-  const load = useCallback(() => {
+  // `quiet` (utilise par le polling passif ci-dessous) : rafraichit pins/bounties SANS
+  // repasser par le skeleton ni remplacer un contenu deja affiche par un message d'erreur -
+  // un echec reseau transitoire en arriere-plan se retente simplement au prochain intervalle
+  // plutot que de degrader l'ecran de quelqu'un qui est deja en train de le lire.
+  const load = useCallback(
+    (opts?: { quiet?: boolean }) => {
+      if (!opts?.quiet) {
+        setLoading(true);
+        setLoadError(false);
+      }
+      return Promise.all([
+        apiFetch<PinView[]>("/pins"),
+        apiFetch<BountyView[]>("/bounties?status=open"),
+      ])
+        .then(([allPins, allBounties]) => {
+          setPins(allPins.filter((p) => p.cityName === cityName));
+          setBounties(allBounties.filter((b) => b.cityName === cityName));
+        })
+        .catch(() => {
+          if (!opts?.quiet) setLoadError(true);
+        })
+        .finally(() => {
+          if (!opts?.quiet) setLoading(false);
+        });
+    },
+    [cityName],
+  );
+
+  // Charge une fois a l'ouverture (skeleton), puis reinterroge en silence toutes les
+  // POLL_INTERVAL_MS tant que le panneau reste ouvert - retour utilisateur 2026-09-09
+  // ("il y a la reactivite ? si quelqu'un pose une complainte, on peut voir ça
+  // automatiquement ?") : jusqu'ici, une Bounty postee par quelqu'un d'autre pendant que ce
+  // panneau restait ouvert n'apparaissait qu'a la prochaine fermeture/reouverture. `cancelled`
+  // au niveau de l'effet (pas par appel) : suffit a couvrir a la fois le demontage ET un
+  // changement de ville en cours de vol, puisque `load` change d'identite (donc l'effet se
+  // nettoie et se relance) des que `cityName` change.
+  useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setLoadError(false);
-    Promise.all([
-      apiFetch<PinView[]>("/pins"),
-      apiFetch<BountyView[]>("/bounties?status=open"),
-    ])
-      .then(([allPins, allBounties]) => {
-        if (cancelled) return;
-        setPins(allPins.filter((p) => p.cityName === cityName));
-        setBounties(allBounties.filter((b) => b.cityName === cityName));
-      })
-      .catch(() => {
-        if (!cancelled) setLoadError(true);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void load();
+    const interval = setInterval(() => {
+      if (!cancelled) void load({ quiet: true });
+    }, POLL_INTERVAL_MS);
     return () => {
       cancelled = true;
+      clearInterval(interval);
     };
-  }, [cityName]);
-
-  // `load` declenche un fetch reseau (cas d'usage canonique d'un effet) et
-  // met a jour l'etat de chargement de façon synchrone en reponse - reste
-  // aussi exposee telle quelle au bouton "Reessayer" plus bas, d'ou
-  // l'indirection par useCallback plutot qu'un effet inline.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => load(), [load]);
+  }, [load]);
 
   if (selectedPin) {
     return (
@@ -105,7 +123,7 @@ export function CityPanel({
             <ErrorMessage>Impossible de charger le contenu de cette ville.</ErrorMessage>
             <button
               type="button"
-              onClick={load}
+              onClick={() => load()}
               className="flex h-11 items-center rounded-lg border border-line bg-bg-elevated px-3 text-xs font-medium text-ink-muted hover:text-ink"
             >
               Réessayer

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
-import { apiFetch, ApiError } from "@/lib/api";
+import { apiFetch, ApiError, POLL_INTERVAL_MS } from "@/lib/api";
 import type { ApprovedSponsor, SponsorshipRequestView } from "@/lib/types";
 import { ErrorMessage } from "@/components/ErrorMessage";
 import { Spinner } from "@/components/Spinner";
@@ -169,17 +169,26 @@ function MyRequests({ token }: { token: string | null }) {
   const [items, setItems] = useState<SponsorshipRequestView[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const reload = useCallback(async () => {
-    try {
-      setItems(await apiFetch<SponsorshipRequestView[]>("/sponsorship-requests/mine", { token }));
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Une erreur est survenue.");
-    }
-  }, [token]);
+  // `quiet` : le polling passif ne doit pas remplacer une liste deja affichee par un message
+  // d'erreur sur un simple raté reseau transitoire (voir CityPanel.tsx pour le meme choix).
+  const reload = useCallback(
+    async (opts?: { quiet?: boolean }) => {
+      try {
+        setItems(await apiFetch<SponsorshipRequestView[]>("/sponsorship-requests/mine", { token }));
+      } catch (err) {
+        if (!opts?.quiet) {
+          setError(err instanceof ApiError ? err.message : "Une erreur est survenue.");
+        }
+      }
+    },
+    [token],
+  );
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void reload();
+    const interval = setInterval(() => void reload({ quiet: true }), POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
   }, [reload]);
 
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
@@ -214,19 +223,26 @@ function VerifierQueue({ token }: { token: string | null }) {
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
-  const reload = useCallback(async () => {
-    try {
-      setItems(
-        await apiFetch<SponsorshipRequestView[]>("/sponsorship-requests/pending", { token }),
-      );
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Une erreur est survenue.");
-    }
-  }, [token]);
+  const reload = useCallback(
+    async (opts?: { quiet?: boolean }) => {
+      try {
+        setItems(
+          await apiFetch<SponsorshipRequestView[]>("/sponsorship-requests/pending", { token }),
+        );
+      } catch (err) {
+        if (!opts?.quiet) {
+          setError(err instanceof ApiError ? err.message : "Une erreur est survenue.");
+        }
+      }
+    },
+    [token],
+  );
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void reload();
+    const interval = setInterval(() => void reload({ quiet: true }), POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
   }, [reload]);
 
   async function decide(id: string, action: "approve" | "reject") {
@@ -295,9 +311,17 @@ function ApprovedList() {
   const [items, setItems] = useState<ApprovedSponsor[] | null>(null);
 
   useEffect(() => {
-    apiFetch<ApprovedSponsor[]>("/sponsorship-requests/approved")
-      .then(setItems)
-      .catch(() => setItems([]));
+    // Echec en silence apres le 1er chargement reussi (poll quiet) : garde la liste deja
+    // affichee plutot que de la vider sur un rate reseau transitoire.
+    const load = (opts?: { quiet?: boolean }) =>
+      apiFetch<ApprovedSponsor[]>("/sponsorship-requests/approved")
+        .then(setItems)
+        .catch(() => {
+          if (!opts?.quiet) setItems([]);
+        });
+    void load();
+    const interval = setInterval(() => void load({ quiet: true }), POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
   }, []);
 
   if (!items || items.length === 0) return null;
