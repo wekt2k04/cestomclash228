@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api";
 import { ErrorMessage } from "@/components/ErrorMessage";
 import { Spinner } from "@/components/Spinner";
+import { EyeIcon, EyeOffIcon } from "@/components/PasswordToggleIcons";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -15,6 +16,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   // Validation au blur (pas a chaque frappe - NN/g : signaler une erreur
@@ -60,6 +62,9 @@ export default function LoginPage() {
           <input
             required
             type="email"
+            inputMode="email"
+            autoComplete="email"
+            autoFocus
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             onBlur={() => setTouched((t) => ({ ...t, email: true }))}
@@ -76,16 +81,37 @@ export default function LoginPage() {
 
         <label className="flex flex-col gap-1.5 text-sm text-ink-muted">
           Mot de passe
-          <input
-            required
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onBlur={() => setTouched((t) => ({ ...t, password: true }))}
-            aria-invalid={!!passwordError}
-            aria-describedby={passwordError ? "login-password-error" : undefined}
-            className={`input ${passwordError ? "border-red" : ""}`}
-          />
+          {/* autoComplete="current-password" (pas "new-password") - Regle 45 du
+              referentiel UX/UI : distingue explicitement une connexion d'une
+              creation de compte, seul le 2e cas doit inciter le gestionnaire
+              de mots de passe a EN GENERER un nouveau. Bouton oeil
+              montrer/cacher (Regle 8, "saisie redondante" - verifier ce qu'on
+              vient de taper sans tout retaper) : pattern attendu par defaut sur
+              un champ mot de passe en 2026, absent jusqu'ici sur ce formulaire. */}
+          <div className="relative">
+            <input
+              required
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onBlur={() => setTouched((t) => ({ ...t, password: true }))}
+              aria-invalid={!!passwordError}
+              aria-describedby={passwordError ? "login-password-error" : undefined}
+              className={`input pr-11 ${passwordError ? "border-red" : ""}`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={
+                showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"
+              }
+              aria-pressed={showPassword}
+              className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center text-ink-muted hover:text-ink"
+            >
+              {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+            </button>
+          </div>
           {passwordError && (
             <span id="login-password-error" role="alert" className="text-xs text-red">
               {passwordError}

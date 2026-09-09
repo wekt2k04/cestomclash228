@@ -8,6 +8,7 @@ import { apiFetch, ApiError } from "@/lib/api";
 import type { City } from "@/lib/types";
 import { ErrorMessage } from "@/components/ErrorMessage";
 import { Spinner } from "@/components/Spinner";
+import { EyeIcon, EyeOffIcon } from "@/components/PasswordToggleIcons";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;
@@ -20,6 +21,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [homeCityId, setHomeCityId] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [touched, setTouched] = useState<{
@@ -79,6 +81,8 @@ export default function SignupPage() {
         <Field label="Nom affiché" error={displayNameError} errorId="signup-displayname-error">
           <input
             required
+            autoComplete="name"
+            autoFocus
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             onBlur={() => setTouched((t) => ({ ...t, displayName: true }))}
@@ -93,6 +97,8 @@ export default function SignupPage() {
           <input
             required
             type="email"
+            inputMode="email"
+            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             onBlur={() => setTouched((t) => ({ ...t, email: true }))}
@@ -108,22 +114,29 @@ export default function SignupPage() {
           error={passwordError}
           errorId="signup-password-error"
         >
+          {/* autoComplete="new-password" (pas "current-password") - incite le
+              gestionnaire de mots de passe a en GENERER un fort plutot que
+              proposer un mot de passe existant, seul comportement correct a
+              la creation d'un compte (Regle 45). Bouton oeil ajoute a cote du
+              check vert existant (les 2 coexistent : l'un confirme la
+              longueur minimale, l'autre permet de relire ce qu'on a tape). */}
           <div className="relative">
             <input
               required
               minLength={MIN_PASSWORD_LENGTH}
-              type="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onBlur={() => setTouched((t) => ({ ...t, password: true }))}
               aria-invalid={!!passwordError}
               aria-describedby={passwordError ? "signup-password-error" : undefined}
-              className={`input pr-9 ${passwordError ? "border-red" : ""}`}
+              className={`input pr-16 ${passwordError ? "border-red" : ""}`}
             />
             {passwordLongEnough && (
               <span
                 aria-hidden="true"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-green"
+                className="pointer-events-none absolute right-11 top-1/2 -translate-y-1/2 text-green"
               >
                 <svg viewBox="0 0 20 20" width="16" height="16" fill="none">
                   <path
@@ -136,6 +149,17 @@ export default function SignupPage() {
                 </svg>
               </span>
             )}
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={
+                showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"
+              }
+              aria-pressed={showPassword}
+              className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center text-ink-muted hover:text-ink"
+            >
+              {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+            </button>
           </div>
         </Field>
 

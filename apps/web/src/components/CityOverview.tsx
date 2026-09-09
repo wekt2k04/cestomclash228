@@ -8,6 +8,7 @@ import { MoroccoMap } from "./MoroccoMap";
 import { CityPanel } from "./CityPanel";
 import { CreateSheet } from "./CreateSheet";
 import { WelcomeIntro } from "./WelcomeIntro";
+import { PageHint } from "./PageHint";
 
 // Remplace l'ancien SocialMap (MapLibre) par la vue "carte du Maroc stylisée
 // + présence par ville" (voir MoroccoMap.tsx). Orchestration : écran d'accueil
@@ -34,6 +35,16 @@ export function CityOverview() {
     // pas seulement son position: absolute).
     <div className="relative flex min-h-0 flex-1 flex-col overflow-y-auto">
       <Hero />
+      {/* Retour utilisateur 2026-09-09 : "les pages pour voir des bounties
+          sont ou ? Je ne vois que la carte. Pas d'explication." Le texte de
+          Hero.tsx donnait deja une piste mais se fondait dans le reste - cette
+          astuce se distingue visuellement et nomme explicitement les 2
+          concepts produit (Pins/Bounties) plutot qu'une reformulation vague. */}
+      <PageHint id="map-pins-bounties">
+        Clique sur une ville pour voir ses <strong className="text-ink">Pins</strong> (astuces
+        déposées) et <strong className="text-ink">Bounties</strong> (demandes d&apos;aide) — ou
+        utilise le bouton <strong className="text-ink">Créer</strong> pour en ajouter un toi-même.
+      </PageHint>
       <MoroccoMap onSelectCity={setSelectedCity} />
 
       {/* fixed, pas absolute : ancre au viewport reel plutot qu'a la hauteur (potentiellement

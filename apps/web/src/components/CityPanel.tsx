@@ -115,7 +115,8 @@ export function CityPanel({
 
         {!loading && !loadError && pins.length === 0 && bounties.length === 0 && (
           <p className="text-sm text-ink-muted">
-            Rien pour l&apos;instant dans cette ville.
+            Rien pour l&apos;instant dans cette ville — sois le premier à déposer une astuce ou
+            une demande d&apos;aide avec le bouton « Créer ».
           </p>
         )}
 

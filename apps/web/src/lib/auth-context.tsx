@@ -97,6 +97,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [hydrate]);
 
+  // Best-effort seulement - a la difference de hydrate() (verifie un token PERSISTE, dont on ne
+  // sait rien a priori), on vient ICI de prouver des identifiants valides via /auth/login ou
+  // /auth/signup (qui a deja renvoye un vrai objet user - voir applyAuthResult). Un echec de
+  // CET appel secondaire (reseau, cold start Render juste apres le premier appel, etc.) ne doit
+  // jamais deconnecter quelqu'un qui vient de reussir sa connexion. Bug reel corrige le
+  // 2026-09-09 (retour utilisateur : "deconnexion instantanee") : hydrate() etait jusqu'ici
+  // rappele juste apres applyAuthResult() dans login()/signup(), et effacait purement et
+  // simplement toute la session au moindre rate de CE SEUL appel secondaire - alors que le
+  // premier (login/signup lui-meme) avait deja reussi. Le garde `s.token === token` evite
+  // d'ecraser un etat plus recent si l'utilisateur s'est deja reconnecte/deconnecte entre-temps.
+  const refreshRoleBestEffort = useCallback(async (token: string) => {
+    try {
+      const me = await apiFetch<{ user: PublicUser; role: Role | null }>(
+        "/auth/me",
+        { token },
+      );
+      setState((s) => (s.token === token ? { ...s, user: me.user, role: me.role } : s));
+    } catch {
+      // Echec silencieux assume : la session reste valide (token+user deja poses par
+      // applyAuthResult juste avant), seul le role reste potentiellement pas a jour jusqu'au
+      // prochain rechargement de page (ou le hydrate() strict du montage le revalidera).
+    }
+  }, []);
+
   const applyAuthResult = (result: AuthResult) => {
     try {
       localStorage.setItem(TOKEN_STORAGE_KEY, result.accessToken);
@@ -117,7 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       body: JSON.stringify({ email, password }),
     });
     applyAuthResult(result);
-    await hydrate(result.accessToken);
+    void refreshRoleBestEffort(result.accessToken);
   };
 
   const signup = async (
@@ -131,7 +155,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       body: JSON.stringify({ email, password, displayName, homeCityId }),
     });
     applyAuthResult(result);
-    await hydrate(result.accessToken);
+    void refreshRoleBestEffort(result.accessToken);
   };
 
   const logout = () => {
