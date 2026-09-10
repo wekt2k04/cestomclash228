@@ -9,6 +9,8 @@ import type { BountyView } from "@/lib/types";
 import { BOUNTY_STATUS_BADGE } from "@/lib/badge-styles";
 import { ErrorMessage } from "./ErrorMessage";
 import { Spinner } from "./Spinner";
+import { BountyInterestsPanel } from "./BountyInterestsPanel";
+import { BountyChat } from "./BountyChat";
 
 // PAS de <DetailSheet> propre ici - voir la note equivalente dans PinDetail.tsx (bug reel
 // corrige le 2026-09-09 : 2 DetailSheet montes/demontes dans le meme commit React
@@ -32,7 +34,11 @@ export function BountyDetail({
 
   const isAuthor = user?.id === bounty.authorId;
   const isClaimant = user?.id === bounty.claimedById;
-  const canClaim = Boolean(user) && !isAuthor && bounty.status === "open";
+  const isPriced = bounty.priceMad !== null;
+  // Bounty payante : pas de "prendre en charge" instantane - passe par
+  // BountyInterestsPanel (proposer/choisir/preuve/confirmer), voir plus bas.
+  const canClaim =
+    Boolean(user) && !isAuthor && bounty.status === "open" && !isPriced;
   const canResolve =
     (isAuthor || isClaimant) && bounty.status === "claimed";
   const canRate =
@@ -95,6 +101,11 @@ export function BountyDetail({
         </div>
 
         <h2 className="font-head text-base font-bold text-ink">{bounty.title}</h2>
+        {isPriced && (
+          <p className="font-head text-lg font-bold text-terracotta">
+            {bounty.priceMad} MAD
+          </p>
+        )}
         <p className="text-sm text-ink-muted">{bounty.description}</p>
         <p className="text-xs text-ink-faint">
           {bounty.cityName} · par {bounty.authorDisplayName}
@@ -142,6 +153,13 @@ export function BountyDetail({
             )}
           </button>
         )}
+
+        {isPriced && bounty.status === "open" && (
+          <BountyInterestsPanel bounty={bounty} onBountyChanged={onChanged} />
+        )}
+
+        {(bounty.status === "claimed" || bounty.status === "resolved") &&
+          (isAuthor || isClaimant) && <BountyChat bountyId={bounty.id} />}
 
         {bounty.ratingValue !== null && (
           <div className="rounded-lg border border-line bg-bg-elevated p-3">

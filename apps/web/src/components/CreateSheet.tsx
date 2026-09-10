@@ -36,6 +36,10 @@ export function CreateSheet({
   const [description, setDescription] = useState("");
   const [pinType, setPinType] = useState<PinType>("astuce");
   const [durationHours, setDurationHours] = useState(2);
+  // Chaine (pas number) pour laisser le champ vide par defaut sans jongler avec NaN - vide =
+  // Bounty gratuite, le chemin "prendre en charge" direct existant reste inchange. Non-vide =
+  // parcours payant (propositions/confiance/preuve, voir BountyDetail.tsx).
+  const [priceMad, setPriceMad] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   // Validation au blur, pas a chaque frappe (NN/g : signaler une erreur
@@ -62,6 +66,7 @@ export function CreateSheet({
       // approximatif de la ville choisie (voir lib/morocco-geo.ts).
       const city = CITIES.find((c) => c.name === cityName) ?? CITIES[0];
       if (kind === "bounty") {
+        const trimmedPrice = priceMad.trim();
         const bounty = await apiFetch<BountyView>("/bounties", {
           method: "POST",
           token,
@@ -71,6 +76,7 @@ export function CreateSheet({
             lat: city.lat,
             lng: city.lng,
             durationHours,
+            ...(trimmedPrice ? { priceMad: Number(trimmedPrice) } : {}),
           }),
         });
         onBountyCreated(bounty);
@@ -173,17 +179,42 @@ export function CreateSheet({
         </label>
 
         {kind === "bounty" ? (
-          <div className="flex gap-2">
-            {DURATIONS.map((h) => (
-              <TabButton
-                key={h}
-                active={durationHours === h}
-                onClick={() => setDurationHours(h)}
-              >
-                {h} h
-              </TabButton>
-            ))}
-          </div>
+          <>
+            <div className="flex gap-2">
+              {DURATIONS.map((h) => (
+                <TabButton
+                  key={h}
+                  active={durationHours === h}
+                  onClick={() => setDurationHours(h)}
+                >
+                  {h} h
+                </TabButton>
+              ))}
+            </div>
+
+            <label className="flex flex-col gap-1.5 text-sm text-ink-muted">
+              Prix (MAD, optionnel)
+              {/* Vide = gratuite (comportement historique inchange, "prendre en charge"
+                  directement) - retour utilisateur 2026-09-10 : un vrai parcours (plusieurs
+                  personnes proposent leur aide, tu choisis sur la base de leur profil, preuve
+                  de paiement avant que le chat ne s'active) se declenche des qu'un prix est
+                  indique, voir BountyDetail.tsx. */}
+              <input
+                type="number"
+                min="1"
+                step="0.01"
+                inputMode="decimal"
+                value={priceMad}
+                onChange={(e) => setPriceMad(e.target.value)}
+                placeholder="Laisser vide pour une Bounty gratuite"
+                className="input"
+              />
+              <span className="text-xs text-ink-faint">
+                Indiqué → plusieurs personnes pourront proposer leur aide, tu choisiras et une
+                preuve de paiement sera demandée avant le chat.
+              </span>
+            </label>
+          </>
         ) : (
           <div className="grid grid-cols-2 gap-2">
             {PIN_TYPES.map((t) => (

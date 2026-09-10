@@ -11,9 +11,12 @@ import { CITIES, MOROCCO_OUTLINE_PATH, MOROCCO_VIEWBOX } from "@/lib/morocco-geo
 // dependance reseau externe (pas de tuiles, pas de style distant) et
 // s'adapte nativement a la taille de l'ecran via viewBox.
 //
-// Compteurs par ville = effectif CESTOM reel (CityGeo.members, source
-// cestom.org - voir morocco-geo.ts), plus le hash deterministe factice
-// utilise avant le 2026-08-31 (l'utilisateur a fourni les vrais chiffres).
+// Compteurs par ville = nombre REEL de Pins+Bounties postes pour cette ville (prop `counts`,
+// calculee par CityOverview.tsx depuis /pins+/bounties - reactivite, poll 20s) - changement du
+// 2026-09-10, remplace l'effectif CESTOM statique (CityGeo.members) qui ne bougeait jamais et se
+// confondait avec "nombre d'utilisateurs inscrits" alors que ce sont 2 choses differentes
+// (effectif reel deplace en bas de page, voir le <footer> de CityOverview.tsx). CityGeo garde
+// members pour CET usage-la, mais plus pour le rendu de cette carte.
 // Chaque ville est un <g role="button" tabIndex={0}> plutot qu'un simple
 // onClick - un <g> SVG sans ça n'est ni focusable ni activable au clavier,
 // gap d'accessibilite reel (NN/g : toute action doit rester operable au
@@ -51,15 +54,17 @@ const HIT_RADIUS = 19;
 
 export function MoroccoMap({
   onSelectCity,
+  counts,
 }: {
   onSelectCity: (cityName: string) => void;
+  counts: Record<string, number>;
 }) {
   const [hovered, setHovered] = useState<string | null>(null);
 
-  const presence = Object.fromEntries(CITIES.map((c) => [c.name, c.members]));
-  const counts = CITIES.map((c) => presence[c.name]);
-  const minCount = Math.min(...counts);
-  const maxCount = Math.max(...counts);
+  const presence = counts;
+  const countValues = CITIES.map((c) => presence[c.name] ?? 0);
+  const minCount = Math.min(...countValues);
+  const maxCount = Math.max(...countValues);
   // Racine carree plutot que lineaire : 220 vs 30 membres = ratio brut 7.3x,
   // qui ecraserait visuellement les petites villes si applique directement
   // au rayon. sqrt() ramene le ratio a ~2.7x, plus lisible - la taille du
@@ -87,7 +92,7 @@ export function MoroccoMap({
   // donc plus rien ne l'est). Pas de nouvelle couleur : reutilise --gold,
   // deja dans la palette a 4 accents existante (voir globals.css).
   const topCityName = CITIES.reduce((best, c) =>
-    presence[c.name] > presence[best.name] ? c : best,
+    (presence[c.name] ?? 0) > (presence[best.name] ?? 0) ? c : best,
   ).name;
 
   return (
@@ -95,7 +100,7 @@ export function MoroccoMap({
       <svg
         viewBox={MOROCCO_VIEWBOX}
         className="h-full max-h-[720px] w-full max-w-[720px]"
-        aria-label="Carte du Maroc avec le nombre de personnes présentes par ville - sélectionne une ville pour voir son contenu"
+        aria-label="Carte du Maroc avec le nombre de Pins et Bounties actifs par ville - sélectionne une ville pour voir son contenu"
       >
         <defs>
           <linearGradient id="mc-outline-grad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -113,7 +118,7 @@ export function MoroccoMap({
         />
 
         {CITIES.map((city) => {
-          const count = presence[city.name];
+          const count = presence[city.name] ?? 0;
           const r = radiusFor(count);
           const color = colorFor(count);
           const isHovered = hovered === city.name;
@@ -133,7 +138,7 @@ export function MoroccoMap({
               }}
               role="button"
               tabIndex={0}
-              aria-label={`${city.name} — ${count} présent·e·s`}
+              aria-label={`${city.name} — ${count} Pin${count === 1 ? "" : "s"}/Bounties`}
               style={{ cursor: "pointer" }}
             >
               {/* Cible tactile invisible, voir HIT_RADIUS plus haut. pointer-events="all"

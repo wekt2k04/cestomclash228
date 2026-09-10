@@ -92,6 +92,17 @@ export class BountyInterestsService {
     }
   }
 
+  // Reponse a "est-ce que J'AI deja propose mon aide ici ?" - distinct de findCandidates()
+  // (reserve a l'auteur, voit TOUS les candidats) : n'importe quel candidat potentiel doit
+  // pouvoir retrouver l'etat de SA PROPRE proposition apres un rechargement de page, sans jamais
+  // voir celles des autres.
+  async findMine(
+    userId: string,
+    bountyId: string,
+  ): Promise<BountyInterest | null> {
+    return this.interests.findOne({ where: { bountyId, userId } });
+  }
+
   async findCandidates(
     actorId: string,
     bountyId: string,

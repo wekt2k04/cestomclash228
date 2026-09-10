@@ -53,6 +53,18 @@ export interface PinCluster {
 
 export type BountyStatus = "open" | "claimed" | "resolved" | "expired";
 
+// Marketplace (apps/api/src/bounties/bounty-kind.enum.ts / service-category.enum.ts, etendu cote
+// API le 2026-09-09) - kind reste "request" pour toute Bounty creee ici (l'"offre de service"
+// n'a pas de flux de creation dedie cote frontend, hors perimetre de ce projet).
+export type BountyKind = "request" | "offer";
+export type ServiceCategory =
+  | "tutorat"
+  | "traduction"
+  | "aide_administrative"
+  | "covoiturage"
+  | "demenagement"
+  | "autre";
+
 export interface BountyView {
   id: string;
   title: string;
@@ -70,6 +82,54 @@ export interface BountyView {
   resolvedAt: string | null;
   ratingValue: number | null;
   ratingComment: string | null;
+  kind: BountyKind;
+  // null = Bounty gratuite (chemin "prendre en charge" direct, /bounties/:id/claim). Non-null =
+  // parcours payant (propositions/confiance/preuve, voir BountyInterestView plus bas).
+  priceMad: number | null;
+  isRemote: boolean;
+  category: ServiceCategory | null;
+  createdAt: string;
+}
+
+export type BountyInterestStatus = "pending" | "accepted" | "declined" | "confirmed";
+export type TrustBadge = "nouveau" | "actif" | "fiable";
+
+// Vue candidat (GET /bounties/:id/interests, reservee a l'auteur) - trustBadge/completedCount/
+// averageRating sont CALCULES cote serveur depuis l'historique reel de Bounties resolues du
+// candidat (voir BountyInterestsService.findCandidates()), jamais des champs de profil
+// editables.
+export interface BountyInterestCandidateView {
+  id: string;
+  userId: string;
+  displayName: string;
+  status: BountyInterestStatus;
+  proofImageUrl: string | null;
+  proofSubmittedAt: string | null;
+  createdAt: string;
+  completedCount: number;
+  averageRating: number | null;
+  trustBadge: TrustBadge;
+}
+
+// Vue "ma proposition" (reponse de POST/PATCH /bounties/:id/interests, /bounty-interests/:id/*) -
+// forme complete renvoyee par le backend (bounty/user imbriques, eager) mais seuls ces champs
+// sont utilises cote frontend.
+export interface BountyInterestView {
+  id: string;
+  bountyId: string;
+  userId: string;
+  status: BountyInterestStatus;
+  proofImageUrl: string | null;
+  proofSubmittedAt: string | null;
+  createdAt: string;
+}
+
+export interface MessageView {
+  id: string;
+  conversationId: string;
+  authorId: string;
+  author: { displayName: string };
+  body: string;
   createdAt: string;
 }
 

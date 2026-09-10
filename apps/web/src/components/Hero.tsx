@@ -38,19 +38,23 @@ export function Hero() {
           Rejoindre la communauté
         </Link>
       )}
-      {/* Bug de decouvrabilite reel trouve le 2026-09-09 en creusant le
-          retour "les pages sont ou ?" : le lien "Sponsoring" du Header est
-          `hidden sm:inline` (economie de largeur voulue et documentee dans
-          Header.tsx) - sur mobile, ecran principal vise par ce projet, la
-          page /sponsoring n'avait ALORS plus aucun point d'entree. Repris
-          ici, visible a toutes les tailles, sans toucher au budget de
-          largeur deja mesure du Header. */}
-      <Link
-        href="/sponsoring"
-        className="mt-3 inline-block text-xs text-ink-muted underline hover:text-ink"
-      >
-        Voir les sponsors vérifiés →
-      </Link>
+      {/* Bug de decouvrabilite reel trouve le 2026-09-09 en creusant le retour "les pages sont
+          ou ?" : ces liens sont `hidden sm:inline` dans le Header (economie de largeur voulue
+          et documentee, budget deja au maximum mesure) - sur mobile, ecran principal vise par
+          ce projet, ces pages n'avaient ALORS plus aucun point d'entree. Repris ici, visibles a
+          toutes les tailles ; "Pins"/"Bounties" ajoutes le 2026-09-10 (memes pages globales que
+          les nouveaux liens du Header). */}
+      <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink-muted">
+        <Link href="/pins" className="underline hover:text-ink">
+          Voir tous les Pins →
+        </Link>
+        <Link href="/bounties" className="underline hover:text-ink">
+          Voir toutes les Bounties →
+        </Link>
+        <Link href="/sponsoring" className="underline hover:text-ink">
+          Voir les sponsors vérifiés →
+        </Link>
+      </div>
     </section>
   );
 }

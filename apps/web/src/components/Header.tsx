@@ -52,6 +52,21 @@ export function Header() {
       </Link>
 
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
+        {/* Meme repli mobile que Sponsoring (deja etabli) : caches ici des `sm:` par economie de
+            largeur (voir la note plus haut), repris en clair dans Hero.tsx pour rester
+            atteignables sur mobile - budget de largeur du Header deja au maximum mesure. */}
+        <Link
+          href="/pins"
+          className="hidden text-xs text-ink-muted hover:text-ink sm:inline"
+        >
+          Pins
+        </Link>
+        <Link
+          href="/bounties"
+          className="hidden text-xs text-ink-muted hover:text-ink sm:inline"
+        >
+          Bounties
+        </Link>
         <Link
           href="/sponsoring"
           className="hidden text-xs text-ink-muted hover:text-ink sm:inline"

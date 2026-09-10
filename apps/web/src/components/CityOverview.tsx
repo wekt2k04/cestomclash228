@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { apiFetch, POLL_INTERVAL_MS } from "@/lib/api";
+import type { BountyView, PinView } from "@/lib/types";
+import { CITIES } from "@/lib/morocco-geo";
 import { Hero } from "./Hero";
 import { MoroccoMap } from "./MoroccoMap";
 import { CityPanel } from "./CityPanel";
@@ -10,6 +13,44 @@ import { CreateSheet } from "./CreateSheet";
 import { WelcomeIntro } from "./WelcomeIntro";
 import { PageHint } from "./PageHint";
 import { Spinner } from "./Spinner";
+
+// Retour utilisateur 2026-09-10 : les chiffres sur la carte doivent etre le nombre REEL de
+// demandes (Pins+Bounties, tous statuts confondus - "tout ce qui a ete deja poste ici") pour
+// cette ville, pas l'effectif CESTOM statique (deplace en bas de page, voir le <footer>
+// plus bas) - une carte qui reflete l'activite reelle de la communaute plutot qu'un chiffre qui
+// ne bouge jamais. Poll 20s (meme pattern que CityPanel.tsx ce soir) : la carte est le tout
+// premier ecran vu, c'est le meilleur endroit pour que la reactivite se voie.
+function useCityActivityCounts(): Record<string, number> {
+  const [counts, setCounts] = useState<Record<string, number>>({});
+
+  const reload = useCallback(async () => {
+    try {
+      const [pins, bounties] = await Promise.all([
+        apiFetch<PinView[]>("/pins"),
+        apiFetch<BountyView[]>("/bounties"),
+      ]);
+      const next: Record<string, number> = {};
+      for (const city of CITIES) next[city.name] = 0;
+      for (const p of pins) next[p.cityName] = (next[p.cityName] ?? 0) + 1;
+      for (const b of bounties) next[b.cityName] = (next[b.cityName] ?? 0) + 1;
+      setCounts(next);
+    } catch {
+      // Silencieux (poll comme au chargement initial) : la carte retombe sur 0 partout
+      // (palier "moyen" uniforme, voir MoroccoMap.tsx) plutot que de bloquer tout l'ecran
+      // d'accueil sur une erreur - le contenu par ville garde sa propre gestion d'erreur
+      // explicite (CityPanel.tsx) au clic.
+    }
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void reload();
+    const interval = setInterval(() => void reload(), POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [reload]);
+
+  return counts;
+}
 
 // Remplace l'ancien SocialMap (MapLibre) par la vue "carte du Maroc stylisée
 // + présence par ville" (voir MoroccoMap.tsx). Orchestration : écran d'accueil
@@ -23,6 +64,10 @@ export function CityOverview() {
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [exploring, setExploring] = useState(false);
+  // Avant tout `return` conditionnel (regle des hooks) - le cout (requete /pins+/bounties
+  // pendant l'ecran de bienvenue/chargement) est negligeable et a l'avantage de pre-charger la
+  // carte avant meme que quelqu'un clique "Explorer".
+  const activityCounts = useCityActivityCounts();
 
   // Bug reel trouve le 2026-09-09 en creusant le retour "deconnexion
   // instantanee" : ce composant decidait avant meme que `loading` existe ici
@@ -68,7 +113,37 @@ export function CityOverview() {
         déposées) et <strong className="text-ink">Bounties</strong> (demandes d&apos;aide) — ou
         utilise le bouton <strong className="text-ink">Créer</strong> pour en ajouter un toi-même.
       </PageHint>
-      <MoroccoMap onSelectCity={setSelectedCity} />
+      <MoroccoMap onSelectCity={setSelectedCity} counts={activityCounts} />
+
+      <footer className="mt-auto border-t border-line px-4 py-5 text-center sm:px-6">
+        <p className="font-head text-sm font-semibold text-ink">
+          Ici, la diaspora togolaise du Maroc ne survit pas seule — elle s&apos;entraide, ville
+          par ville.
+        </p>
+        {/* <details> natif plutot qu'un accordeon en JS - divulgation secondaire (retour
+            utilisateur 2026-09-10 : distinguer clairement l'effectif CESTOM reel du nombre de
+            comptes crees sur l'appli, "un etudiant peut avoir plusieurs comptes") qui n'a pas
+            besoin d'etat React ni d'etre ouverte par defaut. */}
+        <details className="mx-auto mt-3 max-w-md text-left">
+          <summary className="cursor-pointer text-xs text-ink-muted hover:text-ink">
+            Effectif CESTOM réel par ville
+          </summary>
+          <p className="mt-2 text-xs text-ink-faint">
+            Ces chiffres viennent de CESTOM (cestom.org) — la population réelle d&apos;étudiants
+            togolais recensée par ville, distincte du nombre de comptes créés sur cette appli
+            (une même personne peut avoir plusieurs comptes, ce 2ᵉ nombre peut donc dépasser le
+            1ᵉʳ).
+          </p>
+          <ul className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-ink-muted">
+            {CITIES.map((c) => (
+              <li key={c.name} className="flex justify-between">
+                <span>{c.name}</span>
+                <span className="text-ink-faint">{c.members}</span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      </footer>
 
       {/* fixed, pas absolute : ancre au viewport reel plutot qu'a la hauteur (potentiellement
           etendue) de ce conteneur - un bouton d'action flottant doit rester atteignable peu

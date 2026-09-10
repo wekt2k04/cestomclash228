@@ -36,6 +36,18 @@ export class BountyInterestsCollectionController {
   ) {
     return this.interests.findCandidates(user.userId, bountyId);
   }
+
+  // Segment statique ("mine") avant tout parametre dynamique de meme profondeur - aucune
+  // ambiguite ici (ce controller n'a pas de route GET /:id sous ce prefixe), mais garde le
+  // reflexe correct pour la prochaine route ajoutee ici.
+  @UseGuards(JwtAuthGuard)
+  @Get('mine')
+  async mine(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('bountyId') bountyId: string,
+  ) {
+    return (await this.interests.findMine(user.userId, bountyId)) ?? null;
+  }
 }
 
 // Route top-level distincte : accepter/transmettre une preuve/confirmer un paiement se fait sur

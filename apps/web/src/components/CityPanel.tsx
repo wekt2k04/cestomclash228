@@ -171,9 +171,14 @@ export function CityPanel({
                   key={b.id}
                   type="button"
                   onClick={() => setSelectedBounty(b)}
-                  className={`rounded-lg border-l-4 ${badge.accentClassName} bg-bg-elevated px-3 py-2 text-left text-sm text-ink`}
+                  className={`flex items-center justify-between gap-2 rounded-lg border-l-4 ${badge.accentClassName} bg-bg-elevated px-3 py-2 text-left text-sm text-ink`}
                 >
-                  {b.title}
+                  <span className="truncate">{b.title}</span>
+                  {b.priceMad !== null && (
+                    <span className="shrink-0 font-head text-xs font-bold text-terracotta">
+                      {b.priceMad} MAD
+                    </span>
+                  )}
                 </button>
               );
             })}
