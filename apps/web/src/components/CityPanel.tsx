@@ -126,7 +126,7 @@ export function CityPanel({
           />
         </div>
       ) : (
-      <div className="flex max-h-[60vh] flex-col gap-3 overflow-y-auto">
+      <div className="flex max-h-[60dvh] flex-col gap-3 overflow-y-auto">
         <h2 className="font-head text-base font-bold text-ink">{cityName}</h2>
 
         {loading && <CityPanelSkeleton />}

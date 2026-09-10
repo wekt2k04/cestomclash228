@@ -106,6 +106,15 @@
   }
 
   .btn-primary {
+    /* min-height 44px (audit mobile-render-audit du 2026-09-10) - le padding+texte seuls
+       retombaient a ~42px, sous la cible tactile recommandee (WCAG 2.5.5 / NN/g). inline-flex
+       centre le contenu si la boite finit plus haute que le texte ; sans effet visible quand
+       .btn-primary est deja enfant d'un conteneur flex (cas de tous les usages actuels), qui
+       le traite de toute facon comme une boite bloc. */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
     border-radius: 0.6rem;
     background: var(--terracotta);
     color: var(--terracotta-ink);

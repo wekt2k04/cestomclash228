@@ -113,10 +113,10 @@ export function DetailSheet({
         aria-hidden="true"
       />
       <div
-        className="relative w-full max-w-md rounded-t-2xl border border-line bg-bg-card p-4 shadow-2xl sm:m-4 sm:rounded-2xl"
-        style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom, 0px))" }}
+        className="relative flex w-full max-w-md flex-col overflow-hidden rounded-t-2xl border border-line bg-bg-card shadow-2xl sm:m-4 sm:rounded-2xl"
+        style={{ maxHeight: "85dvh" }}
       >
-        <div className="flex justify-end">
+        <div className="flex shrink-0 justify-end px-4 pt-4">
           <button
             type="button"
             onClick={requestClose}
@@ -133,7 +133,18 @@ export function DetailSheet({
             </svg>
           </button>
         </div>
-        {children}
+        {/* Audit mobile-render-audit du 2026-09-10 : cette carte n'avait ni plafond de hauteur
+            ni defilement propre - sur un ecran court avec du contenu dense (ex. plusieurs
+            propositions recues sur une Bounty payante), le haut du panneau pouvait deborder
+            hors ecran, bouton de fermeture inclus, sans aucun moyen d'y acceder (le body est
+            verrouille pendant qu'une sheet est ouverte, voir plus bas). Le bouton de fermeture
+            reste maintenant hors de cette zone de defilement, toujours atteignable. */}
+        <div
+          className="overflow-y-auto px-4"
+          style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom, 0px))" }}
+        >
+          {children}
+        </div>
       </div>
     </div>
   );

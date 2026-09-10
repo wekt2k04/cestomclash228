@@ -165,7 +165,7 @@ function AuthorView({
             >
               {TRUST_BADGE_LABEL[c.trustBadge]}
               {c.completedCount > 0 &&
-                ` · ${c.completedCount} · ${c.averageRating?.toFixed(1)}/5`}
+                ` · ${c.completedCount}${c.averageRating !== null ? ` · ${c.averageRating.toFixed(1)}/5` : ""}`}
             </span>
           </div>
 
