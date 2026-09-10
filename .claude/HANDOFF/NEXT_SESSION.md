@@ -25,25 +25,38 @@ CESTOM statique, deplace dans un `<footer>` avec le slogan demande). Base peuple
 (noms togolais reels, script `seed-community.ts`), 12 Pins, 12 Bounties (4 payantes). Detail
 complet et raisonnement dans `LOG.md`.
 
-**Encore en attente, dans l'ordre de priorité probable** :
+## DIRECTIVE ACTUELLE, EXPLICITE — LIRE AVANT TOUTE CHOSE
+
+Décidé par l'utilisateur le 2026-09-10 en fin de session, après un état des lieux honnête sur la
+maturité du projet : **plus aucun ajout de fonctionnalité avant l'échéance du concours
+(2026-09-12/13). Concentration uniquement sur le rendering/la robustesse** (corriger, vérifier,
+polir — ne rien construire de nouveau). Ne pas reprendre la "3e catégorie" (fil communautaire, ci-
+dessous) ni tout autre chantier neuf sans une nouvelle demande explicite de l'utilisateur, même si
+elle a été discutée ou semblait planifiée plus tôt dans une session précédente. Un audit Android
+bas de gamme (agent `mobile-render-audit`, lecture de code) a été fait le soir même et a trouvé un
+vrai bug (`DetailSheet` sans plafond de hauteur/défilement) — corrigé, déployé, vérifié en direct
+par inspection DOM/CSS (voir `LOG.md`, entrée "Audit rendu Android bas de gamme..."). C'est le
+type de travail attendu maintenant : correctifs de rendu ciblés, pas de nouvelles fonctionnalités.
+
+**Encore en attente, mais NE PAS DÉMARRER sans confirmation explicite (directive ci-dessus)** :
 1. Le "3e categorie" demande par l'utilisateur : un fil communautaire ANONYMISE (ville visible,
    identite reelle cachee - "pour ne pas permettre aux gens de passer outre l'appli") des
    demandes d'aide passees/en cours, upvotable, pour inspirer/faire apprendre d'autres etudiants.
-   Explicitement mis en attente ce soir pour ne pas fragmenter le travail en cours sur le
-   marketplace payant - jamais commence.
-2. Verification rendu sur Android bas de gamme (classe Infinix Hot 30i) - la largeur (360-393px)
-   est deja couverte et mesuree, mais les NOUVEAUX ecrans (liste de propositions, formulaire de
-   preuve, chat) n'ont pas encore ete verifies specifiquement sur une grille de hauteurs reduite.
-3. Test E2E avec 2 vrais comptes utilisateur (PAS les comptes UI Test/smoketest, deja supprimes)
+   Une tentative d'y donner suite ce soir reposait sur une réponse `AskUserQuestion` que
+   l'utilisateur a ensuite explicitement démentie ("Je n'ai rien choisi") - aucun code n'a été
+   écrit pour cette fonctionnalité. Reste non construite ET non autorisée pour l'instant.
+2. Animation logo inclinée + effacement/réécriture façon machine à écrire — concept explicitement
+   différé par l'utilisateur à après les bugs fonctionnels, jamais construit.
+3. Reste du plan `zesty-knitting-biscuit.md` non repris ci-dessus (CitySeat, NeedsTemplates,
+   refonte visuelle "carnet de terrain", 2 documents pitch) reste entièrement non construit.
+
+**Compatible avec la directive "rendering only" ci-dessus, donc légitime à continuer** :
+4. Test E2E avec 2 vrais comptes utilisateur (PAS les comptes UI Test/smoketest, deja supprimes)
    - explicitement demande par l'utilisateur pour "la toute fin, une fois que tous les patchs
    auront ete faits". Le parcours payant complet a deja ete rejoue avec 2 comptes jetables ce
    soir (voir LOG.md) ; ce point concerne un vrai passage avec les comptes reels de
-   l'utilisateur, sur son propre telephone notamment.
-4. Animation logo inclinée + effacement/réécriture façon machine à écrire — concept explicitement
-   différé par l'utilisateur à après les bugs fonctionnels, jamais construit.
-5. Reste du plan `zesty-knitting-biscuit.md` non repris ci-dessus (CitySeat, NeedsTemplates,
-   refonte visuelle "carnet de terrain", 2 documents pitch) reste entièrement non construit.
-6. Vérifier avec l'utilisateur si le PPT jury a bien été confirmé soumis (voir section calendrier
+   l'utilisateur, sur son propre telephone notamment - c'est une vérification, pas une feature.
+5. Vérifier avec l'utilisateur si le PPT jury a bien été confirmé soumis (voir section calendrier
    ci-dessous, point jamais confirmé explicitement dans le chat WhatsApp exporté).
 
 ## Calendrier concours confirmé (2026-09-09) — change la priorité immédiate

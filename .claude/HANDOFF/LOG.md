@@ -1108,3 +1108,41 @@ que le rendu final n'est jamais cassé (vérifié à chaque incrément, pas supp
   inspiré des demandes passées) demandée par l'utilisateur puis explicitement mise en attente
   pour ne pas fragmenter le travail de ce soir ; le test e2e avec les 2 VRAIS comptes personnels
   de l'utilisateur (distinct des 2 comptes jetables utilisés pour la vérification ci-dessus).
+
+## 2026-09-10 (suite) — Audit rendu Android bas de gamme + correctif + recadrage explicite : rendering only, plus de nouvelle fonctionnalité
+
+Immédiatement après le lot ci-dessus, audit dédié (agent `mobile-render-audit`, lecture de code
+uniquement — aucun appareil réel disponible dans cet environnement) sur les écrans neufs les plus
+denses (`BountyInterestsPanel`, `BountyChat`, `BountyDetail`, pages globales). Un vrai bug trouvé,
+haute confiance : `DetailSheet.tsx` n'avait ni plafond de hauteur ni défilement interne propre —
+sur un écran court avec du contenu dense, le haut du panneau (bouton de fermeture inclus) pouvait
+déborder hors écran sans aucun moyen d'y accéder (le `<body>` est verrouillé pendant qu'une sheet
+est ouverte). Corrigé (`e068214`) : bouton de fermeture sorti de la zone de défilement, contenu
+plafonné à `85dvh` avec défilement interne propre. Compagnons corrigés dans les mêmes fichiers déjà
+en scope : `.btn-primary` passait à ~42px de hauteur (sous la cible tactile 44px recommandée,
+motif pré-existant réutilisé partout — corrigé une fois dans `globals.css`, effet global) ;
+`CityPanel.tsx` `60vh`→`60dvh` (cohérence, l'audit l'a noté sévérité faible) ; badge de confiance
+de `BountyInterestsPanel.tsx` affichant littéralement "undefined/5" pour un candidat ayant des
+Bounties complétées mais aucune notation reçue (`averageRating` peut être `null` avec
+`completedCount > 0` — état réel atteignable, pas un cas limite théorique).
+
+**Recadrage explicite de l'utilisateur, survenu au milieu de ce travail** : avant cet audit, un
+appel `AskUserQuestion` avait semblé recueillir un choix ("3e catégorie") — l'utilisateur a
+immédiatement corrigé : *"Je n'ai rien choisi"*. Ce choix n'a jamais été appliqué (aucun code
+écrit pour la 3e catégorie, seulement quelques fichiers lus en préparation) et ne doit pas être
+traité comme une décision actée. L'utilisateur a ensuite demandé un état des lieux honnête
+("Le projet actuel est-il suffisamment solide pour le concours ?") et, la réponse étant oui,
+a explicitement tranché : **arrêt de tout ajout de fonctionnalité, concentration uniquement sur
+le rendering/la robustesse** jusqu'à l'échéance du concours (2026-09-12/13). Le correctif
+ci-dessus est donc le dernier travail autorisé de ce type (rendu/robustesse) — la "3e catégorie"
+reste explicitement NON autorisée, ne pas la reprendre sans nouvelle demande explicite.
+
+**Vérification** : lint/tsc/build propres, déployé sur Firebase Hosting. Capture d'écran
+indisponible ce soir (timeout CDP répété sur `Page.captureScreenshot`, panne connue déjà
+rencontrée cette session) — vérifié à la place par inspection directe du DOM/CSS en direct sur le
+site en production (`javascript_tool`) : contenu factice de 2000px injecté temporairement dans la
+zone de défilement pour forcer un débordement réel → la carte reste plafonnée à sa hauteur max
+calculée (517px sur ce viewport), le bouton de fermeture reste entièrement dans le viewport, et la
+zone de contenu devient effectivement défilable (`scrollHeight` 2295 vs `clientHeight` 472) — preuve
+directe que le bug exact décrit par l'audit ne peut plus se reproduire, plus rigoureuse qu'une
+capture d'écran unique sur le contenu réel du soir (trop court pour déborder naturellement).
