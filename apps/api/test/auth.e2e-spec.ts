@@ -4,6 +4,22 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 
+// supertest type `Response.body` en `any` par defaut (le contenu depend de la route) -
+// interfaces locales pour eviter les acces non types (@typescript-eslint/no-unsafe-member-access,
+// deja applique partout ailleurs dans ce projet).
+interface AuthResponseBody {
+  accessToken: string;
+  user: { email: string };
+}
+
+interface MeResponseBody {
+  user: { email: string };
+}
+
+interface ErrorResponseBody {
+  message: string;
+}
+
 // Couverture ajoutee le 2026-09-09 suite au bug reel "deconnexion instantanee"
 // (voir LOG.md) : le module auth n'avait jusqu'ici AUCUN test, alors que
 // c'est precisement la ou les 2 vrais bugs de la soiree vivaient. Reproduit
@@ -13,6 +29,8 @@ import { AppModule } from './../src/app.module';
 describe('Auth (e2e)', () => {
   let app: INestApplication<App>;
 
+  // Timeout explicite (defaut Jest : 5000ms) - voir la meme note dans
+  // bounty-interests-and-chat.e2e-spec.ts, flake observe une fois sur ce pattern exact.
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -27,7 +45,7 @@ describe('Auth (e2e)', () => {
       }),
     );
     await app.init();
-  });
+  }, 15_000);
 
   afterEach(async () => {
     await app.close();
@@ -47,15 +65,16 @@ describe('Auth (e2e)', () => {
       .send({ email, password: 'password123', displayName: 'E2E Auth' })
       .expect(201);
 
-    expect(signupRes.body.accessToken).toEqual(expect.any(String));
-    expect(signupRes.body.user.email).toBe(email);
+    const signupBody = signupRes.body as AuthResponseBody;
+    expect(signupBody.accessToken).toEqual(expect.any(String));
+    expect(signupBody.user.email).toBe(email);
 
     const meRes = await request(app.getHttpServer())
       .get('/auth/me')
-      .set('Authorization', `Bearer ${signupRes.body.accessToken}`)
+      .set('Authorization', `Bearer ${signupBody.accessToken}`)
       .expect(200);
 
-    expect(meRes.body.user.email).toBe(email);
+    expect((meRes.body as MeResponseBody).user.email).toBe(email);
   });
 
   it('signup avec un email deja utilise est rejete (409)', async () => {
@@ -84,9 +103,10 @@ describe('Auth (e2e)', () => {
       .send({ email, password })
       .expect(201);
 
+    const loginBody = loginRes.body as AuthResponseBody;
     await request(app.getHttpServer())
       .get('/auth/me')
-      .set('Authorization', `Bearer ${loginRes.body.accessToken}`)
+      .set('Authorization', `Bearer ${loginBody.accessToken}`)
       .expect(200);
   });
 
@@ -109,7 +129,9 @@ describe('Auth (e2e)', () => {
 
     // auth.service.ts::login - meme message generique dans les 2 cas, ne
     // doit jamais permettre de deviner si un email est inscrit.
-    expect(wrongPassword.body.message).toBe(unknownEmail.body.message);
+    expect((wrongPassword.body as ErrorResponseBody).message).toBe(
+      (unknownEmail.body as ErrorResponseBody).message,
+    );
   });
 
   it('/auth/me est rejete (401) sans token et avec un token invalide', async () => {

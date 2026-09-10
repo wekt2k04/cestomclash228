@@ -11,6 +11,7 @@ import { Bounty } from './entities/bounty.entity';
 import { BountyStatus } from './bounty-status.enum';
 import { BountyKind } from './bounty-kind.enum';
 import { CitiesService } from '../cities/cities.service';
+import { ChatService } from '../chat/chat.service';
 
 // Cible claim() et resolve() : c'est la ou vit la logique metier a risque
 // (reclamation atomique, empecher l'auto-reclamation, qui a le droit de
@@ -41,14 +42,20 @@ describe('BountiesService', () => {
       ...overrides,
     }) as Bounty;
 
+  let chatService: { ensureConversationForBounty: jest.Mock };
+
   beforeEach(async () => {
     bountiesRepo = { query: jest.fn(), findOne: jest.fn(), update: jest.fn() };
+    chatService = {
+      ensureConversationForBounty: jest.fn().mockResolvedValue(undefined),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         BountiesService,
         { provide: getRepositoryToken(Bounty), useValue: bountiesRepo },
         { provide: CitiesService, useValue: {} },
+        { provide: ChatService, useValue: chatService },
       ],
     }).compile();
 
@@ -126,6 +133,10 @@ describe('BountiesService', () => {
       expect(findOneSpy).toHaveBeenCalledWith('bounty-1');
       expect(result).toEqual({ id: 'bounty-1' });
       expect(bountiesRepo.findOne).not.toHaveBeenCalled(); // pas besoin du chemin d'erreur
+      // Chat active des la reclamation reussie (voir bounties.service.ts::claim()).
+      expect(chatService.ensureConversationForBounty).toHaveBeenCalledWith(
+        'bounty-1',
+      );
     });
   });
 

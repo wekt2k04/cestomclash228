@@ -5,9 +5,15 @@ import { BountiesService } from './bounties.service';
 import { BountiesController } from './bounties.controller';
 import { CitiesModule } from '../cities/cities.module';
 import { RolesModule } from '../roles/roles.module';
+import { ChatModule } from '../chat/chat.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Bounty]), CitiesModule, RolesModule],
+  imports: [
+    TypeOrmModule.forFeature([Bounty]),
+    CitiesModule,
+    RolesModule,
+    ChatModule,
+  ],
   controllers: [BountiesController],
   providers: [BountiesService],
   exports: [BountiesService],

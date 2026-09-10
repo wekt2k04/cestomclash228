@@ -14,6 +14,7 @@ import { ServiceCategory } from './service-category.enum';
 import { CitiesService } from '../cities/cities.service';
 import { CreateBountyDto } from './dto/create-bounty.dto';
 import type { BBox } from '../common/bbox';
+import { ChatService } from '../chat/chat.service';
 
 export interface BountyView {
   id: string;
@@ -50,6 +51,7 @@ export class BountiesService {
     @InjectRepository(Bounty)
     private readonly bounties: Repository<Bounty>,
     private readonly cities: CitiesService,
+    private readonly chat: ChatService,
   ) {}
 
   async create(authorId: string, dto: CreateBountyDto): Promise<BountyView> {
@@ -156,6 +158,11 @@ export class BountiesService {
       // ci-dessus, mais on ne masque jamais un echec silencieusement.
       throw new ConflictException('Impossible de réclamer cette Bounty.');
     }
+
+    // Chat active des qu'une Bounty devient CLAIMED, gratuite ou payante (voir
+    // BountyInterestsService.confirmPayment() pour le chemin payant equivalent) - idempotent,
+    // sans effet si appelee 2 fois (voir ChatService.ensureConversationForBounty()).
+    await this.chat.ensureConversationForBounty(bountyId);
 
     return this.findOne(bountyId);
   }

@@ -14,6 +14,8 @@ import { AuthModule } from './auth/auth.module';
 import { PinsModule } from './pins/pins.module';
 import { BountiesModule } from './bounties/bounties.module';
 import { SponsorshipModule } from './sponsorship/sponsorship.module';
+import { ChatModule } from './chat/chat.module';
+import { BountyInterestsModule } from './bounty-interests/bounty-interests.module';
 
 @Module({
   imports: [
@@ -29,7 +31,9 @@ import { SponsorshipModule } from './sponsorship/sponsorship.module';
     RolesModule,
     AuthModule,
     PinsModule,
+    ChatModule,
     BountiesModule,
+    BountyInterestsModule,
     SponsorshipModule,
   ],
   controllers: [AppController],
