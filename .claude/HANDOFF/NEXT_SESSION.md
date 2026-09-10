@@ -1,38 +1,49 @@
 # NEXT_SESSION
 
-Dernière mise à jour : 2026-09-09.
+Dernière mise à jour : 2026-09-10.
 
 ## État réel à cette date — LIRE EN PREMIER
 
 **L'app est déployée et publique** : https://cestomclash228.web.app (Firebase Hosting) ↔
 https://cestomclash228.onrender.com (NestJS, Render) ↔ Neon (Postgres+PostGIS). Vérifier
-d'abord `git log --oneline -15` et `LOG.md` pour l'état exact — ce fichier dérive vite, l'état
+d'abord `git log --oneline -20` et `LOG.md` pour l'état exact — ce fichier dérive vite, l'état
 réel du code fait foi (CLAUDE.md §5).
 
-Session du soir 2026-09-09 : audit large suite à un retour utilisateur sévère ("expérience
-utilisateur 0/20"). Corrigé et déployé, dans l'ordre : bug "déconnexion instantanée" (2 causes
-distinctes), cache HTML cassé après déploiement (Firebase servait tout en cache 1h, y compris
-le HTML — visiteur qui recharge après un déploiement pouvait recevoir un
-`ChunkLoadError`), ping keep-alive Render (`.github/workflows/keep-alive.yml`), polling passif
-20s sur les listes (Pins/Bounties/Sponsoring), 5 tests e2e réels sur le module auth (jusque-là
-sans AUCUN test), cartes/statuts colorés Pins+Bounties, et un **bug de navigation préexistant
-sérieux** (clic sur un Pin/une Bounty depuis la liste pouvait atterrir sur une autre page du
-site) — détail complet dans `LOG.md`, section "Ping keep-alive Render + polling passif + statuts
-colorés + bug de navigation préexistant corrigé".
+**Session du 2026-09-10 : le marketplace payant reel a ete construit, verifie en direct (2
+vrais comptes, parcours complet rejoue via l'UI) et deploye.** Nouveaux modules backend
+`bounty-interests`/`chat` (migration `1788700000000-AddBountyInterestsAndChat`, 3 nouvelles
+tables) : plusieurs candidats proposent leur aide sur une Bounty payante, l'auteur choisit sur
+la base d'un badge de confiance CALCULE (nouveau/actif/fiable, agrege depuis l'historique reel
+de Bounties resolues - aucune nouvelle colonne de profil), le candidat transmet une preuve de
+paiement (lien image), l'auteur confirme -> la Bounty passe CLAIMED (reutilise tel quel
+status/claimedById existants) et un chat polling 20s s'active (filtre anti-coordonnees). Cote
+frontend : `BountyInterestsPanel.tsx`/`BountyChat.tsx` (nouveaux), integres dans
+`BountyDetail.tsx`. Pages globales `/pins` et `/bounties` (onglets Ouvertes/Prises en
+charge/Archivees), liens dans Header.tsx (>=sm) et Hero.tsx (toujours visibles). Carte
+(`MoroccoMap.tsx`) affiche desormais le nombre REEL de Pins+Bounties par ville (pas l'effectif
+CESTOM statique, deplace dans un `<footer>` avec le slogan demande). Base peuplee : 8 comptes
+(noms togolais reels, script `seed-community.ts`), 12 Pins, 12 Bounties (4 payantes). Detail
+complet et raisonnement dans `LOG.md`.
 
 **Encore en attente, dans l'ordre de priorité probable** :
-1. Test E2E avec 2 vrais comptes utilisateur — explicitement demandé par l'utilisateur, à faire
-   "à la toute fin, une fois que tous les patchs auront été faits" (sa propre formulation). Les
-   patchs fonctionnels du soir sont faits ; c'est probablement le moment.
-2. Nettoyer les artefacts de test dans la vraie base Neon : compte "Debug Test"
-   (`debug-e2e-1788940000@mindclash.local`) et la Bounty "Test E2E debug" qu'il a créée — visible
-   publiquement sur la carte en ce moment.
-3. Animation logo inclinée + effacement/réécriture façon machine à écrire — concept explicitement
+1. Le "3e categorie" demande par l'utilisateur : un fil communautaire ANONYMISE (ville visible,
+   identite reelle cachee - "pour ne pas permettre aux gens de passer outre l'appli") des
+   demandes d'aide passees/en cours, upvotable, pour inspirer/faire apprendre d'autres etudiants.
+   Explicitement mis en attente ce soir pour ne pas fragmenter le travail en cours sur le
+   marketplace payant - jamais commence.
+2. Verification rendu sur Android bas de gamme (classe Infinix Hot 30i) - la largeur (360-393px)
+   est deja couverte et mesuree, mais les NOUVEAUX ecrans (liste de propositions, formulaire de
+   preuve, chat) n'ont pas encore ete verifies specifiquement sur une grille de hauteurs reduite.
+3. Test E2E avec 2 vrais comptes utilisateur (PAS les comptes UI Test/smoketest, deja supprimes)
+   - explicitement demande par l'utilisateur pour "la toute fin, une fois que tous les patchs
+   auront ete faits". Le parcours payant complet a deja ete rejoue avec 2 comptes jetables ce
+   soir (voir LOG.md) ; ce point concerne un vrai passage avec les comptes reels de
+   l'utilisateur, sur son propre telephone notamment.
+4. Animation logo inclinée + effacement/réécriture façon machine à écrire — concept explicitement
    différé par l'utilisateur à après les bugs fonctionnels, jamais construit.
-4. Le reste du plan `zesty-knitting-biscuit.md` (marketplace pay-to-claim, chat + filtre anti-
-   coordonnées, CitySeat, NeedsTemplates, refonte visuelle "carnet de terrain", 2 documents pitch)
-   reste entièrement non construit — le site en ligne est le MVP poli, pas la refonte complète.
-5. Vérifier avec l'utilisateur si le PPT jury a bien été confirmé soumis (voir section calendrier
+5. Reste du plan `zesty-knitting-biscuit.md` non repris ci-dessus (CitySeat, NeedsTemplates,
+   refonte visuelle "carnet de terrain", 2 documents pitch) reste entièrement non construit.
+6. Vérifier avec l'utilisateur si le PPT jury a bien été confirmé soumis (voir section calendrier
    ci-dessous, point jamais confirmé explicitement dans le chat WhatsApp exporté).
 
 ## Calendrier concours confirmé (2026-09-09) — change la priorité immédiate

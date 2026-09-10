@@ -1014,3 +1014,97 @@ direct (lint+tsc+build systématiques, plus Claude in Chrome pour tout ce qui to
   rendu) l'a révélé. Le premier correctif tenté (un seul `DetailSheet`) semblait suffisant sur le
   papier et a quand même laissé le bug intact — ne jamais arrêter la vérification au premier
   correctif plausible quand le symptôme initial était déjà déroutant.
+
+## 2026-09-10 — Marketplace payant réel (offres/confiance/paiement/chat) + pages globales + peuplement + slogan
+
+Demande explicite de l'utilisateur : sur une base jugée "à un stade de maturité qui [lui] plaît
+bien", construire le morceau le plus ambitieux resté en attente — un vrai marché de confiance
+entre étudiants pour les Bounties payantes, pas juste des boutons de statut — plus peupler la
+base avec du contenu réaliste, 2 pages globales de découverte, un slogan, et vérifier le rendu
+Android bas de gamme. Plan validé via `EnterPlanMode`/`ExitPlanMode` avant construction (fichier
+`zesty-knitting-biscuit.md`, contenu précédent — déjà exécuté — entièrement remplacé). Rappel
+explicite de l'utilisateur en cours de route, appliqué : modifier l'existant est autorisé tant
+que le rendu final n'est jamais cassé (vérifié à chaque incrément, pas supposé).
+
+- **Backend — migration unique, 3 nouvelles tables, zéro colonne existante touchée**
+  (`7211052`) : `1788700000000-AddBountyInterestsAndChat.ts` crée `bounty_interests`
+  (`pending|accepted|declined|confirmed`, unique (bountyId,userId), **index unique partiel
+  `WHERE status='accepted'`** — voir plus bas), `conversations` (unique par bountyId),
+  `messages`. Nouveau module `bounty-interests/` : `POST/GET /bounties/:id/interests` (proposer
+  son aide, lister les candidats — auteur seulement), `GET .../interests/mine` (ajouté juste
+  après coup, oublié au premier passage — le candidat doit pouvoir suivre l'état de SA propre
+  proposition sans endpoint réservé à l'auteur), `PATCH /bounty-interests/:id/accept|proof|
+  confirm-payment`. Nouveau module `chat/` : `GET/POST /bounties/:id/messages`, réservé
+  auteur/`claimedById`, filtre anti-coordonnées (`common/contact-filter.ts`, regex téléphone/
+  email/mots-clés WhatsApp etc., réglé pour ne pas bloquer "15h30"/"chambre 204" à tort — testé
+  explicitement). `IsPublicHttpsUrlConstraint` extrait de `sponsorship/dto/` vers
+  `common/validators/` (réutilisé tel quel pour le lien de preuve de paiement — même limitation
+  déjà acceptée pour le Sponsoring : lien vers une image déjà hébergée, pas d'upload de fichier,
+  aucune infra de stockage dans ce projet).
+- **Confiance calculée, pas un profil éditable** : le badge affiché à l'auteur pour chaque
+  candidat (Nouveau/Actif/Fiable) est agrégé par SQL (`COUNT`/`AVG FILTER`) depuis l'historique
+  réel de Bounties déjà résolues où ce candidat était `claimedById` — délibérément AUCUNE
+  nouvelle colonne de profil éditable, hors budget avant l'échéance du concours.
+- **Race condition réelle trouvée et corrigée avant tout déploiement** : un simple `UPDATE ...
+  WHERE status='pending'` protège contre la réacceptation de LA MÊME ligne mais pas contre 2
+  propositions DIFFÉRENTES pour la même Bounty acceptées en concurrence (aucun verrou de ligne
+  naturel entre elles). Corrigé avec l'index unique partiel Postgres `WHERE status='accepted'` —
+  la 2e acceptation concurrente lève une violation `23505`, interceptée proprement en 409 par le
+  service. Vérifié par un vrai test e2e de concurrence forcée (`Promise.allSettled` sur 2 accepts
+  parallèles → exactement 1×200/1×409).
+- **Couverture de test backend** : 61 tests unitaires + 22 tests e2e (dont le test de
+  concurrence ci-dessus, preuve manquante → 409, non-participant au chat → 403, message avant
+  CLAIMED → 409, filtre anti-coordonnées vrais positifs/négatifs, et le chemin gratuit existant
+  via `bounties.service.ts`/`claim()` — comportement/réponse inchangés, chat activé en plus) —
+  tout vert avant tout déploiement.
+- **Frontend** : `BountyInterestsPanel.tsx` (vue auteur : candidats + badges + accepter ; vue
+  candidat : polling de son statut, formulaire preuve, attente) et `BountyChat.tsx` (polling 20s,
+  même pattern que le reste de l'app ce soir), intégrés dans `BountyDetail.tsx` selon l'état
+  (`isPriced`, statut, participant). `CreateSheet.tsx` : champ prix MAD optionnel — vide =
+  Bounty gratuite, chemin `claim()` direct strictement inchangé, zéro régression possible sur ce
+  qui marchait déjà.
+- **Pages globales + découvrabilité** : `/pins` et `/bounties` (nouveau, onglets Ouvertes/Prises
+  en charge/**Archivées** — répond directement à *"une fois qu'une bountie est terminée elle
+  peut passer en archivé mais pas disparaître"*, déjà le comportement réel du backend
+  — `RESOLVED` n'a jamais été supprimée, juste absente de la vue par défaut de `CityPanel`
+  — cette page la rend enfin consultable). Liens dans `Header.tsx` (`sm:` et plus, budget largeur
+  mobile déjà au maximum documenté) ET dans `Hero.tsx` (toujours visibles, même pattern que le
+  lien Sponsoring du 09-09 qui avait révélé ce piège de largeur).
+- **Carte = vraies demandes, pas l'effectif** (retour utilisateur explicite : *"il faut que les
+  chiffres sur la carte soient réellement ceux du nombre de demandes, pas de l'effectif"*) :
+  `MoroccoMap.tsx` affiche désormais `counts` (Pins+Bounties réels par ville, nouveau hook
+  `useCityActivityCounts()` dans `CityOverview.tsx`, polling 20s) au lieu de
+  `CityGeo.members` (effectif CESTOM statique). L'effectif statique n'est pas supprimé — déplacé
+  dans un `<footer>` en bas de `CityOverview.tsx`, `<details>` repliable "Effectif CESTOM réel
+  par ville", avec le texte explicatif demandé (distinction population réelle vs comptes
+  plateforme, "un étudiant peut avoir plusieurs comptes"). Même footer : slogan marketing demandé
+  — **« Ici, la diaspora togolaise du Maroc ne survit pas seule — elle s'entraide, ville par
+  ville. »**
+- **Peuplement réel de la base** (`d57c280`, script `seed-community.ts`) : 8 comptes auteurs
+  (noms togolais réels, Ewe et Kabyè, répartis sur les 6 vraies villes CESTOM), 12 Pins + 12
+  Bounties (4 payantes) sur des sujets concrets de vie étudiante (CIH, CV, colocation, tutorat,
+  démarches administratives, bons plans). Bug réel trouvé en vérifiant le résultat en base (tout
+  se recréait "déjà existant" à chaque relance alors que l'insertion réussissait) :
+  `DataSource.query()` brut (hors Repository) ne renvoie PAS le tuple `[rows, rowCount]` attendu
+  pour un `INSERT ... RETURNING`, contrairement à `Repository.query()` — corrigé avec une
+  vérification défensive de forme, revérifié par une relance propre montrant les bons messages
+  "créé".
+- **Nettoyage production** (`3ad9fa4`, script `cleanup-test-accounts.ts`) : suppression des
+  comptes de test accumulés pendant les vérifications manuelles (`debug-e2e-*`, `smoketest-*`,
+  `ui-test-*`) et leur contenu, dans l'ordre imposé par les FK sans cascade — jamais les comptes
+  `seed-*` ni un vrai compte utilisateur. Exécuté contre Neon (production) avec confirmation,
+  revérifié par `curl` sur `/bounties` en production après coup : exactement les 12 Bounties
+  semées + la Bounty réelle pré-existante d'un vrai utilisateur, aucun résidu de test.
+- **Vérification complète avant de déclarer l'incrément terminé** : 61 tests unitaires + 22 e2e
+  backend verts, lint/tsc/build frontend propres, un smoke test `curl` direct en production, ET
+  le parcours payant complet REJOUÉ EN DIRECT via Claude in Chrome avec 2 vrais comptes créés
+  pour l'occasion (proposer → accepter → soumettre preuve → confirmer paiement → chat → Bounty
+  CLAIMED) — jamais déclaré "fait" sur la seule foi des tests automatisés, conformément à la
+  leçon déjà tirée le 2026-09-09 sur le bug de navigation invisible à `lint`/`tsc`/`build`.
+- **Restent en attente**, explicitement, pour ne pas fragmenter ce lot déjà large : la
+  vérification du rendu sur les NOUVEAUX écrans (liste de propositions, preuve, chat) sur une
+  grille de hauteurs réduites façon Infinix Hot 30i (la largeur 360-393px, elle, est déjà
+  couverte depuis le 09-09) ; la "3e catégorie" (fil communautaire anonymisé, upvotable,
+  inspiré des demandes passées) demandée par l'utilisateur puis explicitement mise en attente
+  pour ne pas fragmenter le travail de ce soir ; le test e2e avec les 2 VRAIS comptes personnels
+  de l'utilisateur (distinct des 2 comptes jetables utilisés pour la vérification ci-dessus).
