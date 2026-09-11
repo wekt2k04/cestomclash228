@@ -27,3 +27,8 @@ pitch/video-render/out/
 pitch/video-render/__pycache__/
 pitch/video-render/*TEMP_MPY*
 pitch/video-render/build_log*.txt
+
+# Export WhatsApp du groupe participants CréaAfrica — contient les numéros/noms d'AUTRES
+# candidats et des photos, jamais destiné à un dépôt public (ce dépôt l'est). Reste en local
+# uniquement, gardé pour référence (annonces de l'organisation), jamais poussé sur GitHub.
+docs/whatsapp-export-participants-edition1/
