@@ -27,4 +27,24 @@ async function bootstrap() {
 
   await app.listen(config.getOrThrow<number>('PORT'));
 }
-void bootstrap();
+
+// Robustesse prod (2026-09-11) : `void bootstrap()` seul avalait silencieusement tout echec de
+// demarrage (env var manquante, base injoignable...) - Node se contentait de planter sans trace
+// exploitable. Les handlers globaux couvrent le reste : une erreur qui echappe au cycle de
+// requete Nest (deja gere par son propre filtre d'exception, donc jamais un crash pour une
+// requete individuelle) plante quand meme le process par defaut depuis Node 15+ - l'objectif
+// ici n'est pas d'empecher ce crash (un redemarrage propre par Render reste correct), juste de
+// s'assurer qu'il est toujours journalise clairement avant.
+process.on('uncaughtException', (err) => {
+  console.error('uncaughtException - arret du process :', err);
+  process.exit(1);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('unhandledRejection - arret du process :', reason);
+  process.exit(1);
+});
+
+bootstrap().catch((err) => {
+  console.error('Échec du démarrage :', err);
+  process.exit(1);
+});
