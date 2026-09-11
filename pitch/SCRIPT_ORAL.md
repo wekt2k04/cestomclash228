@@ -134,7 +134,9 @@ articulés ne comptent pas.
 > "Ce qui existe déjà, aujourd'hui : le code tourne, trente-deux tests sur trente-deux passent,
 > la direction visuelle est tranchée, l'hébergement ne coûte rien.
 >
-> Ce qu'on vous demande : [à compléter — voir note ci-dessous].
+> Ce qu'on vous demande : pas de financement à ce stade. De la visibilité — devant vous, devant
+> la communauté de ce concours, pour amorcer la traction. Le financement, s'il vient, viendra
+> d'une victoire ici, pas d'une demande directe aujourd'hui.
 >
 > CestomClash228, en une phrase : Explore. Partage. Level-up. Merci."
 
@@ -143,10 +145,10 @@ narrative) — le jury a entendu ces trois mots trois fois (couverture, solution
 que ce soit répétitif, parce que chaque fois ils portent un sens différent (accroche → parcours
 produit → clôture).
 
-**⚠️ À compléter avant le jour J :** l'ask exact (financement ? mentorat ? mise en réseau ?)
-n'est pas encore défini — voir `docs/BUSINESS_PLAN.md` § 15 et `pitch/CestomClash228-Pitch.pptx`
-slide 5. Ne monte pas sur scène avec un `[à compléter]` — la phrase ci-dessus doit être réécrite
-avec la vraie demande dès qu'elle est connue.
+**Résolu le 2026-09-11** : l'ask ci-dessus reprend `docs/BUSINESS_PLAN.md` § 15 mot pour mot dans
+son intention ("Visibilité — pas de financement demandé à ce stade") — plus de `[à compléter]`.
+Reste à répercuter la même phrase sur `pitch/CestomClash228-Pitch.pptx` slide 5 (texte du PPT lui-
+même, pas seulement ce script) avant dépôt final.
 
 ---
 
@@ -170,13 +172,18 @@ D'après `docs/CONCOURS.md`, les questions portent sur : problématique, solutio
   transpose à toute diaspora étudiante structurée autour d'une association reconnue.
 - **"Et si le nombre d'utilisateurs explose, ça tient ?"** (ou toute question sur la charge
   technique) → réponse à assumer, pas à esquiver : *"Oui, on a fait un choix délibéré —
-  hébergement 100 % gratuit (Vercel, Render, Supabase) pour rester à coût zéro tant qu'il n'y a
-  pas encore de revenu. La contrepartie assumée : le serveur backend se met en veille après 15
-  minutes sans trafic et met 30 à 60 secondes à se réveiller, et la base de données se met en
-  pause après une semaine d'inactivité sur le palier gratuit. C'est une vraie limite qu'on
-  connaît, pas un angle mort — et elle disparaît dès qu'on bascule vers un palier payant, ce que
-  le premier revenu de Sponsoring permet de financer directement."* Sourcé : `docs/STACK.md`,
-  `docs/ARCHITECTURE.md` § scale-to-zero.
+  hébergement 100 % gratuit (Firebase Hosting, Render, Neon/PostGIS) pour rester à coût zéro tant
+  qu'il n'y a pas encore de revenu. La contrepartie assumée et vérifiée en conditions réelles :
+  le serveur backend Render se met en veille après environ 15 minutes sans trafic et met 30 à 60
+  secondes à se réveiller — un ping automatique le maintient éveillé en continu pendant les
+  moments où on attend justement du monde, comme cette semaine de concours. C'est une vraie
+  limite qu'on connaît, pas un angle mort — et elle disparaît dès qu'on bascule vers un palier
+  payant, ce que le premier revenu de Sponsoring permet de financer directement."* Sourcé :
+  `docs/STACK.md`, `docs/ARCHITECTURE.md` § scale-to-zero — **correction du 2026-09-11** : la
+  version précédente de cette réponse citait Vercel/Supabase et "la base de données en pause
+  après une semaine", des détails d'une pile technique antérieure (le projet tourne aujourd'hui
+  sur Firebase Hosting + Render + Neon) ; ne pas citer un chiffre de mise en veille de Neon en
+  Q&amp;A tant qu'il n'a pas été vérifié en conditions réelles comme celui de Render l'a été.
 
 **Recommandation de posture** : si l'occasion se présente en Q&A (même sans question directe sur
 ce point), glisser toi-même cette limite assumée plutôt que d'attendre qu'on te la reproche — un
@@ -201,7 +208,9 @@ vestimentaire** comme critère à part entière. Rappels pratiques, pas de conte
 
 ## Ce qu'il reste à toi de compléter avant le jour J
 
-1. L'ask exact (slide 5 du PPT et de ce script).
+1. ~~L'ask exact~~ — résolu dans ce script le 2026-09-11 (voir slide 5 ci-dessus). Reste à
+   reporter le même texte dans `pitch/CestomClash228-Pitch.pptx` slide 5 (le fichier PPT
+   lui-même n'a pas été régénéré).
 2. Relecture visuelle du PPT — jamais vu à l'écran par personne, y compris moi (voir
    `pitch/README.md`).
 3. Un chrono à blanc réel : ce script vise 4 min 45, mais seul un passage à voix haute confirme
