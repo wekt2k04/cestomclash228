@@ -1146,3 +1146,29 @@ calculée (517px sur ce viewport), le bouton de fermeture reste entièrement dan
 zone de contenu devient effectivement défilable (`scrollHeight` 2295 vs `clientHeight` 472) — preuve
 directe que le bug exact décrit par l'audit ne peut plus se reproduire, plus rigoureuse qu'une
 capture d'écran unique sur le contenu réel du soir (trop court pour déborder naturellement).
+
+## 2026-09-11 — 2 correctifs de robustesse trouvés en vérifiant l'état réel de prod (pas supposés)
+
+**3 commits jamais poussés sur GitHub** (`4f3ae9f`, `e068214`, `c8d9d7c`) : trouvé en répondant à
+"tout est clean sur la branche ?" — `git log origin/main..HEAD` montrait un écart alors que le
+dossier local était propre. Aucun impact fonctionnel (le frontend avait été déployé directement
+via `firebase deploy`, vérifié en direct ; les 2 autres commits sont de la doc pure), mais ce
+travail n'existait que sur cette machine. Poussé (`git push origin main`), écart vérifié résorbé.
+
+**Bounties semées bientôt toutes invisibles** : en vérifiant l'état général du projet, `GET
+/bounties?status=open` renvoyait 7 au lieu des 12 attendues. Investigation : `seed-community.ts`
+donnait aux Bounties une durée de vie de 12-24h (`durationHours`, pensée pour un test immédiat le
+soir du peuplement) — 5 avaient déjà expiré (et **disparu de tous les onglets de l'UI**, aucun
+n'affiche le statut `expired` - ni Ouvertes, ni Prises en charge, ni Archivées), et les 7
+restantes expiraient dans les ~6h suivantes. Sans correctif, la plateforme aurait été
+complètement vide de Bounties pendant tout le week-end, pile pendant la présentation jury du
+dimanche 13 septembre. Script ponctuel `extend-seed-bounty-expiry.ts` (`365b24b`) : remet les 12
+Bounties des comptes `seed-*@cestomclash.local` à `open`, `expiresAt = now() + 10 jours` — ne
+touche jamais un vrai compte (vérifié au préalable que l'unique Bounty non-open du moment
+appartenait à un vrai utilisateur, "Test"/"Willy", pas à un compte seed). Vérifié en direct sur
+l'API publique après exécution : 12 bounties ouvertes, expiration la plus proche le 2026-09-21.
+
+**Leçon** : peupler une base avec des dates d'expiration courtes pour tester immédiatement, puis
+ne jamais revérifier leur état quelques jours plus tard avant un jalon important, est exactement
+le genre de détail qui casse silencieusement une démo — invisible à tout test automatisé, trouvé
+uniquement en interrogeant l'API en direct avec les vrais filtres que l'UI utilise.
