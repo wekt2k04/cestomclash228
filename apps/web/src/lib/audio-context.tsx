@@ -64,6 +64,7 @@ class LoopEngine {
   private baseVolume = DEFAULT_VOLUME;
   private duckFactor = 1;
   private playingUrl: string | null = null;
+  private silentlyUnlocked = false;
 
   private getCtx(): AudioContext {
     if (!this.ctx) {
@@ -118,6 +119,35 @@ class LoopEngine {
     return this.playingUrl !== null;
   }
 
+  // Bug reel constate le 2026-09-12 (retour utilisateur, iPhone d'un tiers) : aucun son ne
+  // joue jamais, sans erreur JS associee. Cause probable, specifique a Safari/WebKit iOS :
+  // ctx.resume() peut se resoudre et ctx.state passer reellement a "running" (donc la
+  // verification plus bas ne detecte rien d'anormal) SANS que la sortie audio ne soit
+  // vraiment debloquee materiellement, tant qu'aucun son n'a ete demarre tres pres du geste
+  // d'origine. Or ici, la lecture reelle (startCycle -> source.start) n'arrive qu'apres DEUX
+  // creux asynchrones supplementaires (le `await ctx.resume()` puis `await this.preload()` -
+  // fetch+decodeAudioData du MP3, potentiellement plusieurs centaines de ms) - largement
+  // hors de la fenetre que WebKit associe encore au geste. Palliatif standard (utilise par ex.
+  // par Howler.js) : demarrer un buffer SILENCIEUX d'un seul echantillon de facon synchrone,
+  // ici, avant le moindre `await` - "amorce" reellement la sortie materielle pendant qu'on est
+  // encore dans la pile d'appel du geste, independamment du chargement asynchrone de la vraie
+  // piste. Sans effet audible ni sur Android ni sur desktop (ou le probleme ne se produit pas),
+  // donc rien de deja fonctionnel n'est modifie par cet ajout.
+  private unlockSilently(ctx: AudioContext): void {
+    if (this.silentlyUnlocked) return;
+    this.silentlyUnlocked = true;
+    try {
+      const buffer = ctx.createBuffer(1, 1, 22050);
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(ctx.destination);
+      source.start(0);
+    } catch {
+      // Si meme ce buffer trivial echoue, le deblocage plus bas echouera aussi et sera
+      // rattrape par le catch existant de l'appelant (attemptUnlock) - pas de plan B ici.
+    }
+  }
+
   // Doit etre appelee de façon synchrone dans un gestionnaire d'evenement
   // natif (le resume() de l'AudioContext a la meme contrainte de "geste
   // utilisateur" que audio.play(), voir le commentaire dans AudioProvider).
@@ -128,6 +158,7 @@ class LoopEngine {
   // tort que la lecture a demarre.
   async play(url: string): Promise<void> {
     const ctx = this.getCtx();
+    this.unlockSilently(ctx);
     if (ctx.state === "suspended") {
       await ctx.resume();
     }
