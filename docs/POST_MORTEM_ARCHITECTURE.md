@@ -9,6 +9,75 @@ partout ailleurs : aucun chiffre non vérifié, aucune affirmation non sourcée.
 
 ---
 
+## 0. Vue d'ensemble visuelle — le chemin architectural
+
+*Cette section précède volontairement tout le reste : c'est le chemin architectural du projet,
+pas un détail annexe, et il doit se lire d'un coup d'œil avant d'entrer dans le détail textuel
+des sections 1 à 4 qui l'explicitent et le justifient.*
+
+### 0.1 Trajectoire chronologique
+
+```mermaid
+timeline
+    title CestomClash228 — trajectoire architecturale
+    section Fondations (08-22 → 08-25)
+        RBAC spatial + migrations versionnées : Incrément 0
+        Moteur audio + 1ers correctifs mobile : Polish MVP
+    section Pivot d'infrastructure
+        Vercel/Supabase abandonnés : Firebase Hosting + Render + Neon/PostGIS retenus pour la viabilité stricte du palier gratuit
+    section Maturation produit (09-04 → 09-05)
+        Sponsoring vérifié + Notation : 1er mécanisme de revenu réel
+        1er audit visuel réel : bug CSS invisible à lint/tsc/build trouvé
+    section Mise en production (09-09 → 09-10)
+        1er déploiement public : Neon + Render + Firebase Hosting
+        Fiabilité : cache, polling 20s, bug de navigation corrigé
+        Marketplace payant : offres, confiance, paiement, chat
+    section Durcissement (09-11 → 09-12)
+        Robustesse mesurée : keep-alive re-mesuré, expiration corrigée, démarrage sécurisé, audio iOS corrigé
+    section Clôture (09-13 → 09-19)
+        Présentation jury : 2026-09-13
+        Post-mortem, archivage, arrêt des services : 2026-09-19
+```
+
+### 0.2 Architecture déployée (état final)
+
+```mermaid
+flowchart LR
+    User(["Étudiant·e\n(navigateur mobile/desktop)"])
+
+    subgraph FB["Firebase Hosting — statique, gratuit"]
+        Web["Next.js / React\nexport statique"]
+    end
+
+    subgraph RD["Render — palier gratuit"]
+        Api["NestJS\nAPI REST + JWT"]
+        Sleep["⏾ veille ~15 min\nsans trafic → cold start 30-60s"]
+    end
+
+    subgraph NE["Neon — Postgres serverless"]
+        Db[("PostGIS\nrequêtes atomiques SQL")]
+    end
+
+    Cron["cron-job.org\nping externe /5 min"]
+
+    User -->|HTTPS| Web
+    Web -->|"HTTP/JSON + Bearer JWT\npolling 20s, jamais de WebSocket"| Api
+    Api -->|"SQL brut\ncompare-and-swap + index partiel"| Db
+    Cron -.->|"GET /health\n(maintien en éveil)"| Api
+    Api -.- Sleep
+
+    style FB fill:#1a1620,stroke:#FFC94D,color:#F5F3EE
+    style RD fill:#1a1620,stroke:#3FE0FF,color:#F5F3EE
+    style NE fill:#1a1620,stroke:#2FE894,color:#F5F3EE
+```
+
+*Deux process de déploiement totalement indépendants (frontend manuel via `firebase deploy`,
+backend automatique sur push GitHub), zéro connexion persistante entretenue par le client, une
+seule dépendance externe (le ping) pour compenser le comportement scale-to-zero du palier
+gratuit — le détail de chaque flèche de ce diagramme est justifié en section 3.*
+
+---
+
 ## 1. Genèse et évolution chronologique
 
 ### 1.1 Cadrage initial
