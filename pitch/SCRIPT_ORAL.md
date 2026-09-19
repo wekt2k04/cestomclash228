@@ -5,34 +5,47 @@ Ce document accompagne `CestomClash228-Pitch.pptx` : pour chaque slide, ce qu'il
 retenir** au jury, et un repère de minutage. Contenu strictement basé sur `docs/BUSINESS_PLAN.md`,
 `docs/VISION.md` et le contenu réel du PPT — aucun chiffre ni argument inventé ici.
 
+**Réécrit par toi-même le 2026-09-12** (voix personnelle) — corrections appliquées : grammaire/
+typos, plus 2 corrections de fond signalées explicitement ci-dessous (slide 3 : "Pins (ou
+requêtes)" → "Pins (ou astuces)", un Pin n'est pas une requête dans le produit réel ; slide 4 :
+retiré "validation humaine par vidéo marketing", le Sponsoring vérifié fonctionne par preuve de
+virement, pas par vidéo). Le reste : corrigé mot à mot sans changer le sens ni le ton voulu.
+
 Format réel du concours (`docs/CONCOURS.md`) : **5 minutes de présentation**, puis **5 à 7
 minutes de questions** portant sur problématique, solution, business plan (surtout les chiffres),
 marché ciblé et sa taille — **explicitement pas d'angle bénévolat**. Critères notés : Pertinence
 (important), Posture du candidat (important), Pitch, Tenue vestimentaire.
 
-## Repères de minutage (total cible : 4 min 45 — laisse ~15s de marge sur les 5 min)
+## Repères de minutage (total recalculé : ~4 min 32 — ~28s de marge sur les 5 min)
 
-| Slide | Contenu | Durée cible | Cumul |
-|---|---|---|---|
-| 1 | Couverture | 20 s | 0:20 |
-| 2 | Problème | 55 s | 1:15 |
-| 3 | Solution | 55 s | 2:10 |
-| 4 | Business case | 110 s | 3:55 |
-| 5 | Conclusion | 45 s | 4:40 |
+| Slide | Contenu | Mots | Durée estimée | Cumul |
+|---|---|---|---|---|
+| 1 | Couverture | 53 | ~31 s | 0:31 |
+| 2 | Problème | 65 | ~38 s | 1:09 |
+| 3 | Solution | 105 | ~62 s | 2:11 |
+| 4 | Business case | 192 | ~113 s | 4:04 |
+| 5 | Conclusion | 48 | ~28 s | 4:32 |
+
+*Méthode : débit calibré sur TON débit réel établi par la version précédente du script (486 mots
+pour un 4:45 déjà validé comme cible = ~1,7 mot/seconde), pas un débit générique — donc cette
+estimation te ressemble, mais seul un chrono à voix haute confirme le vrai chiffre. Slides 2 et 5
+sont maintenant plus courtes (citation et détail des tests retirés) ; slide 1 un peu plus longue
+(contexte source cestom.org ajouté) ; slides 3-4 quasi stables.*
 
 Le business case porte le plus de poids (critère de notation "business plan, surtout les
-chiffres") — c'est volontairement la slide la plus longue à l'oral, pas la plus dense visuellement.
+chiffres") — reste la slide la plus longue à l'oral, volontairement.
 
 ---
 
-## Slide 1 — Couverture (~20 s)
+## Slide 1 — Couverture (~31 s)
 
 **À dire :**
 > "Bonjour, je suis [ton prénom], porteur du projet CestomClash228, avec le soutien de la CESTOM.
-> Aujourd'hui, six cent cinquante étudiants togolais au Maroc réapprennent chacun, seuls, ce que
-> les autres savent déjà. CestomClash228 change ça."
+> Selon le site de la CESTOM, nous sommes environ 650 étudiants togolais au Maroc qui, et c'est
+> là la faille, réapprennent souvent avec difficulté et seuls, ce que les autres savent déjà.
+> CestomClash228 est là pour corriger cela."
 
-**Ce qu'il faut faire retenir :** un chiffre réel (650) dès la première phrase — pas de
+**Ce qu'il faut faire retenir :** un chiffre réel (650) tôt, sourcé (site CESTOM) — pas de
 présentation lente, on entre directement dans l'enjeu. Le nom du projet est prononcé une fois,
 clairement, tout de suite (le jury le réentendra sur chaque slide via le footer).
 
@@ -40,159 +53,163 @@ clairement, tout de suite (le jury le réentendra sur chaque slide via le footer
 
 ---
 
-## Slide 2 — Problème (~55 s)
+## Slide 2 — Problème (~38 s)
 
 **À dire :**
-> "Trois réalités, vécues la même semaine par n'importe quel nouvel arrivant.
+> "Trois réalités, avérées récurrentes après analyse de la vie estudiantine.
 >
-> Un : l'information est éclatée. Elle vit dans des dizaines de groupes WhatsApp — jamais
-> indexée, jamais retrouvable après coup.
+> Un : l'information est dispersée et parfois contradictoire d'une source à une autre.
 >
-> Deux : celui qui aide un pair n'a rien en retour. Zéro reconnaissance, zéro trace, zéro
-> réputation construite dans la durée.
+> Deux : la ressource humaine, la compétence, l'offre sont disponibles, mais n'arrivent pas à
+> localiser la demande qui en a besoin, parfois même payante.
 >
-> Trois — et c'est le plus dur : l'isolement à l'arrivée, exactement au moment où on a le plus
-> besoin d'un repère.
->
-> Un exemple réel, pas hypothétique : *'Je suis coincé à la gare de Casa-Voyageurs à 23h, qui
-> peut m'héberger ?'* Ce message existe. Il se perd dans le flux. Chaque semaine."
+> Trois, et c'est le plus dur : l'isolement à l'arrivée, généralement au moment où on a le plus
+> besoin d'un repère."
 
-**Ce qu'il faut faire retenir :** la citation est le point d'ancrage émotionnel de tout le
-pitch — marque une vraie pause après l'avoir dite, laisse-la respirer une seconde avant
-d'enchaîner sur la slide Solution.
+**Ce qu'il faut faire retenir :** le point Deux a changé de nature par rapport à une version
+précédente — ce n'est plus seulement "aider ne rapporte rien", c'est "l'offre existe mais ne
+trouve pas la demande" — un problème de **mise en relation**, directement résolu par le
+mécanisme d'offres/Bounties payantes (slide 3, et section 3 du dossier de révision).
 
-**Repère :** si le temps presse, c'est cette slide qu'on peut raccourcir (fusionner 1+3 en une
-phrase) — jamais la citation, c'est elle qui reste en mémoire.
+**Repère :** slide sans citation cette fois — le rythme est plus dense, articule les trois "Un/
+Deux/Trois" distinctement plutôt que de chercher une pause dramatique.
 
 ---
 
-## Slide 3 — Solution (~55 s)
+## Slide 3 — Solution (~62 s)
 
 **À dire :**
-> "À chacun de ces trois problèmes, une réponse concrète — déjà en code, pas une intention.
+> "À chacun de ces trois problèmes, une réponse concrète — déjà prototypée, pas qu'une intention.
 >
-> Une carte par ville, avec des Pins : l'information devient persistante, cherchable, ancrée à un
-> lieu précis.
+> Une fois connecté, vous avez accès à une carte avec les villes où sont présents vos pairs, et
+> par ville, des Pins (ou astuces) : l'information partagée devient persistante, cherchable.
 >
-> Des Bounties, avec notation : on résout une demande d'aide, on est noté, on construit une
-> réputation qui dure.
+> En parallèle, les Bounties, avec notation : vous identifiez une demande récurrente et proposez
+> un service pour y répondre ; avec le temps, vous êtes noté et votre réputation grandit.
 >
-> Et tout ça porté par la CESTOM elle-même — pas une application anonyme de plus, une communauté
-> déjà organisée sur le terrain.
->
-> Le parcours utilisateur tient en trois gestes, ceux de notre tagline : Explore. Partage.
-> Level-up. De la première visite à la réputation construite. Zéro friction."
+> Et tout ça est pensé pour s'adapter à une communauté précise, d'où le nom CestomClash228, afin
+> de promouvoir la discussion en langues locales sur la plateforme au besoin et de favoriser
+> cette notion d'appartenance."
 
-**Ce qu'il faut faire retenir :** le mapping 1-pour-1 avec la slide précédente (même ordre,
-mêmes couleurs à l'écran) — dis "à chacun de ces trois problèmes" pour que le jury fasse
-consciemment le lien, ne le laisse pas deviner.
+**Ce qu'il faut faire retenir :** le mapping 1-pour-1 avec la slide précédente (même ordre) —
+"Pins" répond au problème Un (info dispersée), "Bounties avec notation" répond au problème Deux
+(offre qui ne trouve pas la demande). **Correction de fond appliquée ici** : "Pins (ou astuces)"
+remplace "Pins (ou requêtes)" — dans le produit réel, un Pin n'est PAS une requête/demande (ça,
+c'est une Bounty) ; dire "requêtes" en Q&A créerait une confusion immédiate avec un jury qui
+regarderait l'appli.
 
-**Repère :** finis fort sur la tagline — c'est la ligne qui doit rester en tête après cette slide.
+**Repère :** finis fort sur "cette notion d'appartenance" — la ligne qui doit rester en tête
+après cette slide.
 
 ---
 
-## Slide 4 — Business case (~110 s, la plus longue)
+## Slide 4 — Business case (~113 s, la plus longue)
 
 **À dire :**
-> "Parlons chiffres — parce que c'est ce qui compte ici, pas du bénévolat, un vrai modèle
-> économique.
+> "Parlons chiffres — parce que ce qui compte ici, c'est un vrai modèle économique, pas du
+> bénévolat.
 >
-> Phase 1, maintenant : le Sponsoring vérifié. Un acteur qui veut de la visibilité fait un
-> virement réel vers un compte CESTOM dédié, soumet une preuve dans l'app, un vérificateur
-> valide. Zéro pourcentage prélevé par une passerelle de paiement tierce — cent pour cent reste
-> dans le circuit CESTOM. C'est du code en développement pour ce concours, pas une slide
-> d'intention.
+> Nous commencerons avec la Phase 1, que j'appelle le Sponsoring vérifié — validation humaine,
+> preuve de virement réel, pour témoigner du zéro pourcentage prélevé par une passerelle tierce
+> lors des premières opérations.
 >
-> Phase 2, une fois la confiance installée : commission sur les services rendus entre étudiants.
+> Puis vient la Phase 2, où, une fois la confiance installée, nous assurerons une transition vers
+> les commissions sur les services rendus entre étudiants.
 >
-> Phase 3, la vision : la même architecture, transposée à d'autres diasporas étudiantes
-> structurées.
+> Et enfin, la Phase 3, la vision : la même architecture, si réussie, sera transposée à d'autres
+> diasporas étudiantes.
 >
-> Le marché, maintenant, avec des vrais chiffres : six cent cinquante membres CESTOM réels,
-> répartis sur six villes — Rabat, Casablanca, Marrakech, Fès, Tanger, Oujda. Source : cestom.org,
-> vérifiable en deux clics, pas une estimation. Sur cette base, avec une hypothèse de portée de
-> 500 étudiants informés en première année et un taux d'adoption de 30 à 40 %, on vise entre 150
-> et 200 utilisateurs actifs dès l'année 1.
+> Le marché actuel permet la réalisation de ce projet : nous sommes actuellement environ 650
+> étudiants répartis sur 6 villes. En considérant l'hypothèse de portée 500 en année 1, avec une
+> adoption de 30 à 40%, on vise 150 à 200 utilisateurs actifs.
 >
-> Et le coût d'infrastructure ? Zéro euro tant qu'on reste sous les seuils gratuits des
-> hébergeurs. La marge est protégée dès le premier sponsor."
+> Le produit est déployé avec un CapEx nul, permettant de concentrer les fonds initiaux à la
+> gestion des imprévus qui ne manquent jamais — à l'instar des frais d'OpEx si l'on devait migrer
+> vers d'autres services pour des questions de performance."
 
-**Ce qu'il faut faire retenir :** trois chiffres précis à articuler lentement et distinctement,
-ce sont ceux que le jury va noter et reprendre en question — **650** (marché réel, sourcé),
-**150-200** (objectif Année 1, avec la méthode de calcul dite à voix haute, pas juste le
-résultat), **0 %** (aucune commission prélevée par un tiers sur le Sponsoring). Dire "zéro
-bénévolat" explicitement neutralise par avance la consigne du jury.
+**Ce qu'il faut faire retenir :** mêmes trois chiffres qu'avant à articuler lentement et
+distinctement — **650** (marché réel, sourcé), **150-200** (objectif Année 1, méthode dite à
+voix haute), **0 %** (aucune commission prélevée par un tiers sur le Sponsoring). **Correction de
+fond appliquée ici** : retiré "validation humaine par vidéo marketing" — le Sponsoring vérifié
+fonctionne par preuve de VIREMENT (capture d'écran), pas par vidéo ; une vidéo marketing n'existe
+nulle part dans le mécanisme réel, mentionner ça en Q&A serait une contradiction facile à
+repérer pour un jury qui poserait une question de suivi.
 
 **Repère :** c'est la slide où ralentir le débit est plus payant qu'aller vite — les chiffres mal
-articulés ne comptent pas.
+articulés ne comptent pas. La phrase CapEx/OpEx est dense (vocabulaire finance) — si le jury a un
+profil business, ça peut jouer en ta faveur ; sinon, ralentis encore plus sur cette phrase précise.
 
 ---
 
-## Slide 5 — Conclusion (~45 s)
+## Slide 5 — Conclusion (~28 s)
 
 **À dire :**
-> "Ce qui existe déjà, aujourd'hui : le code tourne, trente-deux tests sur trente-deux passent,
-> la direction visuelle est tranchée, l'hébergement ne coûte rien.
+> "Comme dit précédemment, le prototype actuel est déployé et accessible au lien
+> cestomclash228.web.app. Je vous invite, ainsi que toute l'audience, à y jeter un coup d'œil.
 >
-> Ce qu'on vous demande : pas de financement à ce stade. De la visibilité — devant vous, devant
-> la communauté de ce concours, pour amorcer la traction. Le financement, s'il vient, viendra
-> d'une victoire ici, pas d'une demande directe aujourd'hui.
+> Le financement, s'il vient, viendra d'une victoire ici, avec votre accord.
 >
-> CestomClash228, en une phrase : Explore. Partage. Level-up. Merci."
+> CestomClash228, en une phrase : Explore. Partage. Level-up. Merci pour votre attention."
 
 **Ce qu'il faut faire retenir :** referme sur la même tagline qu'à l'ouverture (boucle
-narrative) — le jury a entendu ces trois mots trois fois (couverture, solution, conclusion) sans
-que ce soit répétitif, parce que chaque fois ils portent un sens différent (accroche → parcours
-produit → clôture).
+narrative). **Point d'attention, pas une erreur à corriger unilatéralement** : cette version ne
+répète plus explicitement "pas de financement à ce stade, de la visibilité" (la formulation
+précise validée le 2026-09-11 sur `docs/BUSINESS_PLAN.md` § 15) — "avec votre accord" reste
+compatible avec ça mais est moins explicite. Choix assumé de ta part ou raccourci involontaire ?
+À toi de trancher avant le jour J ; l'ancienne formulation explicite reste juste en dessous si tu
+veux la reprendre telle quelle :
+> *(Variante plus explicite, si tu préfères) : "Ce qu'on vous demande : pas de financement à ce
+> stade. De la visibilité — devant vous, devant la communauté de ce concours, pour amorcer la
+> traction. Le financement, s'il vient, viendra d'une victoire ici."*
 
-**Résolu le 2026-09-11** : l'ask ci-dessus reprend `docs/BUSINESS_PLAN.md` § 15 mot pour mot dans
-son intention ("Visibilité — pas de financement demandé à ce stade") — plus de `[à compléter]`.
-Reste à répercuter la même phrase sur `pitch/CestomClash228-Pitch.pptx` slide 5 (texte du PPT lui-
-même, pas seulement ce script) avant dépôt final.
+**Repère :** cette version est plus courte que l'ancienne (le détail "trente-deux tests" a été
+retiré — ce chiffre était de toute façon dépassé, le projet en compte 83 aujourd'hui, voir
+`docs/REVISION_JURY.md` § Q&A robustesse) — la marge gagnée peut absorber un léger dépassement
+ailleurs sans stress.
 
 ---
 
 ## Anticiper les questions du jury (5-7 min)
 
 D'après `docs/CONCOURS.md`, les questions portent sur : problématique, solution, business plan
-(surtout les chiffres), marché ciblé et sa taille. Réponses courtes prêtes, toutes sourcées :
+(surtout les chiffres), marché ciblé et sa taille. Réponses courtes prêtes, toutes sourcées —
+**4 nouvelles questions ajoutées le 2026-09-12, réponses complètes et code à l'appui dans
+`docs/REVISION_JURY.md` § 2** (ici, juste le résumé condensé) :
 
 - **"Ces 650 membres, c'est vérifié comment ?"** → cestom.org, capture d'écran du 2026-08-31,
   répartition publique par ville.
 - **"Comment vous passez de 650 à 150-200 utilisateurs actifs ?"** → hypothèse de portée (500
-  informés en Année 1, donnée par le porteur de projet) × taux d'adoption 30-40 % (hypothèse de
-  départ pour un canal de confiance déjà utilisé quotidiennement — à ajuster avec les vraies
-  données après un trimestre d'usage réel).
+  informés en Année 1) × taux d'adoption 30-40 % — à ajuster avec les vraies données après un
+  trimestre d'usage réel.
 - **"Pourquoi pas une vraie passerelle de paiement dès maintenant ?"** → zéro frais de
-  transaction (1,5-3 % ailleurs), zéro dépendance à un compte marchand, cohérent avec la
-  contrainte déjà actée de ne dépendre d'aucun service payant pour l'infrastructure.
+  transaction (1,5-3 % ailleurs), zéro dépendance à un compte marchand.
 - **"Et si ça reste du bénévolat déguisé ?"** → le Sponsoring vérifié est un vrai flux
-  monétaire actif dès cette version, pas une promesse — le distinguer clairement d'un don.
-- **"Ça marche que pour les Togolais ?"** → Phase 3 du modèle économique : l'architecture se
-  transpose à toute diaspora étudiante structurée autour d'une association reconnue.
-- **"Et si le nombre d'utilisateurs explose, ça tient ?"** (ou toute question sur la charge
-  technique) → réponse à assumer, pas à esquiver : *"Oui, on a fait un choix délibéré —
-  hébergement 100 % gratuit (Firebase Hosting, Render, Neon/PostGIS) pour rester à coût zéro tant
-  qu'il n'y a pas encore de revenu. La contrepartie assumée et vérifiée en conditions réelles :
-  le serveur backend Render se met en veille après environ 15 minutes sans trafic et met 30 à 60
-  secondes à se réveiller — un ping automatique le maintient éveillé en continu pendant les
-  moments où on attend justement du monde, comme cette semaine de concours. C'est une vraie
-  limite qu'on connaît, pas un angle mort — et elle disparaît dès qu'on bascule vers un palier
-  payant, ce que le premier revenu de Sponsoring permet de financer directement."* Sourcé :
-  `docs/STACK.md`, `docs/ARCHITECTURE.md` § scale-to-zero — **correction du 2026-09-11** : la
-  version précédente de cette réponse citait Vercel/Supabase et "la base de données en pause
-  après une semaine", des détails d'une pile technique antérieure (le projet tourne aujourd'hui
-  sur Firebase Hosting + Render + Neon) ; ne pas citer un chiffre de mise en veille de Neon en
-  Q&amp;A tant qu'il n'a pas été vérifié en conditions réelles comme celui de Render l'a été.
+  monétaire actif dès cette version, pas une promesse.
+- **"Ça marche que pour les Togolais ?"** → Phase 3 : l'architecture se transpose à toute
+  diaspora étudiante structurée autour d'une association reconnue.
+- **"Et si le nombre d'utilisateurs explose, ça tient ?"** → hébergement 100 % gratuit
+  (Firebase Hosting, Render, Neon/PostGIS), backend Render en veille après ~15 min sans trafic
+  (ping automatique actif), limite assumée qui disparaît dès le premier revenu de Sponsoring.
+- **"Quelle est la différence technique entre un Pin et une Bounty ?"** (nouveau) → un Pin est
+  une info qui reste, sans statut ni expiration ; une Bounty est une demande à résoudre une fois,
+  avec un vrai cycle de vie et une expiration — réponse complète : `docs/REVISION_JURY.md`.
+- **"Comment vérifiez-vous qu'un utilisateur est un vrai étudiant CESTOM ?"** (nouveau) →
+  honnêtement, rien ne le vérifie techniquement aujourd'hui — la confiance vient du canal de
+  distribution (groupe WhatsApp CESTOM fermé), pas d'un contrôle en base. Vraie limite assumée,
+  pas un angle mort caché — réponse complète : `docs/REVISION_JURY.md`.
+- **"Vos tests prouvent quoi exactement ?"** (nouveau) → 83 tests backend (61 unitaires + 22 de
+  bout en bout), dont un test qui force deux acceptations simultanées sur la même Bounty pour
+  prouver que le verrou en base tient réellement — réponse complète : `docs/REVISION_JURY.md`.
+- **"Vos 3 phases économiques, concrètement, comment ça marche ?"** (nouveau) → réponse pas-à-pas
+  complète : `docs/REVISION_JURY.md`.
 
 **Recommandation de posture** : si l'occasion se présente en Q&A (même sans question directe sur
-ce point), glisser toi-même cette limite assumée plutôt que d'attendre qu'on te la reproche — un
-jury remarque davantage la maturité d'un candidat qui connaît les faiblesses de son propre
-système que l'absence de faiblesse elle-même.
+ce point), glisser toi-même la limite de vérification d'identité et la limite d'hébergement
+plutôt que d'attendre qu'on te les reproche — un jury remarque davantage la maturité d'un
+candidat qui connaît les faiblesses de son propre système que l'absence de faiblesse elle-même.
 
 Si une question sort de ce que tu sais avec certitude : dire "je vérifie et je reviens vers vous"
-plutôt qu'inventer un chiffre — un chiffre faux découvert par le jury coûte plus cher qu'une
-réponse différée.
+plutôt qu'inventer un chiffre.
 
 ## Posture et présentation (critères notés explicitement)
 
@@ -201,17 +218,18 @@ vestimentaire** comme critère à part entière. Rappels pratiques, pas de conte
 
 - Débit lent et articulé sur les chiffres (slide 4) plutôt que rapide et dense partout.
 - Regarder le jury, pas l'écran — le texte y est déjà, le public le lit tout seul.
-- Une vraie pause après la citation (slide 2) et avant l'ask (slide 5) — le silence marque plus
-  qu'une phrase de plus.
+- Slide 2 n'a plus de citation à faire respirer — répartis plutôt une micro-pause après chaque
+  "Un/Deux/Trois" pour laisser le point s'installer.
 - Tenue adaptée au format concours (pas de recommandation spécifique connue — à vérifier avec les
   organisateurs si un dress code est communiqué).
 
 ## Ce qu'il reste à toi de compléter avant le jour J
 
-1. ~~L'ask exact~~ — résolu dans ce script le 2026-09-11 (voir slide 5 ci-dessus). Reste à
-   reporter le même texte dans `pitch/CestomClash228-Pitch.pptx` slide 5 (le fichier PPT
-   lui-même n'a pas été régénéré).
-2. Relecture visuelle du PPT — jamais vu à l'écran par personne, y compris moi (voir
+1. Décider slide 5 : garder "avec votre accord" ou reprendre la variante explicite "pas de
+   financement à ce stade, de la visibilité" (les deux sont ci-dessus).
+2. Reporter le texte final (une fois ce choix fait) dans `pitch/CestomClash228-Pitch.pptx` — le
+   fichier PPT lui-même n'a pas été régénéré depuis la réécriture du 2026-09-12.
+3. Relecture visuelle du PPT — jamais vu à l'écran par personne, y compris moi (voir
    `pitch/README.md`).
-3. Un chrono à blanc réel : ce script vise 4 min 45, mais seul un passage à voix haute confirme
+4. Un chrono à blanc réel : ce script vise 4 min 32, mais seul un passage à voix haute confirme
    que ça tient dans les 5 minutes avec ton propre débit.

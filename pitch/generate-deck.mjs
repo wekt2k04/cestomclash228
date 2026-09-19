@@ -25,7 +25,16 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const LOGO_PATH = path.join(__dirname, '..', 'assets', 'brand', 'CESTOM.png');
+// 2026-09-12, demande explicite : logo CESTOM (bas-centre de la couverture) remplace par celui
+// du projet lui-meme ; logo CreaAfrica (organisateur du concours) ajoute en haut a gauche.
+// PROJECT_LOGO_PATH = meme icone que l'app reelle (apps/web/src/app/icon.png, convention
+// Next.js) - pas une image separee a maintenir en double. CREAAFRICA_LOGO_PATH = version
+// recadree de pitch/CreaAfrica_logo.png (original 540x1170, logo reel seulement sur une bande
+// de 125px - recadre au plus proche du contenu pour eviter un enorme pave blanc a l'affichage).
+const PROJECT_LOGO_PATH = path.join(
+  __dirname, '..', 'apps', 'web', 'src', 'app', 'icon.png',
+);
+const CREAAFRICA_LOGO_PATH = path.join(__dirname, 'creaafrica-logo-cropped.png');
 
 // Palette assombrie/repunchee vers "anthracite profond + neons" (direction afro-futuriste
 // retenue le 2026-08-31, voir docs/PLAN_EXTENSION.md) — mêmes rôles fonctionnels que la palette
@@ -229,15 +238,18 @@ function threeCardRow(s, y, cardH, items, iconGlyph, accent) {
   });
 }
 
+// Points 2026-09-12 : point 2 change de nature (revue avec l'utilisateur) - ce n'est plus
+// "aider ne rapporte rien" mais "l'offre existe et ne trouve pas la demande", un probleme de
+// mise en relation directement resolu par les Bounties payantes (SOLUTION_ITEMS[1]).
 const PROBLEM_ITEMS = [
-  ['Information fragmentée', "WhatsApp non indexable, non consultable après coup, aucune valeur générée pour personne."],
-  ["Aide rendue non valorisée", "Celui qui aide un pair n'obtient aujourd'hui aucune reconnaissance durable, aucune trace."],
+  ['Information dispersée', "Parfois contradictoire d'une source à l'autre, non indexée, non retrouvable après coup."],
+  ["L'offre ne trouve pas la demande", "Ressource humaine, compétence disponibles, mais aucun moyen de localiser qui en a besoin — même payant."],
   ["Isolement à l'arrivée", "Un nouvel arrivant manque des codes locaux essentiels au moment où il en a le plus besoin."],
 ];
 const SOLUTION_ITEMS = [
   ['Carte par ville + Pins', "Informations pratiques persistantes, consultables par tous, ancrées à un lieu précis."],
-  ['Bounties + Notation', "Demande d'aide résolue → note publique (1-5) → réputation qui se construit dans la durée."],
-  ['Ancrage CESTOM', "Porté par une communauté déjà organisée sur le terrain — pas une app anonyme de plus."],
+  ['Bounties + Notation', "Une demande récurrente devient un service proposé → réputation qui se construit dans la durée."],
+  ['Communauté, pas une app de plus', "Pensé pour une communauté précise — discussion en langues locales, notion d'appartenance."],
 ];
 
 // ---------- 1. Couverture ----------
@@ -277,7 +289,14 @@ const SOLUTION_ITEMS = [
       fontFace: FONT_BODY, fontSize: 13, color: COLOR.inkMuted,
     },
   );
-  s.addImage({ path: LOGO_PATH, x: W / 2 - 0.35, y: 5.3, w: 0.7, h: 0.7 });
+  // Logo CreaAfrica (organisateur), haut-gauche - a l'ecart des isoCube decoratifs (haut-droite).
+  // Recadre 504x155 (ratio ~3.25:1) : largeur fixee, hauteur dérivée pour ne jamais l'etirer.
+  const creaAfricaW = 1.9;
+  s.addImage({
+    path: CREAAFRICA_LOGO_PATH, x: 0.55, y: 0.45, w: creaAfricaW, h: creaAfricaW * (155 / 504),
+  });
+  // Logo du projet (remplace CESTOM ici) - meme fichier que l'icone reelle de l'app.
+  s.addImage({ path: PROJECT_LOGO_PATH, x: W / 2 - 0.35, y: 5.3, w: 0.7, h: 0.7 });
   s.addText('Concours CréaAfrica 2026 · Propulsé par CESTOM', {
     x: 0, y: 6.1, w: W, h: 0.4, align: 'center',
     fontFace: FONT_BODY, fontSize: 12, color: COLOR.inkMuted,
@@ -288,23 +307,11 @@ const SOLUTION_ITEMS = [
 {
   const s = baseSlide();
   edgeAccent(s, COLOR.red);
-  titleBlock(s, 'Le problème', "Trois frictions réelles, vécues chaque semaine par un étudiant togolais au Maroc");
-  threeCardRow(s, 2.25, 2.15, PROBLEM_ITEMS, '!', COLOR.red);
-
-  // Citation reelle, deja utilisee dans le pitch deck d'origine (docs/LEAN_CANVAS.md /
-  // git history) — pas une nouvelle affirmation inventee.
-  s.addShape(pptx.ShapeType.roundRect, {
-    x: MARGIN, y: 4.75, w: W - MARGIN * 2, h: 1.15, rectRadius: 0.08,
-    fill: { color: COLOR.bgCard }, line: { color: COLOR.red, width: 1, transparency: 30 },
-    shadow: glow(COLOR.red, { blur: 8, opacity: 0.25 }),
-  });
-  s.addText(
-    '"Je suis coincé à la gare de Casa-Voyageurs à 23h, qui peut m\'héberger ?"',
-    {
-      x: MARGIN + 0.35, y: 4.75, w: W - MARGIN * 2 - 0.7, h: 1.15, valign: 'middle',
-      fontFace: FONT_BODY, italic: true, fontSize: 15, color: COLOR.ink,
-    },
-  );
+  titleBlock(s, 'Le problème', "Trois réalités récurrentes, avérées après analyse de la vie estudiantine togolaise au Maroc");
+  // Cartes agrandies (2.15->3.35) : la citation "gare de Casa-Voyageurs" retiree ici le
+  // 2026-09-12 - le script oral reecrit par l'utilisateur ne la prononce plus (voir
+  // pitch/SCRIPT_ORAL.md), la garder a l'ecran sans jamais la dire aurait ete incoherent.
+  threeCardRow(s, 2.4, 3.35, PROBLEM_ITEMS, '!', COLOR.red);
   footer(s, '02 · Problème');
 }
 
@@ -434,25 +441,47 @@ const SOLUTION_ITEMS = [
   const s = baseSlide();
   edgeAccent(s, COLOR.gold);
   titleBlock(s, "Ce qu'on a déjà construit, et ce qu'on vous demande");
+  // 2026-09-12 : colonne QR ajoutee a droite (audience scanne le lien pendant la conclusion) -
+  // les 2 cartes existantes retrecissent (pleine largeur -> CARD_W) pour lui laisser la place,
+  // meme hauteur totale qu'avant (2.15 a 5.60) pour ne rien bousculer d'autre sur la slide.
+  const CARD_W = 9.33;
   const real = [
-    'Carte, demandes d\'aide, authentification, gouvernance à 2 niveaux — code fonctionnel, testé (59/59 tests automatisés)',
-    'Direction visuelle afro-futuriste appliquée au produit réel (palette, écran d\'accueil)',
+    'Carte, Pins, Bounties gratuites et payantes, authentification — 83/83 tests automatisés',
+    'Marché de confiance payant : offres, réputation calculée, testé sous accès concurrent réel',
     'Sponsoring vérifié + notation : construits, testés bout-en-bout, audités avant mise en ligne',
     'Hébergement 100 % gratuit (aucune carte bancaire engagée) — marge protégée dès le 1er sponsor',
   ];
-  glassCard(s, { x: MARGIN, y: 2.15, w: W - MARGIN * 2, h: 1.95, accent: COLOR.cyan });
+  glassCard(s, { x: MARGIN, y: 2.15, w: CARD_W, h: 1.95, accent: COLOR.cyan });
   s.addText(real.map((t) => ({ text: t, options: { bullet: { code: '25B8' }, color: COLOR.ink, breakLine: true } })), {
-    x: MARGIN + 0.35, y: 2.35, w: W - MARGIN * 2 - 0.7, h: 1.6,
-    fontFace: FONT_BODY, fontSize: 13, valign: 'top', lineSpacingMultiple: 1.45,
+    x: MARGIN + 0.3, y: 2.32, w: CARD_W - 0.6, h: 1.65,
+    fontFace: FONT_BODY, fontSize: 11.5, valign: 'top', lineSpacingMultiple: 1.35,
   });
 
-  glassCard(s, { x: MARGIN, y: 4.35, w: W - MARGIN * 2, h: 1.25, accent: COLOR.gold });
+  glassCard(s, { x: MARGIN, y: 4.35, w: CARD_W, h: 1.25, accent: COLOR.gold });
   s.addText([
     { text: 'Ce qu\'on demande : ', options: { bold: true, color: COLOR.gold } },
 { text: "De la visibilité — l'exposition du concours suffit à amorcer la traction. Le reste suivra naturellement.", options: { italic: true, color: COLOR.inkMuted } },
   ], {
-    x: MARGIN + 0.35, y: 4.35, w: W - MARGIN * 2 - 0.7, h: 1.25, valign: 'middle',
-    fontFace: FONT_BODY, fontSize: 13, lineSpacingMultiple: 1.3,
+    x: MARGIN + 0.3, y: 4.35, w: CARD_W - 0.6, h: 1.25, valign: 'middle',
+    fontFace: FONT_BODY, fontSize: 12, lineSpacingMultiple: 1.3,
+  });
+
+  // Colonne QR : meme empan vertical que les 2 cartes ci-dessus (2.15 -> 5.60), a droite.
+  const qrColX = MARGIN + CARD_W + 0.3;
+  const qrColW = W - MARGIN - qrColX;
+  glassCard(s, { x: qrColX, y: 2.15, w: qrColW, h: 3.45, accent: COLOR.green });
+  s.addText('Scanne pour tester', {
+    x: qrColX + 0.15, y: 2.32, w: qrColW - 0.3, h: 0.35, align: 'center',
+    fontFace: FONT_HEAD, fontSize: 11, bold: true, color: COLOR.ink,
+  });
+  const qrSize = Math.min(1.7, qrColW - 0.5);
+  s.addImage({
+    path: path.join(__dirname, 'qr-app-link.png'),
+    x: qrColX + (qrColW - qrSize) / 2, y: 2.72, w: qrSize, h: qrSize,
+  });
+  s.addText('cestomclash228.web.app', {
+    x: qrColX + 0.1, y: 2.72 + qrSize + 0.12, w: qrColW - 0.2, h: 0.3, align: 'center',
+    fontFace: FONT_BODY, fontSize: 9, color: COLOR.inkMuted,
   });
 
   s.addText(TAGLINE, {

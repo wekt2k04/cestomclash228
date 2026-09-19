@@ -31,13 +31,7 @@ pitch/video-render/build_log*.txt
 # Export WhatsApp du groupe participants CréaAfrica — contient les numéros/noms d'AUTRES
 # candidats et des photos, jamais destiné à un dépôt public (ce dépôt l'est). Reste en local
 # uniquement, gardé pour référence (annonces de l'organisation), jamais poussé sur GitHub.
-docs/whatsapp-export-participants-edition1/
-
-# Décision utilisateur du 2026-09-11 : le dépôt distant (public) ne garde que le code et ce
-# dont il a besoin pour tourner - docs/ et pitch/ (business plan, architecture, script oral,
-# deck...) restent en local uniquement à partir de maintenant. Ce qui était déjà poussé avant
-# cette date reste visible dans l'historique GitHub (décision explicite : pas de purge
-# rétroactive) - seuls les changements FUTURS sur ces 2 dossiers ne sont plus commités.
-# N'affecte pas .claude/HANDOFF/ (LOG.md, NEXT_SESSION.md), qui reste suivi normalement.
-docs/
-pitch/
+# Exclusion maintenue le 2026-09-19 (décision utilisateur "commit tout") : cette exception
+# reste, contrairement au reste de docs/ et pitch/ redevenus suivis - donnees de tiers, pas
+# une decision a laisser une simple instruction generale ecraser silencieusement.
+docs/ARCHIVE/whatsapp-export-participants-edition1/
